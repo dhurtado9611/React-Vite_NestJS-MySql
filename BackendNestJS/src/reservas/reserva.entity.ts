@@ -17,15 +17,18 @@ export class Reserva {
   @Column()
   valor: number;
 
-  @Column({ nullable: true })
-  observaciones: string;
-
   @Column()
   hentrada: string;
+
+  @Column({ nullable: true })
+  hsalida: string;
 
   @Column({ nullable: true })
   hsalidamax: string;
 
   @Column({ nullable: true })
-  hsalida: string;
+  observaciones: string;
+
+  @Column({ nullable: true })
+  fecha: string;
 }

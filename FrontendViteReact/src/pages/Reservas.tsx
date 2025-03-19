@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
 import api from '../services/api';
 
 interface Reserva {
@@ -11,49 +12,56 @@ interface Reserva {
   hsalidamax: string;
   hsalida: string;
   observaciones: string;
+  fecha: string;
 }
-
-// Componente para mostrar la hora actual
-const HoraActual = () => {
-  const [horaActual, setHoraActual] = useState<string>('');
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setHoraActual(
-        new Date().toLocaleTimeString('en-GB', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        })
-      );
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  return ( 
-    <div className="d-flex justify-content-center my-4">
-      <div
-        className="bg-light text-dark border rounded shadow-sm px-4 py-2"
-        style={{
-          fontSize: '1.5rem',
-          fontWeight: 'bold',
-          letterSpacing: '1px',
-          minWidth: '250px',
-          textAlign: 'center',
-        }}
-      >
-        {horaActual}
-      </div>
-    </div>
-  );
-};
 
 const Reservas = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [formData, setFormData] = useState<Partial<Reserva>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  
+  // ✅ Estados para el filtrado y paginación
+  const [filterDate, setFilterDate] = useState<string>(''); 
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const rowsPerPage = 20;
+
+
+const exportToExcel = () => {
+  // Filtrar los datos basados en la fecha seleccionada
+  const filteredData = filterDate
+    ? reservas.filter((reserva) => reserva.fecha === filterDate)
+    : reservas;
+
+  if (filteredData.length === 0) {
+    alert('No hay datos para exportar.');
+    return;
+  }
+
+  // Crear una hoja de trabajo (worksheet)
+  const worksheet = XLSX.utils.json_to_sheet(
+    filteredData.map(({ id, vehiculo, placa, habitacion, valor, hentrada, hsalidamax, hsalida, observaciones, fecha }) => ({
+      ID: id,
+      Vehículo: vehiculo,
+      Placa: placa,
+      Habitación: habitacion,
+      Valor: valor,
+      'Hora Entrada': hentrada,
+      'Hora Salida Máxima': hsalidamax,
+      'Hora Salida': hsalida || 'Pendiente',
+      Observaciones: observaciones,
+      Fecha: fecha || 'Sin fecha',
+    }))
+  );
+
+  // Crear el libro de trabajo (workbook)
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservas');
+
+  // Generar el archivo y descargarlo
+  XLSX.writeFile(workbook, `Reservas_${filterDate || 'Todas'}.xlsx`);
+};
+
 
   useEffect(() => {
     fetchReservas();
@@ -81,14 +89,36 @@ const Reservas = () => {
     });
   };
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterDate(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (editingId !== null) {
-        await api.put(`/reservas/${editingId}`, formData);
-      } else {
-        await api.post('/reservas', formData);
+      if (!formData.vehiculo || !formData.placa || !formData.habitacion || !formData.valor || !formData.hentrada) {
+        alert('Por favor completa todos los campos requeridos.');
+        return;
       }
+
+      const fechaActual = new Date().toISOString().split('T')[0];
+  
+      const dataToSend = {
+        ...formData,
+        fecha: fechaActual,
+      };
+  
+      if (editingId !== null) {
+        await api.put(`/reservas/${editingId}`, dataToSend);
+      } else {
+        await api.post('/reservas', dataToSend);
+      }
+  
       fetchReservas();
       setFormData({});
       setEditingId(null);
@@ -132,16 +162,28 @@ const Reservas = () => {
         minute: '2-digit',
       });
       await api.put(`/reservas/${id}`, { hsalida: horaActual });
-      fetchReservas(); // Refresca los datos
+      fetchReservas();
     } catch (error) {
       console.error('Error al registrar la hora de salida:', error);
     }
   };
 
+  // Filtrar por fecha
+  const filteredReservas = filterDate
+    ? reservas.filter((reserva) => reserva.fecha === filterDate)
+    : reservas;
+
+  // Paginación
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = filteredReservas.slice(indexOfFirstRow, indexOfLastRow);
+  const totalPages = Math.ceil(filteredReservas.length / rowsPerPage);
+
   return (
-    <div className="container mt-5"><HoraActual />
+    <div className="container mt-5">
       <h2 className="mb-4">{editingId ? 'Editar Reserva' : 'Agregar Reserva'}</h2>
       <form onSubmit={handleSubmit} className="row g-2">
+        
         <div className="col-md-4">
           <label className="form-label">Vehículo</label>
           <select
@@ -157,6 +199,7 @@ const Reservas = () => {
             <option value="Sin especificar">Sin especificar</option>
           </select>
         </div>
+        
         <div className="col-md-4">
           <label className="form-label">Placa</label>
           <input
@@ -168,6 +211,7 @@ const Reservas = () => {
             required
           />
         </div>
+        
         <div className="col-md-4">
           <label className="form-label">Habitación</label>
           <select
@@ -185,6 +229,7 @@ const Reservas = () => {
             ))}
           </select>
         </div>
+        
         <div className="col-md-4">
           <label className="form-label">Valor</label>
           <input
@@ -196,6 +241,7 @@ const Reservas = () => {
             required
           />
         </div>
+        
         <div className="col-md-4">
           <label className="form-label">Hora de Entrada</label>
           <input
@@ -284,7 +330,29 @@ const Reservas = () => {
 
       </div>
     {/*Tabla de Reservas*/}
-      <h2 className="mt-5">Lista de Reservas</h2>
+    <div className="row">
+      <div className="col">
+        <h2 className="mt-5">Lista de Reservas</h2>
+      </div>
+      <div className="col d-flex justify-content-end">
+        <h3 className='mt-5'>Filtrar por fecha</h3>
+          {/* Filtro por fecha */}
+          <div className="mt-5 px-3">
+            <input
+              type="date"
+              value={filterDate}
+              onChange={handleFilterChange}
+              className="form-control"
+            />
+          </div>
+          <button
+            className="btn btn-success mt-5 px-3"
+            onClick={exportToExcel}
+            >
+            Exportar a Excel
+        </button>
+      </div>
+    </div>
       <div className="table-responsive overflow-auto" style={{ maxHeight: '400px' }}>
         <table className="table table-striped text-center">
           <thead>
@@ -299,6 +367,7 @@ const Reservas = () => {
               <th>Hora Salida Máxima</th>
               <th>Hora Salida</th>
               <th>Observaciones</th>
+              <th>Fecha</th>
             </tr>
           </thead>
           <tbody>
@@ -318,14 +387,33 @@ const Reservas = () => {
                 <td>{reserva.valor}</td>
                 <td>{reserva.hentrada}</td>
                 <td>{reserva.hsalidamax}</td>
-                <td>
                 <td>{reserva.hsalida || 'Pendiente'}</td>
-                </td>
                 <td>{reserva.observaciones}</td>
+                <td>{reserva.fecha || 'Sin fecha'}</td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+      {/* ✅ Paginación */}
+      <div className="d-flex justify-content-center mt-3">
+        <button
+          className="btn btn-secondary me-2"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Anterior
+        </button>
+        <span>
+          Página {currentPage} de {totalPages}
+        </span>
+        <button
+          className="btn btn-secondary ms-2"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Siguiente
+        </button>
       </div>
     </div>
   );
