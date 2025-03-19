@@ -1,0 +1,26 @@
+.home-container {
+    background-image: url('../assets/fondo1.jpg'); /* Asegúrate de que la imagen esté en la carpeta correcta */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  
+  .overlay {
+    background-color: rgba(0, 0, 0, 0.5); /* Oscurece el fondo para mejor visibilidad */
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+  }
+  
+  .content h1 {
+    font-weight: bold;
+  }
+  
+  .content .btn {
+    margin-top: 1rem;
+  }
+  

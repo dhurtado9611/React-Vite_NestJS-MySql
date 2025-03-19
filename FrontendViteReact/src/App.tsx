@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Home from './components/Home';
+import Home from './pages/Home';
 import Login from './components/Login';
-import Reservas from './components/Reservas';
-import Historial from './components/Historial';
+import Reservas from './pages/Reservas';
+import Historial from './pages/Historial';
 
 function App() {
   return (
