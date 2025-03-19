@@ -10,8 +10,8 @@ import { AuthModule } from './auth/auth.module';
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
-      port: 33065, // Asegúrate de que coincida con el puerto de MySQL
-      username: 'dhurt9611',
+      port: 3306, // Asegúrate de que coincida con el puerto de MySQL
+      username: 'root',
       password: '', // Si tienes contraseña, ponla aquí
       database: 'reservas_motel', // Tu base de datos
       entities: [Reserva], // Las entidades que vas a utilizar

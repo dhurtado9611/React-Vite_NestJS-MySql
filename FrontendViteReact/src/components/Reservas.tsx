@@ -7,10 +7,10 @@ interface Reserva {
   placa: string;
   habitacion: number;
   valor: number;
-  observaciones: string;
   hentrada: string;
   hsalidamax: string;
   hsalida: string;
+  observaciones: string;
 }
 
 // Componente para mostrar la hora actual
@@ -202,6 +202,16 @@ const Reservas = () => {
             type="time"
             name="hsalida"
             value={formData.hsalida || ''}
+            onChange={handleInputChange}
+            className="form-control"
+          />
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">Observaciones</label>
+          <input
+            type="text"
+            name="observaciones"
+            value={formData.observaciones || ''}
             onChange={handleInputChange}
             className="form-control"
           />

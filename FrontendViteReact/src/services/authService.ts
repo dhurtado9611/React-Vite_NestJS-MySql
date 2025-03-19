@@ -2,14 +2,19 @@ import api from './api';
 
 export const login = async (email: string, password: string) => {
   const response = await api.post('/auth/login', { email, password });
-  const { access_token } = response.data;
+  const token = response.data.access_token;
 
-  // Guardar token en LocalStorage
-  localStorage.setItem('token', access_token);
+  if (token) {
+    localStorage.setItem('token', token);
+  }
 
-  return response.data;
+  return token;
 };
 
 export const logout = () => {
   localStorage.removeItem('token');
+};
+
+export const getToken = (): string | null => {
+  return localStorage.getItem('token');
 };
