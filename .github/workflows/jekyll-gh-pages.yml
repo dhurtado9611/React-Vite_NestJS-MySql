@@ -20,12 +20,14 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: ./FrontendViteReact
 
       - name: Build project
         run: npm run build
+        working-directory: ./FrontendViteReact
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: dist
+          folder: FrontendViteReact/dist
