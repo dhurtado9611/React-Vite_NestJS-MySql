@@ -1,29 +1,37 @@
-import { useEffect, useState } from 'react';
+import { Reserva } from './types';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Reserva } from './types';
+import api from '../services/api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-interface GraficaReservasProps {
-  reservas: Reserva[];
-}
-
-const GraficaReservas: React.FC<GraficaReservasProps> = ({ reservas }) => {
+const GraficaReservas = () => {
   const [data, setData] = useState<{ [key: number]: number }>({});
 
   useEffect(() => {
-    // Contar las reservas por habitación
-    const conteoHabitaciones: { [key: number]: number } = reservas.reduce(
-      (acc, reserva) => {
-        acc[reserva.habitacion] = (acc[reserva.habitacion] || 0) + 1;
-        return acc;
-      },
-      {} as { [key: number]: number }
-    );
+    const fetchData = async () => {
+      try {
+        const response = await api.get<Reserva[]>('/reservas');
+        const reservas = response.data;
 
-    setData(conteoHabitaciones);
-  }, [reservas]);
+        // Contar las reservas por habitación
+        const conteoHabitaciones: { [key: number]: number } = reservas.reduce(
+          (acc, reserva) => {
+            acc[reserva.habitacion] = (acc[reserva.habitacion] || 0) + 1;
+            return acc;
+          },
+          {} as { [key: number]: number }
+        );
+
+        setData(conteoHabitaciones);
+      } catch (error) {
+        console.error('Error al obtener los datos de las reservas:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const labels = Object.keys(data).map(Number);
   const valores = Object.values(data);
@@ -34,8 +42,8 @@ const GraficaReservas: React.FC<GraficaReservasProps> = ({ reservas }) => {
       {
         label: 'Cantidad de Reservas',
         data: valores,
-        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-        borderColor: 'rgba(54, 162, 235, 1)',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        borderColor: 'rgb(255, 10, 10)',
         borderWidth: 2,
         borderRadius: 4, // Bordes redondeados
       },
