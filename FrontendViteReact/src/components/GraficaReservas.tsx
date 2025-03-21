@@ -2,36 +2,28 @@ import { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Reserva } from './types';
-import api from '../services/api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const GraficaReservas = () => {
+interface GraficaReservasProps {
+  reservas: Reserva[];
+}
+
+const GraficaReservas: React.FC<GraficaReservasProps> = ({ reservas }) => {
   const [data, setData] = useState<{ [key: number]: number }>({});
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await api.get<Reserva[]>('/reservas');
-        const reservas = response.data;
+    // Contar las reservas por habitación
+    const conteoHabitaciones: { [key: number]: number } = reservas.reduce(
+      (acc, reserva) => {
+        acc[reserva.habitacion] = (acc[reserva.habitacion] || 0) + 1;
+        return acc;
+      },
+      {} as { [key: number]: number }
+    );
 
-        // Contar las reservas por habitación
-        const conteoHabitaciones: { [key: number]: number } = reservas.reduce(
-          (acc, reserva) => {
-            acc[reserva.habitacion] = (acc[reserva.habitacion] || 0) + 1;
-            return acc;
-          },
-          {} as { [key: number]: number }
-        );
-
-        setData(conteoHabitaciones);
-      } catch (error) {
-        console.error('Error al obtener los datos de las reservas:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
+    setData(conteoHabitaciones);
+  }, [reservas]);
 
   const labels = Object.keys(data).map(Number);
   const valores = Object.values(data);

@@ -90,6 +90,7 @@ const Historial = () => {
         <Modal.Body>
           {reservaSeleccionada ? (
             <>
+              <p><strong>Fecha:</strong> {reservaSeleccionada.fecha}</p> {/* ✅ Nueva propiedad */}
               <p><strong>Vehículo:</strong> {reservaSeleccionada.vehiculo}</p>
               <p><strong>Placa:</strong> {reservaSeleccionada.placa}</p>
               <p><strong>Hora Entrada:</strong> {reservaSeleccionada.hentrada}</p>
