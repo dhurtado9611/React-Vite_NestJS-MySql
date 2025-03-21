@@ -11,8 +11,8 @@ import { AuthModule } from './auth/auth.module';
       type: 'mysql',
       host: 'localhost',
       port: 3306, // Asegúrate de que coincida con el puerto de MySQL
-      username: 'root',
-      password: '', // Si tienes contraseña, ponla aquí
+      username: 'dhurtado9611',
+      password: 'Porsche918**', // Si tienes contraseña, ponla aquí
       database: 'reservas_motel', // Tu base de datos
       entities: [Reserva], // Las entidades que vas a utilizar
       synchronize: true, // Activa la sincronización automática
