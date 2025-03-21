@@ -174,9 +174,9 @@ const exportToExcel = () => {
     : reservas;
 
   // Paginación
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredReservas.slice(indexOfFirstRow, indexOfLastRow);
+  //const indexOfLastRow = currentPage * rowsPerPage;
+  //const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  //const currentRows = filteredReservas.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(filteredReservas.length / rowsPerPage);
 
   return (
