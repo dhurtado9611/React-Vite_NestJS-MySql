@@ -1,16 +1,13 @@
 {
   "name": "frontendvitereact",
-  "homepage": "https://github.com/dhurtado9611/React-Vite_NestJS-MySql.git",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "node server.js",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
