@@ -11,6 +11,8 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true, // Permitir cookies o autenticación con credenciales
   });
+  
+  console.log('Servidor iniciado correctamente por CPANEL');
 
   await app.listen(3000);
 }
