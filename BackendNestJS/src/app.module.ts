@@ -8,17 +8,25 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+// Validar las variables de entorno
+if (!process.env.DB_HOST || !process.env.DB_PORT || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_NAME) {
+  throw new Error('⚠️ Faltan variables de entorno para configurar la base de datos');
+}
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres', // Cambiado a PostgreSQL
+      type: 'postgres',
       host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT!, 10) || 5432, // Puerto por defecto de PostgreSQL
+      port: parseInt(process.env.DB_PORT!, 10) || 5432,
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Reserva], // Las entidades que vas a utilizar
-      synchronize: true, // Para desarrollo, desactívalo en producción
+      entities: [Reserva],
+      synchronize: process.env.NODE_ENV !== 'production', // Solo en desarrollo
+      ssl: {
+        rejectUnauthorized: false, // Para conexión con SSL en Render
+      },
     }),
     TypeOrmModule.forFeature([Reserva]),
     AuthModule,
