@@ -4,11 +4,12 @@ import { Reserva } from './reservas/reserva.entity';
 import { ReservaService } from './reservas/reserva.service';
 import { ReservaController } from './reservas/reserva.controller';
 import { AuthModule } from './auth/auth.module';
+import { AppController } from './app.controller'; // ✅ Importar el controlador raíz
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-// Validar las variables de entorno
+// ⚠️ Validar las variables de entorno
 if (!process.env.DB_HOST || !process.env.DB_PORT || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_NAME) {
   throw new Error('⚠️ Faltan variables de entorno para configurar la base de datos');
 }
@@ -31,7 +32,7 @@ if (!process.env.DB_HOST || !process.env.DB_PORT || !process.env.DB_USER || !pro
     TypeOrmModule.forFeature([Reserva]),
     AuthModule,
   ],
-  controllers: [ReservaController],
+  controllers: [ReservaController, AppController], // ✅ Registrar el controlador raíz
   providers: [ReservaService],
 })
 export class AppModule {}
