@@ -11,7 +11,11 @@ import { AppService } from './app.service';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL, // URL completa de Render
+      host: process.env.DB_HOST ?? 'localhost',
+      port: parseInt(process.env.DB_PORT ?? '5432'), // Puerto por defecto para PostgreSQL
+      username: process.env.DB_USER ?? 'default_user',
+      password: process.env.DB_PASSWORD ?? 'default_password',
+      database: process.env.DB_NAME ?? 'default_database',
       entities: [Reserva],
       synchronize: process.env.NODE_ENV !== 'production',
       ssl: {
