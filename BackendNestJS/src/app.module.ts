@@ -1,38 +1,31 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm'; 
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Reserva } from './reservas/reserva.entity';
 import { ReservaService } from './reservas/reserva.service';
 import { ReservaController } from './reservas/reserva.controller';
 import { AuthModule } from './auth/auth.module';
-import { AppController } from './app.controller'; // ✅ Importar el controlador raíz
-import * as dotenv from 'dotenv';
-
-dotenv.config();
-
-// ⚠️ Validar las variables de entorno
-if (!process.env.DB_HOST || !process.env.DB_PORT || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_NAME) {
-  throw new Error('⚠️ Faltan variables de entorno para configurar la base de datos');
-}
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: process.env.DB_HOST ?? 'localhost',
+      port: parseInt(process.env.DB_PORT ?? '5432'), // Puerto por defecto para PostgreSQL
+      username: process.env.DB_USER ?? 'default_user',
+      password: process.env.DB_PASSWORD ?? 'default_password',
+      database: process.env.DB_NAME ?? 'default_database',
       entities: [Reserva],
-      synchronize: process.env.NODE_ENV !== 'production', // Solo en desarrollo
+      synchronize: process.env.NODE_ENV !== 'production',
       ssl: {
-        rejectUnauthorized: false, // Para conexión con SSL en Render
+        rejectUnauthorized: false,
       },
-    }),
+    }),    
     TypeOrmModule.forFeature([Reserva]),
     AuthModule,
   ],
-  controllers: [ReservaController, AppController], // ✅ Registrar el controlador raíz
-  providers: [ReservaService],
+  controllers: [ReservaController, AppController],
+  providers: [ReservaService, AppService],
 })
 export class AppModule {}
