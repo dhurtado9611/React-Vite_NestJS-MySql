@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './Home.css';
+import api from '../services/api';
 
 const Home: React.FC = () => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await api.get('/'); // Ruta base de tu API en Render
+        console.log(response.data); // Muestra la respuesta en consola
+      } catch (error) {
+        console.error('Error al conectar con el backend:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="home-container">
       <div className="overlay">
@@ -13,6 +27,6 @@ const Home: React.FC = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Home;
