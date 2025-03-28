@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // Usa './' o '/' para asegurar que las rutas estén bien configuradas
+  base: '/FrontendViteReact/', // ✅ Ruta base ajustada a la carpeta del proyecto
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
