@@ -13,11 +13,11 @@ dotenv.config();
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.DB_HOST ?? 'localhost',
-      port: parseInt(process.env.DB_PORT ?? '3306'),
-      username: process.env.DB_USER ?? 'root',
-      password: process.env.DB_PASSWORD ?? 'password',
-      database: process.env.DB_NAME ?? 'test',
+      host: process.env.DATABASE_HOST,
+      port: parseInt(process.env.DATABASE_PORT!),
+      username: process.env.DATABASE_USERNAME,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_NAME,
       entities: [Reserva],
       synchronize: process.env.NODE_ENV !== 'production',
       ssl: {
