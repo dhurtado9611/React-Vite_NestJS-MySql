@@ -49,7 +49,7 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.nav
-            className="fixed top-0 left-0 w-64 h-full bg-gray-900 text-white z-50 shadow-2xl flex flex-col justify-start p-6"
+            className="fixed top-0 left-0 w-64 h-full bg-gray-900 text-white z-100 shadow-2xl flex flex-col justify-start p-6"
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
@@ -57,6 +57,8 @@ const Navbar = () => {
           >
             {/* Hora */}
             <div className="text-3xl font-bold mb-8">
+              <h2>Hora</h2>
+              <h4>Actual</h4>
               {currentTime}
             </div>
 
