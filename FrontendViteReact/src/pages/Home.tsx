@@ -1,29 +1,16 @@
-import React, { useEffect } from 'react';
-import './Home.css';
-import api from '../services/api';
+import Carousel from '../components/Carousel'; 
 
-const Home: React.FC = () => {
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await api.get('/'); // Ruta base de tu API en Render
-        console.log(response.data); // Muestra la respuesta en consola
-      } catch (error) {
-        console.error('Error al conectar con el backend:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+const Home = () => {
   return (
-    <div className="home-container">
-      <div className="overlay">
-        <div className="content">
-          <h1 className="display-4">¡Bienvenido!</h1>
-          <p className="lead">Administra tus reservas de manera fácil y rápida.</p>
-          <a href="/reservas" className="btn btn-primary btn-lg">Ir a Reservas</a>
-        </div>
+    <div className="flex h-screen bg-gray-900 text-white relative">
+      {/* Saludo */}
+      <div className="w-1/2 flex items-center justify-center p-8">
+        <h1 className="text-4xl font-bold">¡Bienvenido a nuestra plataforma de reservas!</h1>
+      </div>
+      
+      {/* Carrusel */}
+      <div className="m-3 w-1/2 flex items-center justify-center relative z-50"> {/* Asegurar que el carrusel esté encima */}
+        <Carousel />
       </div>
     </div>
   );
