@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getToken, logout } from '../services/authService';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const token = getToken();
@@ -13,7 +14,6 @@ const Navbar = () => {
     const interval = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString());
     }, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -23,82 +23,99 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg bg-dark shadow">
-      <div className="container">
-        {/* Logo */}
-        <Link className="navbar-brand text-white fw-bold" to="/">
-          Reservas App
-        </Link>
+    <>
+      {/* Botón para abrir menú */}
+      <button
+        className="fixed top-4 left-4 z-50 bg-gray-800 text-white px-3 py-2 rounded-md shadow-lg hover:bg-gray-700 transition-all duration-300"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        ☰
+      </button>
 
-        {/* Hora */}
-        <span className="text-white ms-3 fw-light d-none d-md-block">
-          {currentTime}
-        </span>
+      {/* Fondo para cerrar menú */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 z-40"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-        {/* Botón para colapsar en pantallas pequeñas */}
-        <button
-          className="navbar-toggler border-0"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded={isOpen}
-          aria-label="Toggle navigation"
-          onClick={() => setIsOpen(!isOpen)}
-          style={{
-            transition: 'transform 0.3s ease',
-            transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-          }}
-        >
-          <i className="bi bi-list text-white fs-2"></i>
-        </button>
+      {/* Menú lateral */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.nav
+            className="fixed top-0 left-0 w-64 h-full bg-gray-900 text-white z-50 shadow-2xl flex flex-col justify-start p-6"
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+          >
+            {/* Hora */}
+            <div className="text-3xl font-bold mb-8">
+              {currentTime}
+            </div>
 
-        {/* Opciones de navegación */}
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto align-items-center">
-            {!token ? (
-              <li className="nav-item">
-                <Link className="nav-link text-white" to="/login">
-                  Iniciar Sesión
-                </Link>
-              </li>
-            ) : (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link text-white" to="/reservas">
-                    Reservas
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link text-white" to="/historial">
-                    Historial
-                  </Link>
-                </li>
-                <li className="nav-item ms-2">
-                  <button
-                    className="btn btn-outline-light px-3 py-1 rounded-pill"
-                    onClick={handleLogout}
-                    style={{
-                      transition: 'background-color 0.3s ease, transform 0.2s ease',
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)')
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = 'transparent')
-                    }
-                    onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-                    onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            {/* Logo */}
+            <Link
+              to="/"
+              className="text-xl font-semibold mb-6 hover:text-gray-400 transition-all"
+              onClick={() => setIsOpen(false)}
+            >
+              Reservas App
+            </Link>
+
+            {/* Links */}
+            <ul className="flex flex-col gap-6">
+              {!token ? (
+                <li>
+                  <Link
+                    to="/login"
+                    className="block text-lg hover:text-gray-400 transition-all"
+                    onClick={() => setIsOpen(false)}
                   >
-                    Cerrar Sesión
-                  </button>
+                    Iniciar Sesión
+                  </Link>
                 </li>
-              </>
-            )}
-          </ul>
-        </div>
-      </div>
-    </nav>
+              ) : (
+                <>
+                  <li>
+                    <Link
+                      to="/reservas"
+                      className="block text-lg hover:text-gray-400 transition-all"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Reservas
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/historial"
+                      className="block text-lg hover:text-gray-400 transition-all"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Historial
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      onClick={handleLogout}
+                      className="mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition-all"
+                    >
+                      Cerrar Sesión
+                    </button>
+                  </li>
+                </>
+              )}
+            </ul>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

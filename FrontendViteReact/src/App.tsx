@@ -4,10 +4,7 @@ import Home from './pages/Home';
 import Login from './components/Login';
 import Reservas from './pages/Reservas';
 import Historial from './pages/Historial';
-import './index.css'
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+
 
 function App() {
   return (
