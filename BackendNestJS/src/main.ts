@@ -4,19 +4,13 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ Permitir solicitudes desde desarrollo y producción
+  // Configurar CORS para permitir solicitudes desde el dominio del frontend
   app.enableCors({
-    origin: [
-      'http://localhost:5173', // Desarrollo local
-      'https://www.elesconditemotel.lat', // Dominio personalizado
-      'https://react-vite-nest-js-my-sql.vercel.app' // Dominio en Vercel
-    ],
+    origin: 'https://react-vite-nest-js-my-ds74mxdem-danielhurtados-projects.vercel.app', // Permitir solo tu frontend
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
-    credentials: true, // Permitir cookies o autenticación con credenciales
+    credentials: true, // Si usas cookies o autenticación
   });
-
-  console.log('🚀 Servidor iniciado correctamente');
 
   await app.listen(3000);
 }
