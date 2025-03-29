@@ -102,10 +102,3 @@
   height: auto;
   object-fit: cover; /* Ajusta la imagen sin espacios en blanco */
 }
-
-html, body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: #000; /* Opcional, para evitar que se note si hay margen blanco */
-}
