@@ -30,7 +30,7 @@
     "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.3",
     "dotenv": "^16.4.7",
-    "mysql2": "^3.13.0",
+    "mysql2": "^3.14.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.14.1",
