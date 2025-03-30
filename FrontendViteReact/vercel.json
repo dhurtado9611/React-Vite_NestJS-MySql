@@ -1,0 +1,6 @@
+{
+    "rewrites": [
+      { "source": "/FrontendViteReact/(.*)", "destination": "/$1" }
+    ]
+  }
+  
