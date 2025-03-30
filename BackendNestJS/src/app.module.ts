@@ -3,32 +3,26 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Reserva } from './reservas/reserva.entity';
 import { ReservaService } from './reservas/reserva.service';
 import { ReservaController } from './reservas/reserva.controller';
+import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.DATABASE_HOST,
-      port: parseInt(process.env.DATABASE_PORT!),
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT!, 10),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       entities: [Reserva],
-      synchronize: process.env.NODE_ENV !== 'production',
-      ssl: {
-        rejectUnauthorized: false,
-      },
-      connectTimeout: 30000, // Aumenta el tiempo de espera a 30 segundos
-    }),       
+      synchronize: true, // solo para desarrollo
+    }),
     TypeOrmModule.forFeature([Reserva]),
     AuthModule,
   ],
-  controllers: [ReservaController, AppController],
-  providers: [ReservaService, AppService],
+  controllers: [ReservaController],
+  providers: [ReservaService],
 })
 export class AppModule {}
