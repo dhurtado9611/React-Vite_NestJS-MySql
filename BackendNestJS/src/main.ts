@@ -1,4 +1,4 @@
-// main.ts (correcto para Railway)
+// main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
@@ -12,8 +12,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const PORT = process.env.PORT || 3000; // 👈 importante usar process.env.PORT
-  await app.listen(PORT, '0.0.0.0');      // 👈 Añade '0.0.0.0' explícitamente
+  const PORT = process.env.PORT || 3000;
+  // IMPORTANTE: Añadir explícitamente '0.0.0.0' para escuchar en todas las interfaces
+  await app.listen(PORT, '0.0.0.0');
   console.log(`Aplicación corriendo en el puerto: ${PORT}`);
 }
 
