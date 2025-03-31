@@ -24,6 +24,10 @@ const Navbar = () => {
     if (token) setIsExpanded(!isExpanded);
   };
 
+  const handleLinkClick = () => {
+    setIsExpanded(false);
+  };
+
   return (
     <aside
       className={`fixed top-0 left-0 h-screen ${
@@ -45,14 +49,26 @@ const Navbar = () => {
 
       {/* Navegación (solo con sesión activa y expandido) */}
       {token && isExpanded && (
-        <div className="flex flex-col items-start text-white text-sm gap-5 px-4 w-full">
-          <Link to="/" className="flex items-center gap-2 hover:text-red-500 transition">
+        <div className="flex flex-col items-start gap-3 px-4 w-full">
+          <Link
+            to="/"
+            onClick={handleLinkClick}
+            className="flex items-center gap-2 px-2 py-1 rounded-md bg-black/40 text-white text-sm hover:text-red-500 transition"
+          >
             <FaHome /> <span>Inicio</span>
           </Link>
-          <Link to="/reservas" className="flex items-center gap-2 hover:text-red-500 transition">
+          <Link
+            to="/reservas"
+            onClick={handleLinkClick}
+            className="flex items-center gap-2 px-2 py-1 rounded-md bg-black/40 text-white text-sm hover:text-red-500 transition"
+          >
             <FaListAlt /> <span>Reservas</span>
           </Link>
-          <Link to="/historial" className="flex items-center gap-2 hover:text-red-500 transition">
+          <Link
+            to="/historial"
+            onClick={handleLinkClick}
+            className="flex items-center gap-2 px-2 py-1 rounded-md bg-black/40 text-white text-sm hover:text-red-500 transition"
+          >
             <FaHistory /> <span>Historial</span>
           </Link>
         </div>
@@ -63,7 +79,10 @@ const Navbar = () => {
         {token ? (
           isExpanded ? (
             <button
-              onClick={handleLogout}
+              onClick={() => {
+                handleLogout();
+                setIsExpanded(false);
+              }}
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition"
               title="Cerrar sesión"
             >
