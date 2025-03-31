@@ -1,35 +1,14 @@
-import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { LocalAuthGuard } from './local-auth.guard';
 
-class LoginDto {
-  email!: string;
-  password!: string;
-}
-
-@Controller('auth') // Ruta base: /auth
+@Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @Post('login') // Ruta específica: /auth/login
-  async login(@Body() body: LoginDto) {
-    try {
-      const user = await this.authService.validateUser(body.email, body.password);
-      if (!user) {
-        throw new UnauthorizedException('Credenciales incorrectas');
-      }
-
-      // 🔥 Devolver datos adicionales (email, id) y el token
-      const result = await this.authService.login(user);
-      return {
-        access_token: result.access_token,
-        user: {
-          id: user.id,
-          email: user.email,
-        },
-      };
-    } catch (error) {
-      console.error('Error al autenticar:', error.message);
-      throw new UnauthorizedException('Credenciales incorrectas');
-    }
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  async login(@Request() req) {
+    return this.authService.login(req.user);
   }
 }
