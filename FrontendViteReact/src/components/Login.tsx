@@ -3,60 +3,76 @@ import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState(''); // Cambiado de email a username
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await login(username, password); // Usamos username
+    const result = await login(username, password);
     if (result) {
-      navigate('/reservas'); // Redirige a reservas si el login es exitoso
+      navigate('/reservas');
     } else {
       setError('Usuario o contraseña incorrectos');
     }
   };
 
   return (
-    <main className="form-signin w-100 m-auto">
-      <form onSubmit={handleLogin}>
-        <h1 className="h3 mb-3 fw-normal text-center text-white">Inicio de Sesión</h1>
+    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="bg-white/10 backdrop-blur-md border border-red-700 p-8 rounded-2xl shadow-xl w-full max-w-sm text-white">
+        <h1 className="text-2xl font-semibold text-center mb-6 text-red-500">Inicio de Sesión</h1>
 
-        {error && <div className="alert alert-danger">{error}</div>}
+        <form onSubmit={handleLogin} className="space-y-4">
+          {error && (
+            <div className="bg-red-600 text-white px-4 py-2 rounded-md text-sm text-center">
+              {error}
+            </div>
+          )}
 
-        <div className="form-floating mb-2">
-          <input
-            type="text"
-            className="form-control rounded-3"
-            id="floatingInput"
-            placeholder="Nombre de usuario"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <label htmlFor="floatingInput">Nombre de usuario</label>
-        </div>
-        <div className="form-floating mb-2">
-          <input
-            type="password"
-            className="form-control rounded-3"
-            id="floatingPassword"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <label htmlFor="floatingPassword">Contraseña</label>
-        </div>
+          <div>
+            <label htmlFor="username" className="block text-sm mb-1 text-white">
+              Nombre de usuario
+            </label>
+            <input
+              type="text"
+              id="username"
+              className="w-full px-4 py-2 bg-black border border-red-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+              placeholder="usuario123"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
 
-        <button className="btn btn-primary w-100 py-2" type="submit">
-          Iniciar Sesión
-        </button>
+          <div>
+            <label htmlFor="password" className="block text-sm mb-1 text-white">
+              Contraseña
+            </label>
+            <input
+              type="password"
+              id="password"
+              className="w-full px-4 py-2 bg-black border border-red-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-        <p className="mt-5 mb-3 text-white text-center">&copy; {new Date().getFullYear()}</p>
-      </form>
-    </main>
+          <button
+            type="submit"
+            className="w-full py-2 bg-red-600 hover:bg-red-700 rounded-md font-semibold transition-colors"
+          >
+            Iniciar Sesión
+          </button>
+
+          <p className="text-center text-xs text-white mt-4">
+            &copy; {new Date().getFullYear()} Reservas App
+          </p>
+        </form>
+      </div>
+    </div>
   );
 };
 
