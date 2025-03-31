@@ -1,33 +1,48 @@
-import { Link } from 'react-router-dom';
-import { FaHome, FaBookOpen, FaHistory, FaGithub } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaWhatsapp, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Footer = () => {
   return (
-    <footer
-      className="fixed bottom-0 left-0 w-full bg-red-900 text-white py-6 z-30"
-    >
-      <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        {/* Texto de copyright */}
-        <p className="text-sm text-gray-200">&copy; {new Date().getFullYear()} Reservas App. Todos los derechos reservados.</p>
-
-        {/* Enlaces rápidos */}
-        <div className="flex gap-6 text-sm items-center">
-          <Link to="/" className="flex items-center gap-1 hover:text-gray-300 transition-colors">
-            <FaHome /> Inicio
-          </Link>
-          <Link to="/reservas" className="flex items-center gap-1 hover:text-gray-300 transition-colors">
-            <FaBookOpen /> Reservas
-          </Link>
-          <Link to="/historial" className="flex items-center gap-1 hover:text-gray-300 transition-colors">
-            <FaHistory /> Historial
-          </Link>
+    <footer className="fixed bottom-0 left-0 w-full bg-white/10 backdrop-blur-md text-white py-4 z-30 shadow-inner">
+      <div className="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
+        <p className="text-xs text-gray-300 mb-2 md:mb-0">
+          © {new Date().getFullYear()} Reservas App. Todos los derechos reservados.
+        </p>
+        <div className="flex space-x-6 text-lg">
           <a
-            href="https://github.com/dhurtado9611"
+            href="https://www.facebook.com/elescondite1199"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+            className="hover:text-gray-200 transition"
+            aria-label="Facebook"
           >
-            <FaGithub /> GitHub
+            <FaFacebookF />
+          </a>
+          <a
+            href="https://www.instagram.com/cabanas_elescondite/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gray-200 transition"
+            aria-label="Instagram"
+          >
+            <FaInstagram />
+          </a>
+          <a
+            href="https://wa.link/cqi7jj"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gray-200 transition"
+            aria-label="WhatsApp"
+          >
+            <FaWhatsapp />
+          </a>
+          <a
+            href="https://maps.app.goo.gl/AjWYS9xYyRBrYSY96"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gray-200 transition"
+            aria-label="Google Maps"
+          >
+            <FaMapMarkerAlt />
           </a>
         </div>
       </div>
