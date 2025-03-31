@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // Usa la URL desde el archivo .env
+  baseURL: import.meta.env.VITE_API_URL, // Toma desde .env
   headers: {
     'Content-Type': 'application/json'
   }
@@ -23,7 +23,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('Error en la respuesta de la API:', error);
+    console.error('Error en la respuesta de la API BackendNestJS:', error);
     return Promise.reject(error);
   }
 );
