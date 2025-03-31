@@ -30,7 +30,7 @@ const Navbar = () => {
         isExpanded ? 'w-48' : 'w-16'
       } bg-white/10 backdrop-blur-md border-r border-red-800 z-50 flex flex-col justify-between items-center py-4 shadow-xl transition-all duration-300`}
     >
-      {/* Logo (siempre visible, actúa como botón de expansión si hay sesión) */}
+      {/* Logo (siempre visible, despliega menú si hay sesión) */}
       <div
         className="flex flex-col items-center cursor-pointer"
         onClick={toggleMenu}
@@ -43,7 +43,7 @@ const Navbar = () => {
         />
       </div>
 
-      {/* Navegación (solo si hay sesión y está expandido) */}
+      {/* Navegación (solo con sesión activa y expandido) */}
       {token && isExpanded && (
         <div className="flex flex-col items-start text-white text-sm gap-5 px-4 w-full">
           <Link to="/" className="flex items-center gap-2 hover:text-red-500 transition">
@@ -61,15 +61,29 @@ const Navbar = () => {
       {/* Iniciar o cerrar sesión (siempre visible) */}
       <div className="mb-4 text-white">
         {token ? (
-          <button
-            onClick={handleLogout}
-            className="hover:text-red-500 transition text-lg"
-            title="Cerrar sesión"
-          >
-            <FaSignOutAlt />
-          </button>
+          isExpanded ? (
+            <button
+              onClick={handleLogout}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition"
+              title="Cerrar sesión"
+            >
+              Cerrar sesión
+            </button>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="hover:text-red-500 transition text-lg"
+              title="Cerrar sesión"
+            >
+              <FaSignOutAlt />
+            </button>
+          )
         ) : (
-          <Link to="/login" className="hover:text-red-500 transition text-lg" title="Iniciar sesión">
+          <Link
+            to="/login"
+            className="hover:text-red-500 transition text-lg"
+            title="Iniciar sesión"
+          >
             <FaSignInAlt />
           </Link>
         )}
