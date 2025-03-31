@@ -15,6 +15,7 @@ export class ReservaController {
 
   @Get()
   findAll() {
+    console.log('→ Entró a GET /reservas');
     return this.reservaService.findAll();
   }
 
