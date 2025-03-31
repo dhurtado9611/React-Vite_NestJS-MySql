@@ -1,11 +1,10 @@
-// main.ts
+// main.ts (correcto para Railway)
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Habilita CORS para permitir solicitudes desde tu frontend en Vercel
   app.enableCors({
     origin: 'https://react-vite-nest-js-my-ds74mxdem-danielhurtados-projects.vercel.app',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -13,7 +12,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // 🚨 Aquí está el cambio importante 👇
-  await app.listen(process.env.PORT || 3000);
+  const PORT = process.env.PORT || 3000; // 👈 importante usar process.env.PORT
+  await app.listen(PORT, '0.0.0.0');      // 👈 Añade '0.0.0.0' explícitamente
+  console.log(`Aplicación corriendo en el puerto: ${PORT}`);
 }
+
 bootstrap();
