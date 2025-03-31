@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { Reserva } from './reservas/reserva.entity';
+import { User } from './auth/user.entity'; // Asegúrate de que la ruta sea correcta
 import { ReservaService } from './reservas/reserva.service';
 import { ReservaController } from './reservas/reserva.controller';
-import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -12,12 +13,12 @@ import { AuthModule } from './auth/auth.module';
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT!, 10),
+      port: parseInt(process.env.DB_PORT ?? '3306', 10),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Reserva],
-      synchronize: true, // solo para desarrollo
+      entities: [Reserva, User], // Se incluye la entidad User
+      synchronize: true, // Solo para desarrollo
     }),
     TypeOrmModule.forFeature([Reserva]),
     AuthModule,
