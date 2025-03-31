@@ -16,3 +16,7 @@ src/
 ├── styles/
 ├── App.tsx
 └── index.tsx
+
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwic3ViIjoxLCJpYXQiOjE3NDM0Mzg3MTcsImV4cCI6MTc0MzUyNTExN30.s_-od17fWPb3hPvZhtoTEsJdZJgeKc7lQIex-X9idLc"
+}
