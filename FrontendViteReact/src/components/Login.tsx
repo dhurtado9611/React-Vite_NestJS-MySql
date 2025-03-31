@@ -1,86 +1,62 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 
-const Login = () => {
-  const [email, setEmail] = useState('');
+const Login: React.FC = () => {
+  const [username, setUsername] = useState(''); // Cambiado de email a username
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const result = await login(email, password);
-      console.log('Resultado:', result);
-      alert('Inicio de sesión exitoso');
-      navigate('/reservas');
-    } catch (error) {
-      console.error('Error en login:', error);
-      alert('Credenciales incorrectas');
+    const result = await login(username, password); // Usamos username
+    if (result) {
+      navigate('/reservas'); // Redirige a reservas si el login es exitoso
+    } else {
+      setError('Usuario o contraseña incorrectos');
     }
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
-      <div className="card shadow-lg border-0 rounded-4" style={{ width: '100%', maxWidth: '400px' }}>
-        <div className="card-body p-4">
-          <h2 className="text-center mb-4 fw-bold text-primary">Iniciar Sesión</h2>
-          <form onSubmit={handleSubmit}>
-            {/* ✅ Email */}
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Correo electrónico</label>
-              <input
-                type="email"
-                className="form-control rounded-3"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="Ingresa tu correo"
-                style={{
-                  transition: 'border-color 0.2s ease-in-out',
-                  border: '1px solid #ced4da',
-                  boxShadow: 'none',
-                }}
-              />
-            </div>
+    <main className="form-signin w-100 m-auto">
+      <form onSubmit={handleLogin}>
+        <h1 className="h3 mb-3 fw-normal text-center text-white">Inicio de Sesión</h1>
 
-            {/* ✅ Contraseña */}
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Contraseña</label>
-              <input
-                type="password"
-                className="form-control rounded-3"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Ingresa tu contraseña"
-                style={{
-                  transition: 'border-color 0.2s ease-in-out',
-                  border: '1px solid #ced4da',
-                  boxShadow: 'none',
-                }}
-              />
-            </div>
+        {error && <div className="alert alert-danger">{error}</div>}
 
-            {/* ✅ Botón */}
-            <button
-              type="submit"
-              className="btn btn-primary w-100 rounded-3 fw-semibold"
-              style={{
-                transition: 'background-color 0.3s ease-in-out, transform 0.2s ease',
-                backgroundColor: '#0d6efd',
-                borderColor: '#0d6efd',
-                padding: '12px',
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-              onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-            >
-              Ingresar
-            </button>
-          </form>
+        <div className="form-floating mb-2">
+          <input
+            type="text"
+            className="form-control rounded-3"
+            id="floatingInput"
+            placeholder="Nombre de usuario"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+          <label htmlFor="floatingInput">Nombre de usuario</label>
         </div>
-      </div>
-    </div>
+        <div className="form-floating mb-2">
+          <input
+            type="password"
+            className="form-control rounded-3"
+            id="floatingPassword"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <label htmlFor="floatingPassword">Contraseña</label>
+        </div>
+
+        <button className="btn btn-primary w-100 py-2" type="submit">
+          Iniciar Sesión
+        </button>
+
+        <p className="mt-5 mb-3 text-white text-center">&copy; {new Date().getFullYear()}</p>
+      </form>
+    </main>
   );
 };
 
