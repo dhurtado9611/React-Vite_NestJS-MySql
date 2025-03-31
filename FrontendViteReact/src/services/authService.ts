@@ -11,3 +11,11 @@ export const login = async (username: string, password: string) => {
     return false;
   }
 };
+
+export const getToken = (): string | null => {
+  return localStorage.getItem('token');
+};
+
+export const logout = () => {
+  localStorage.removeItem('token');
+};
