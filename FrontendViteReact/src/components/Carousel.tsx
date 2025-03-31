@@ -30,7 +30,7 @@ const Carousel = () => {
   };
 
   return (
-    <div className="relative flex items-center justify-center h-[400px] w-full bg-gray-900 z-40">
+    <div className="relative flex items-center justify-center h-[400px] w-full z-10">
       {images.map((src, index) => (
         <img
           key={index}

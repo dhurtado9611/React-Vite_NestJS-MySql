@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './components/Login';
 import Reservas from './pages/Reservas';
 import Historial from './pages/Historial';
+import Footer from "./components/Footer";
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/reservas" element={<Reservas />} />
         <Route path="/historial" element={<Historial />} />
       </Routes>
+      <Footer/>
     </Router>
   );
 }
