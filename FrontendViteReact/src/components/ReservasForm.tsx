@@ -38,6 +38,10 @@ const ReservasForm = ({
   disableEditButton = false,
   disableDeleteButton = false,
 }: Props) => {
+  const habitacionesOcupadas = reservas
+    .filter((r) => r.hsalida === 'pendiente')
+    .map((r) => r.habitacion);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -109,14 +113,18 @@ const ReservasForm = ({
     <form onSubmit={handleSubmit} className="row g-3">
       <div className="col-md-6">
         <label className="form-label">Vehículo</label>
-        <input
-          type="text"
+        <select
           name="vehiculo"
           value={formData.vehiculo || ''}
           onChange={handleInputChange}
           className="form-control"
           required
-        />
+        >
+          <option value="">Seleccione</option>
+          <option value="Carro">Carro</option>
+          <option value="Moto">Moto</option>
+          <option value="Otro">Otro</option>
+        </select>
       </div>
 
       <div className="col-md-6">
@@ -133,24 +141,32 @@ const ReservasForm = ({
 
       <div className="col-md-6">
         <label className="form-label">Habitación</label>
-        <input
-          type="number"
+        <select
           name="habitacion"
           value={formData.habitacion || ''}
           onChange={handleInputChange}
           className="form-control"
           required
-        />
+        >
+          <option value="">Seleccione</option>
+          {Array.from({ length: 16 }, (_, i) => i + 1).map((num) => (
+            <option key={num} value={num} disabled={habitacionesOcupadas.includes(num)}>
+              Habitación {num} {habitacionesOcupadas.includes(num) ? '(Ocupada)' : ''}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="col-md-6">
         <label className="form-label">Valor</label>
         <input
-          type="number"
+          type="text"
           name="valor"
           value={formData.valor || ''}
           onChange={handleInputChange}
           className="form-control"
+          placeholder="$0.00"
+          pattern="^\$?\d+(,\d{3})*(\.\d{0,2})?$"
           required
         />
       </div>
