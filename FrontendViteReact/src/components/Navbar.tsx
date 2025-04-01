@@ -29,9 +29,11 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    localStorage.removeItem('datosTurno'); // Limpia turno
+    localStorage.removeItem('datosTurno');
     navigate('/login');
   };
+
+  if (token && !rol) return null;
 
   return (
     <>
