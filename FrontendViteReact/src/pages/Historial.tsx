@@ -4,7 +4,7 @@ import { Reserva } from '../components/types';
 import api from '../services/api';
 import { Modal, Button } from 'react-bootstrap';
 
-// ✅ Extender el tipo Reserva para incluir valores convertidos
+// Extender el tipo Reserva para incluir valores convertidos
 type ReservaExtendida = Reserva & {
   hentradaNum: number;
   hsalidamaxNum: number;
