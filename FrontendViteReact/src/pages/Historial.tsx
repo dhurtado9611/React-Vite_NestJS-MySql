@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import GraficaReservas from '../components/GraficaReservas';
-import TableReservas from '../components/TableReservas';
 import { Reserva } from '../components/types';
 import api from '../services/api';
 import { Modal, Button } from 'react-bootstrap';
@@ -16,7 +15,6 @@ const Historial = () => {
   const [showModal, setShowModal] = useState(false);
   const [reservaSeleccionada, setReservaSeleccionada] = useState<ReservaExtendida | null>(null);
   const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<number | null>(null);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   // ✅ Obtener datos desde la API
   const fetchDatosReservas = async () => {
@@ -125,16 +123,6 @@ const Historial = () => {
             <GraficaReservas reservas={reservas} />
           </div>
         </div>
-      </div>
-
-      <div className="mt-5">
-        <h2 className="text-center">Historial Completo</h2>
-        <TableReservas
-          reservas={reservas}
-          fetchReservas={fetchDatosReservas}
-          selectedId={selectedId}
-          setSelectedId={setSelectedId}
-        />
       </div>
 
       <style>
