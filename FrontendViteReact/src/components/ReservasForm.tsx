@@ -110,8 +110,8 @@ const ReservasForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="row g-3">
-      <div className="col-md-6">
+    <form onSubmit={handleSubmit} className="row row-cols-1 row-cols-md-4 g-3">
+      <div className="col">
         <label className="form-label">Vehículo</label>
         <select
           name="vehiculo"
@@ -127,7 +127,7 @@ const ReservasForm = ({
         </select>
       </div>
 
-      <div className="col-md-6">
+      <div className="col">
         <label className="form-label">Placa</label>
         <input
           type="text"
@@ -139,7 +139,7 @@ const ReservasForm = ({
         />
       </div>
 
-      <div className="col-md-6">
+      <div className="col">
         <label className="form-label">Habitación</label>
         <select
           name="habitacion"
@@ -157,7 +157,7 @@ const ReservasForm = ({
         </select>
       </div>
 
-      <div className="col-md-6">
+      <div className="col">
         <label className="form-label">Valor</label>
         <input
           type="text"
@@ -171,7 +171,7 @@ const ReservasForm = ({
         />
       </div>
 
-      <div className="col-md-6">
+      <div className="col">
         <label className="form-label">Hora de Entrada</label>
         <input
           type="time"
@@ -183,7 +183,7 @@ const ReservasForm = ({
         />
       </div>
 
-      <div className="col-md-6">
+      <div className="col">
         <label className="form-label">Hora de Salida Máxima</label>
         <input
           type="time"
@@ -194,7 +194,7 @@ const ReservasForm = ({
         />
       </div>
 
-      <div className="col-md-6">
+      <div className="col">
         <label className="form-label">Hora de Salida</label>
         <input
           type="time"
@@ -205,7 +205,7 @@ const ReservasForm = ({
         />
       </div>
 
-      <div className="col-md-12">
+      <div className="col-12">
         <label className="form-label">Observaciones</label>
         <textarea
           name="observaciones"
