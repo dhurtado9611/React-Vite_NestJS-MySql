@@ -20,9 +20,11 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await api.post('/auth/login', { username, password });
-      const { access_token, rol } = response.data;
+      const { access_token, rol, user } = response.data;
       localStorage.setItem('token', access_token);
       localStorage.setItem('rol', rol);
+      localStorage.setItem('user', user);
+
       setRol(rol);
     } catch (error) {
       console.error(error);

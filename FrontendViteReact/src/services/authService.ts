@@ -7,10 +7,9 @@ export const login = async (username: string, password: string) => {
 
     // Guarda el token
     localStorage.setItem('token', token);
-
-    // Extrae y guarda el username y rol si vienen en la respuesta
-    if (res.data.username) {
-      localStorage.setItem('username', res.data.username);
+    // Extrae y guarda el user y rol si vienen en la respuesta
+    if (res.data.user) {
+      localStorage.setItem('user', res.data.user);
     }
     if (res.data.rol) {
       localStorage.setItem('rol', res.data.rol);
@@ -30,5 +29,5 @@ export const getToken = (): string | null => {
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('rol');
-  localStorage.removeItem('username');//usuario
+  localStorage.removeItem('user');//usuario
 };
