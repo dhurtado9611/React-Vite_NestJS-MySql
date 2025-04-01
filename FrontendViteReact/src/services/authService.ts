@@ -9,7 +9,7 @@ export const login = async (username: string, password: string) => {
     localStorage.setItem('token', token);
 
     // Extrae y guarda el username y rol si vienen en la respuesta
-    if (res.data.nombre) {
+    if (res.data.username) {
       localStorage.setItem('username', res.data.username);
     }
     if (res.data.rol) {
