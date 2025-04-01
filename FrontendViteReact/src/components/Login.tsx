@@ -20,11 +20,12 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await api.post('/auth/login', { username, password });
-      const { token, rol } = response.data;
-      localStorage.setItem('token', token);
+      const { access_token, rol } = response.data;
+      localStorage.setItem('token', access_token);
       localStorage.setItem('rol', rol);
       setRol(rol);
     } catch (error) {
+      console.error(error);
       setError('Usuario o contraseña incorrectos');
     }
   };
