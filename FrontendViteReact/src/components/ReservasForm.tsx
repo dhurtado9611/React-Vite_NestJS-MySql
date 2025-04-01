@@ -23,7 +23,7 @@ interface Props {
   setSelectedId: React.Dispatch<React.SetStateAction<number | null>>;
   reservas: Reserva[];
   disableEditButton?: boolean;
-disableDeleteButton?: boolean;
+  disableDeleteButton?: boolean;
 }
 
 const ReservasForm = ({
@@ -106,10 +106,101 @@ const ReservasForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="row g-2">
-      {/* ... campos del formulario ... */}
+    <form onSubmit={handleSubmit} className="row g-3">
+      <div className="col-md-6">
+        <label className="form-label">Vehículo</label>
+        <input
+          type="text"
+          name="vehiculo"
+          value={formData.vehiculo || ''}
+          onChange={handleInputChange}
+          className="form-control"
+          required
+        />
+      </div>
 
-      <div className="col-md-12 mt-3 d-flex justify-content-center">
+      <div className="col-md-6">
+        <label className="form-label">Placa</label>
+        <input
+          type="text"
+          name="placa"
+          value={formData.placa || ''}
+          onChange={handleInputChange}
+          className="form-control"
+          required
+        />
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label">Habitación</label>
+        <input
+          type="number"
+          name="habitacion"
+          value={formData.habitacion || ''}
+          onChange={handleInputChange}
+          className="form-control"
+          required
+        />
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label">Valor</label>
+        <input
+          type="number"
+          name="valor"
+          value={formData.valor || ''}
+          onChange={handleInputChange}
+          className="form-control"
+          required
+        />
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label">Hora de Entrada</label>
+        <input
+          type="time"
+          name="hentrada"
+          value={formData.hentrada || ''}
+          onChange={handleInputChange}
+          className="form-control"
+          required
+        />
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label">Hora de Salida Máxima</label>
+        <input
+          type="time"
+          name="hsalidamax"
+          value={formData.hsalidamax || ''}
+          readOnly
+          className="form-control"
+        />
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label">Hora de Salida</label>
+        <input
+          type="time"
+          name="hsalida"
+          value={formData.hsalida || ''}
+          onChange={handleInputChange}
+          className="form-control"
+        />
+      </div>
+
+      <div className="col-md-12">
+        <label className="form-label">Observaciones</label>
+        <textarea
+          name="observaciones"
+          value={formData.observaciones || ''}
+          onChange={handleInputChange}
+          className="form-control"
+          rows={2}
+        ></textarea>
+      </div>
+
+      <div className="col-12 d-flex justify-content-center">
         <button type="submit" className="btn btn-primary me-2">
           {editingId ? 'Actualizar' : 'Guardar'}
         </button>
