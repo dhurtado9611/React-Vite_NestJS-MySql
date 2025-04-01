@@ -17,20 +17,15 @@ const Navbar = () => {
   const location = useLocation();
   const [active, setActive] = useState(location.pathname);
   const [rol, setRol] = useState<string | null>(null);
-  const [nombreUsuario, setNombreUsuario] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedRol = localStorage.getItem('rol');
-    const storedNombre = localStorage.getItem('nombre');
-    if (storedRol) {
+    if (token) {
+      const storedRol = localStorage.getItem('rol');
       setRol(storedRol);
     }
-    if (storedNombre) {
-      setNombreUsuario(storedNombre);
-    }
     setLoading(false);
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     setActive(location.pathname);
@@ -39,6 +34,8 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     localStorage.removeItem('datosTurno');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('nombre');
     navigate('/login');
   };
 
@@ -53,7 +50,6 @@ const Navbar = () => {
       <aside className="hidden md:flex fixed top-0 left-0 h-screen w-20 bg-white/10 backdrop-blur-md border-r border-red-800 z-50 flex-col justify-between items-center py-4 shadow-xl">
         <div className="flex flex-col items-center gap-6 mt-4 text-white text-2xl w-full">
           <img src={Logo} alt="Logo" className="w-12 h-12 rounded-full border border-white" />
-          {nombreUsuario && <span className="text-xs text-center text-white px-1">{nombreUsuario}</span>}
 
           {token && rol === 'admin' && (
             <>
@@ -69,7 +65,7 @@ const Navbar = () => {
             </>
           )}
 
-          {token && rol === 'invitado' && !['admin'].includes(rol) && (
+          {token && rol === 'invitado' && (
             <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
               <FaPlus />
             </Link>
@@ -102,7 +98,7 @@ const Navbar = () => {
           </>
         )}
 
-        {token && rol === 'invitado' && !['admin'].includes(rol) && (
+        {token && rol === 'invitado' && (
           <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
             <FaPlus />
           </Link>
@@ -112,7 +108,6 @@ const Navbar = () => {
           <div className="bg-black p-2 rounded-full border-4 border-white transform scale-110 shadow-md">
             <img src={Logo} alt="Logo" className="w-14 h-14 object-contain" />
           </div>
-          {nombreUsuario && <span className="text-xs text-white mt-1 text-center">{nombreUsuario}</span>}
         </div>
 
         {token && rol === 'admin' && (
