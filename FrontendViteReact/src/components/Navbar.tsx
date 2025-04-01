@@ -100,6 +100,9 @@ const Navbar = () => {
             <Link to="/reservas" className={linkClass('/reservas')} title="Reservas">
               <FaListAlt className="text-lg" />
             </Link>
+            <Link to="/historial" className={linkClass('/historial')} title="Historial">
+                <FaHistory />
+            </Link>
           </>
         )}
 
