@@ -30,5 +30,5 @@ export const getToken = (): string | null => {
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('rol');
-  localStorage.removeItem('username');
+  localStorage.removeItem('username');//usuario
 };
