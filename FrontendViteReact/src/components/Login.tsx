@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import FormularioTurno from './FormularioTurno';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState('');
   const [rol, setRol] = useState<string | null>(null);
   const [turnoIniciado, setTurnoIniciado] = useState(false);
@@ -20,11 +20,11 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await api.post('/auth/login', { username, password });
-      const { access_token, rol, usernamee } = response.data;
+      const { access_token, rol, username: nombreUsuario, id } = response.data;
       localStorage.setItem('token', access_token);
       localStorage.setItem('rol', rol);
-      localStorage.setItem('username', usernamee);
-
+      localStorage.setItem('username', nombreUsuario);
+      localStorage.setItem('userId', id.toString());
       setRol(rol);
     } catch (error) {
       console.error(error);
@@ -33,18 +33,9 @@ const Login = () => {
   };
 
   const handleTurnoSubmit = (data: { colaborador: string; turno: string; fecha: string }) => {
-    localStorage.setItem('datosTurno', JSON.stringify(data));
     setDatosTurno(data);
     setTurnoIniciado(true);
   };
-
-  useEffect(() => {
-    const turnoGuardado = localStorage.getItem('datosTurno');
-    if (rol === 'invitado' && turnoGuardado) {
-      setTurnoIniciado(true);
-      setDatosTurno(JSON.parse(turnoGuardado));
-    }
-  }, [rol]);
 
   if (rol === 'invitado' && !turnoIniciado) {
     return <FormularioTurno onSubmit={handleTurnoSubmit} />;

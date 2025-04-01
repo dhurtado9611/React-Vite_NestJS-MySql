@@ -1,30 +1,33 @@
 import { useState, useEffect } from 'react';
 
 interface Props {
-  onSubmit: (data: { colaborador: string; turno: string; fecha: string }) => void;
+  onSubmit: (data: { colaborador: string; turno: string; fecha: string; userId: number }) => void;
 }
 
 const FormularioTurno = ({ onSubmit }: Props) => {
   const [colaborador, setColaborador] = useState('');
   const [turno, setTurno] = useState('');
+  const [userId, setUserId] = useState<number | null>(null);
   const fechaActual = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    const username = localStorage.getItem('username') || localStorage.getItem('rol');
+    const username = localStorage.getItem('username');
+    const id = localStorage.getItem('userId');
     if (username) setColaborador(username);
+    if (id) setUserId(Number(id));
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!colaborador || !turno) {
+    if (!colaborador || !turno || userId === null) {
       alert('Por favor complete todos los campos');
       return;
     }
-    onSubmit({ colaborador, turno, fecha: fechaActual });
+    onSubmit({ colaborador, turno, fecha: fechaActual, userId });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="container mt-5 max-w-md mx-auto bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-lg border border-red-600">
+    <form onSubmit={handleSubmit} className="container mt-5 max-w-md mx-auto bg-gray-900 text-white backdrop-blur-md p-6 rounded-xl shadow-lg border border-red-600">
       <h3 className="mb-4 text-xl font-semibold text-center text-red-500">Inicio de Turno - Invitado</h3>
 
       <div className="mb-4">
