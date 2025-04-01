@@ -20,9 +20,14 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.username, sub: user.id };
+    const payload = {
+      username: user.username,
+      sub: user.id,
+      rol: user.rol, // incluir el rol en el token
+    };
     return {
       access_token: this.jwtService.sign(payload),
+      rol: user.rol, // devolver también el rol explícitamente
     };
-  }
+  }  
 }
