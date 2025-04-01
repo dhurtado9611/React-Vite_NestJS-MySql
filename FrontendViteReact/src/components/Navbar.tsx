@@ -26,9 +26,9 @@ const Navbar = () => {
     setLoading(false);
   }, []);
 
-  const handleClick = (path: string) => {
-    setActive(path);
-  };
+  useEffect(() => {
+    setActive(location.pathname);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -37,6 +37,9 @@ const Navbar = () => {
   };
 
   if (loading) return null;
+
+  const linkClass = (path: string) =>
+    `hover:scale-110 transition-transform ${active === path ? 'text-red-500 scale-125 bg-white/20 p-2 rounded-lg' : ''}`;
 
   return (
     <>
@@ -47,20 +50,20 @@ const Navbar = () => {
 
           {token && rol === 'admin' && (
             <>
-              <Link to="/" onClick={() => handleClick('/')} className={`hover:scale-110 transition-transform ${active === '/' ? 'text-red-500 scale-110' : ''}`} title="Inicio">
+              <Link to="/" className={linkClass('/')} title="Inicio">
                 <FaHome />
               </Link>
-              <Link to="/reservas" onClick={() => handleClick('/reservas')} className={`hover:scale-110 transition-transform ${active === '/reservas' ? 'text-red-500 scale-110' : ''}`} title="Reservas">
+              <Link to="/reservas" className={linkClass('/reservas')} title="Reservas">
                 <FaListAlt />
               </Link>
-              <Link to="/historial" onClick={() => handleClick('/historial')} className={`hover:scale-110 transition-transform ${active === '/historial' ? 'text-red-500 scale-110' : ''}`} title="Historial">
+              <Link to="/historial" className={linkClass('/historial')} title="Historial">
                 <FaHistory />
               </Link>
             </>
           )}
 
           {token && rol === 'invitado' && (
-            <Link to="/crear-reservas" onClick={() => handleClick('/crear-reservas')} className={`hover:scale-110 transition-transform ${active === '/crear-reservas' ? 'text-red-500 scale-110' : ''}`} title="Crear Reserva">
+            <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
               <FaPlus />
             </Link>
           )}
@@ -72,7 +75,7 @@ const Navbar = () => {
               <FaSignOutAlt />
             </button>
           ) : (
-            <Link to="/login" onClick={() => handleClick('/login')} title="Iniciar sesión" className={`hover:scale-110 transition-transform ${active === '/login' ? 'text-red-500 scale-110' : ''}`}>
+            <Link to="/login" className={linkClass('/login')} title="Iniciar sesión">
               <FaSignInAlt />
             </Link>
           )}
@@ -83,17 +86,17 @@ const Navbar = () => {
       <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/10 backdrop-blur-md border-t border-red-800 z-50 flex justify-around items-center px-2 py-2 shadow-xl">
         {token && rol === 'admin' && (
           <>
-            <Link to="/" onClick={() => handleClick('/')} className={`flex flex-col items-center text-white text-2xl transition-transform ${active === '/' ? 'scale-110 border-t-4 border-red-600' : 'hover:scale-105'}`}>
+            <Link to="/" className={linkClass('/')} title="Inicio">
               <FaHome />
             </Link>
-            <Link to="/reservas" onClick={() => handleClick('/reservas')} className={`flex flex-col items-center text-white text-2xl transition-transform ${active === '/reservas' ? 'scale-110 border-t-4 border-red-600' : 'hover:scale-105'}`}>
+            <Link to="/reservas" className={linkClass('/reservas')} title="Reservas">
               <FaListAlt />
             </Link>
           </>
         )}
 
         {token && rol === 'invitado' && (
-          <Link to="/crear-reservas" onClick={() => handleClick('/crear-reservas')} className={`flex flex-col items-center text-white text-2xl transition-transform ${active === '/crear-reservas' ? 'scale-110 border-t-4 border-red-600' : 'hover:scale-105'}`}>
+          <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
             <FaPlus />
           </Link>
         )}
@@ -103,7 +106,7 @@ const Navbar = () => {
         </div>
 
         {token && rol === 'admin' && (
-          <Link to="/historial" onClick={() => handleClick('/historial')} className={`flex flex-col items-center text-white text-2xl transition-transform ${active === '/historial' ? 'scale-110 border-t-4 border-red-600' : 'hover:scale-105'}`}>
+          <Link to="/historial" className={linkClass('/historial')} title="Historial">
             <FaHistory />
           </Link>
         )}
@@ -114,7 +117,7 @@ const Navbar = () => {
               <FaSignOutAlt />
             </button>
           ) : (
-            <Link to="/login" onClick={() => handleClick('/login')} className={`flex flex-col items-center transition-transform ${active === '/login' ? 'scale-110 border-t-4 border-red-600' : 'hover:scale-105'}`} title="Iniciar sesión">
+            <Link to="/login" className={linkClass('/login')} title="Iniciar sesión">
               <FaSignInAlt className="text-white" />
             </Link>
           )}
