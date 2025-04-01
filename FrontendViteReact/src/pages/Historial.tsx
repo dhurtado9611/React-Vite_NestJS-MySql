@@ -53,15 +53,27 @@ const Historial = () => {
     return 'libre';
   };
 
-  const handleClickHabitacion = (habitacion: number) => {
+  const handleClickHabitacion = async (habitacion: number) => {
     setHabitacionSeleccionada(habitacion);
-    const reservasDeHabitacion = reservas.filter(
-      (reserva) => reserva.habitacion === habitacion
-    );
-    const ultimaReserva = reservasDeHabitacion.sort(
-      (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-    )[0];
-    setReservaSeleccionada(ultimaReserva || null);
+    try {
+      const response = await api.get(`/reservas`);
+      const reservasHabitacion = response.data.filter(
+        (reserva: Reserva) => reserva.habitacion === habitacion && !reserva.hsalida
+      );
+      if (reservasHabitacion.length > 0) {
+        const reservaActiva = reservasHabitacion[reservasHabitacion.length - 1];
+        setReservaSeleccionada({
+          ...reservaActiva,
+          hentradaNum: convertirHoraANumero(reservaActiva.hentrada),
+          hsalidamaxNum: convertirHoraANumero(reservaActiva.hsalidamax)
+        });
+      } else {
+        setReservaSeleccionada(null);
+      }
+    } catch (error) {
+      console.error('Error al consultar la base de datos:', error);
+      setReservaSeleccionada(null);
+    }
     setShowModal(true);
   };
 
