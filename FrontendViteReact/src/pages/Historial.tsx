@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import GraficaReservas from '../components/GraficaReservas';
+import TableReservas from '../components/TableReservas';
 import { Reserva } from '../components/types';
 import api from '../services/api';
 import { Modal, Button } from 'react-bootstrap';
 
-// Extender el tipo Reserva para incluir valores convertidos
+// ✅ Extender el tipo Reserva para incluir valores convertidos
 type ReservaExtendida = Reserva & {
   hentradaNum: number;
   hsalidamaxNum: number;
@@ -15,6 +16,7 @@ const Historial = () => {
   const [showModal, setShowModal] = useState(false);
   const [reservaSeleccionada, setReservaSeleccionada] = useState<ReservaExtendida | null>(null);
   const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   // ✅ Obtener datos desde la API
   const fetchDatosReservas = async () => {
@@ -22,6 +24,7 @@ const Historial = () => {
       const response = await api.get('/reservas');
       const reservasConvertidas = response.data.map((reserva: Reserva) => ({
         ...reserva,
+        hsalida: reserva.hsalida ?? '',
         hentradaNum: convertirHoraANumero(reserva.hentrada),
         hsalidamaxNum: convertirHoraANumero(reserva.hsalidamax)
       }));
@@ -31,14 +34,12 @@ const Historial = () => {
     }
   };
 
-  // ✅ Convertir hora a formato numérico (HH:mm → HHmm)
   const convertirHoraANumero = (hora: string): number => {
     if (!hora) return 0;
     const [h, m] = hora.split(':').map(Number);
     return h * 100 + m;
   };
 
-  // ✅ Determinar el estado de la habitación
   const getEstadoHabitacion = (habitacion: number) => {
     const reservaActiva = reservas.find(
       (reserva) => reserva.habitacion === habitacion && !reserva.hsalida
@@ -46,38 +47,33 @@ const Historial = () => {
 
     if (reservaActiva) {
       const { hentradaNum, hsalidamaxNum } = reservaActiva;
-
-      // ✅ Si la diferencia entre entrada y salida máxima es >= 4000 → Estado crítico
-      return hsalidamaxNum - hentradaNum >= 4000 ? 'critica' : 'ocupada';
+      return hsalidamaxNum - hentradaNum >= 400 ? 'critica' : 'ocupada';
     }
 
     return 'libre';
   };
 
-  // ✅ Mostrar detalles de la reserva en el modal
   const handleClickHabitacion = (habitacion: number) => {
     setHabitacionSeleccionada(habitacion);
-    const reservaActiva = reservas.find(
-      (reserva) => reserva.habitacion === habitacion && !reserva.hsalida
+    const reservasDeHabitacion = reservas.filter(
+      (reserva) => reserva.habitacion === habitacion
     );
-    setReservaSeleccionada(reservaActiva || null);
+    const ultimaReserva = reservasDeHabitacion.sort(
+      (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+    )[0];
+    setReservaSeleccionada(ultimaReserva || null);
     setShowModal(true);
   };
 
-  // ✅ Cargar datos iniciales y establecer un intervalo de actualización
   useEffect(() => {
     fetchDatosReservas();
-
-    // 🔥 Actualización de reservas cada 10 segundos
     const updateInterval = setInterval(fetchDatosReservas, 10000);
-
     return () => clearInterval(updateInterval);
   }, []);
 
   return (
     <div className="container mt-4">
       <div className="row">
-        {/* ✅ Estado de las Habitaciones */}
         <div className="col-md-6">
           <h2 className="mb-4 text-center">Estado de las Habitaciones</h2>
           <div className="row justify-content-center">
@@ -111,7 +107,6 @@ const Historial = () => {
           </div>
         </div>
 
-        {/* ✅ Gráfica de Resultados */}
         <div className="col-md-6">
           <h2 className="mb-4 text-center">Estadísticas</h2>
           <div className="card shadow p-3">
@@ -120,7 +115,16 @@ const Historial = () => {
         </div>
       </div>
 
-      {/* ✅ Estilo para parpadeo */}
+      <div className="mt-5">
+        <h2 className="text-center">Historial Completo</h2>
+        <TableReservas
+          reservas={reservas}
+          fetchReservas={fetchDatosReservas}
+          selectedId={selectedId}
+          setSelectedId={setSelectedId}
+        />
+      </div>
+
       <style>
         {`
           @keyframes parpadeo {
@@ -131,7 +135,6 @@ const Historial = () => {
         `}
       </style>
 
-      {/* ✅ Modal de Información */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Habitación {habitacionSeleccionada}</Modal.Title>
@@ -139,7 +142,7 @@ const Historial = () => {
         <Modal.Body>
           {reservaSeleccionada ? (
             <>
-              <p><strong>Fecha:</strong> {reservaSeleccionada.fecha}</p> {/* ✅ Nueva propiedad */}
+              <p><strong>Fecha:</strong> {reservaSeleccionada.fecha}</p>
               <p><strong>Vehículo:</strong> {reservaSeleccionada.vehiculo}</p>
               <p><strong>Placa:</strong> {reservaSeleccionada.placa}</p>
               <p><strong>Hora Entrada:</strong> {reservaSeleccionada.hentrada}</p>
