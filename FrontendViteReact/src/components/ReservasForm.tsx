@@ -39,7 +39,7 @@ const ReservasForm = ({
   disableDeleteButton = false,
 }: Props) => {
   const habitacionesOcupadas = reservas
-    .filter((r) => r.hsalida === 'pendiente')
+    .filter((r) => !r.hsalida || r.hsalida.toLowerCase() === 'pendiente')
     .map((r) => r.habitacion);
 
   const handleInputChange = (
