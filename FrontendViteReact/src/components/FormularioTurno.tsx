@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Props {
   onSubmit: (data: { colaborador: string; turno: string; fecha: string }) => void;
@@ -8,6 +8,11 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   const [colaborador, setColaborador] = useState('');
   const [turno, setTurno] = useState('');
   const fechaActual = new Date().toISOString().split('T')[0];
+
+  useEffect(() => {
+    const username = localStorage.getItem('username');
+    if (username) setColaborador(username);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,48 +24,45 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="container mt-5">
-      <h3 className="mb-4">Inicio de Turno - Invitado</h3>
+    <form onSubmit={handleSubmit} className="container mt-5 max-w-md mx-auto bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-lg border border-red-600">
+      <h3 className="mb-4 text-xl font-semibold text-center text-red-500">Inicio de Turno - Invitado</h3>
 
-      <div className="mb-3">
-        <label className="form-label">Colaborador</label>
-        <select
-          className="form-control"
+      <div className="mb-4">
+        <label className="form-label text-white">Colaborador</label>
+        <input
+          type="text"
+          className="form-control bg-black text-white border-red-500"
           value={colaborador}
-          onChange={(e) => setColaborador(e.target.value)}
-          required
-        >
-          <option value="">Seleccione...</option>
-          <option value="Fabian">Fabian</option>
-          <option value="Tatiana">Tatiana</option>
-          <option value="Paola">Paola</option>
-          <option value="Franci">Franci</option>
-          <option value="Maria">Maria</option>
-        </select>
+          disabled
+        />
       </div>
 
-      <div className="mb-3">
-        <label className="form-label">Turno</label>
+      <div className="mb-4">
+        <label className="form-label text-white">Turno</label>
         <input
           type="time"
-          className="form-control"
+          className="form-control bg-black text-white border-red-500"
           value={turno}
           onChange={(e) => setTurno(e.target.value)}
           required
         />
       </div>
 
-      <div className="mb-3">
-        <label className="form-label">Fecha</label>
+      <div className="mb-4">
+        <label className="form-label text-white">Fecha</label>
         <input
           type="date"
-          className="form-control"
+          className="form-control bg-black text-white border-red-500"
           value={fechaActual}
           disabled
         />
       </div>
 
-      <button type="submit" className="btn btn-primary">Iniciar Turno</button>
+      <div className="text-center">
+        <button type="submit" className="btn btn-danger px-4 py-2 font-semibold rounded">
+          Iniciar Turno
+        </button>
+      </div>
     </form>
   );
 };
