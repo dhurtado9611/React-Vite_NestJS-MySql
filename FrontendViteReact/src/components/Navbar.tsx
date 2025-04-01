@@ -39,7 +39,7 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  if (loading || !rol) return null;
+  if (loading) return null;
 
   const linkClass = (path: string) =>
     `hover:scale-110 transition-transform p-2 md:p-3 rounded-full bg-black/40 backdrop-blur-sm ${active === path ? 'text-red-500 scale-125' : 'text-white'}`;
