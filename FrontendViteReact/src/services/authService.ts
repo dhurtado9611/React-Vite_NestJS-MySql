@@ -4,7 +4,18 @@ export const login = async (username: string, password: string) => {
   try {
     const res = await api.post('/auth/login', { username, password });
     const token = res.data.access_token;
+
+    // Guarda el token
     localStorage.setItem('token', token);
+
+    // Extrae y guarda el nombre y rol si vienen en la respuesta
+    if (res.data.nombre) {
+      localStorage.setItem('nombre', res.data.nombre);
+    }
+    if (res.data.rol) {
+      localStorage.setItem('rol', res.data.rol);
+    }
+
     return true;
   } catch (err) {
     console.error('❌ Error en login', err);
@@ -18,4 +29,6 @@ export const getToken = (): string | null => {
 
 export const logout = () => {
   localStorage.removeItem('token');
+  localStorage.removeItem('rol');
+  localStorage.removeItem('nombre');
 };
