@@ -29,6 +29,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    localStorage.removeItem('datosTurno'); // Limpia turno
     navigate('/login');
   };
 

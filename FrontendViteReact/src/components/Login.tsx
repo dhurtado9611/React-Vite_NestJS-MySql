@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import FormularioTurno from './FormularioTurno';
@@ -31,9 +31,18 @@ const Login = () => {
   };
 
   const handleTurnoSubmit = (data: { colaborador: string; turno: string; fecha: string }) => {
+    localStorage.setItem('datosTurno', JSON.stringify(data));
     setDatosTurno(data);
     setTurnoIniciado(true);
   };
+
+  useEffect(() => {
+    const turnoGuardado = localStorage.getItem('datosTurno');
+    if (rol === 'invitado' && turnoGuardado) {
+      setTurnoIniciado(true);
+      setDatosTurno(JSON.parse(turnoGuardado));
+    }
+  }, [rol]);
 
   if (rol === 'invitado' && !turnoIniciado) {
     return <FormularioTurno onSubmit={handleTurnoSubmit} />;
