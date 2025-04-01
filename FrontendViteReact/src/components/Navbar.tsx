@@ -42,14 +42,14 @@ const Navbar = () => {
   if (loading || !rol) return null;
 
   const linkClass = (path: string) =>
-    `hover:scale-110 transition-transform p-3 rounded-full bg-black/40 backdrop-blur-sm ${active === path ? 'text-red-500 scale-125' : 'text-white'}`;
+    `hover:scale-110 transition-transform p-2 md:p-3 rounded-full bg-black/40 backdrop-blur-sm ${active === path ? 'text-red-500 scale-125' : 'text-white'}`;
 
   return (
     <>
       {/* Navbar para escritorio */}
       <aside className="hidden md:flex fixed top-0 left-0 h-screen w-20 bg-white/10 backdrop-blur-md border-r border-red-800 z-50 flex-col justify-between items-center py-4 shadow-xl">
         <div className="flex flex-col items-center gap-6 mt-4 text-white text-2xl w-full">
-          <img src={Logo} alt="Logo" className="w-12 h-12 rounded-full border border-white" />
+          <img src={Logo} alt="Logo" className="w-12 h-12 rounded-full border-4 border-white object-cover shadow-md" />
 
           {token && rol === 'admin' && (
             <>
@@ -83,8 +83,8 @@ const Navbar = () => {
               <FaSignOutAlt />
             </button>
           ) : (
-            <Link to="/login" className={linkClass('/login')} title="Iniciar sesión">
-              <FaSignInAlt />
+            <Link to="/login" className="p-2 rounded-full bg-black/40 backdrop-blur-sm hover:scale-110 transition-transform" title="Iniciar sesión">
+              <FaSignInAlt className="text-white" />
             </Link>
           )}
         </div>
@@ -95,10 +95,10 @@ const Navbar = () => {
         {token && rol === 'admin' && (
           <>
             <Link to="/" className={linkClass('/')} title="Inicio">
-              <FaHome />
+              <FaHome className="text-lg" />
             </Link>
             <Link to="/reservas" className={linkClass('/reservas')} title="Reservas">
-              <FaListAlt />
+              <FaListAlt className="text-lg" />
             </Link>
           </>
         )}
@@ -106,28 +106,28 @@ const Navbar = () => {
         {token && rol === 'invitado' && (
           <>
             <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
-              <FaPlus />
+              <FaPlus className="text-lg" />
             </Link>
             <Link to="/historial-invitado" className={linkClass('/historial-invitado')} title="Historial">
-              <FaHistory />
+              <FaHistory className="text-lg" />
             </Link>
           </>
         )}
 
         <div className="flex flex-col items-center">
-          <div className="bg-black p-2 rounded-full border-4 border-white transform scale-110 shadow-md">
-            <img src={Logo} alt="Logo" className="w-14 h-14 object-contain" />
+          <div className="bg-black p-1 rounded-full border-4 border-white transform scale-105 shadow-md">
+            <img src={Logo} alt="Logo" className="w-10 h-10 object-cover rounded-full" />
           </div>
         </div>
 
-        <div className="text-white text-2xl">
+        <div className="text-white text-lg">
           {token ? (
-            <button onClick={handleLogout} className="hover:scale-105 transition-transform bg-black/40 backdrop-blur-sm p-3 rounded-full" title="Cerrar sesión">
+            <button onClick={handleLogout} className="hover:scale-105 transition-transform bg-black/40 backdrop-blur-sm p-2 rounded-full" title="Cerrar sesión">
               <FaSignOutAlt />
             </button>
           ) : (
-            <Link to="/login" className={linkClass('/login')} title="Iniciar sesión">
-              <FaSignInAlt className="text-white" />
+            <Link to="/login" className="p-2 rounded-full bg-black/40 backdrop-blur-sm hover:scale-110 transition-transform" title="Iniciar sesión">
+              <FaSignInAlt className="text-white text-lg" />
             </Link>
           )}
         </div>
