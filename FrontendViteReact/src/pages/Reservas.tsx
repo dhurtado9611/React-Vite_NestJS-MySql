@@ -21,6 +21,12 @@ const Reservas = () => {
   const [formData, setFormData] = useState<Partial<Reserva>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+      const storedUsername = localStorage.getItem('username');
+      setUsername(storedUsername);
+  }, []);
 
   const fetchReservas = async () => {
     try {
@@ -37,8 +43,10 @@ const Reservas = () => {
 
   return (
     <div className="container mt-5">
+      <h2 className="text-2xl font-bold mb-4">
+        Bienvenido, {username || 'Invitado'}
+      </h2>
       <h2 className="mb-4">{editingId ? 'Editar Reserva' : 'Agregar Reserva'}</h2>
-
       <ReservasForm
         fetchReservas={fetchReservas}
         formData={formData}

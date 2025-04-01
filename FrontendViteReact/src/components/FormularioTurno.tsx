@@ -34,7 +34,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
         <label className="form-label text-white">Colaborador</label>
         <input
           type="text"
-          className="form-control bg-gray-800 text-white border-red-500"
+          className="form-control bg-gray-900 text-white border-red-500"
           value={colaborador}
           disabled
         />
@@ -44,7 +44,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
         <label className="form-label text-white">Turno</label>
         <input
           type="time"
-          className="form-control bg-gray-800 text-white border-red-500"
+          className="form-control bg-gray-900 text-white border-red-500"
           value={turno}
           onChange={(e) => setTurno(e.target.value)}
           required
@@ -55,7 +55,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
         <label className="form-label text-white">Fecha</label>
         <input
           type="date"
-          className="form-control bg-gray-800 text-white border-red-500"
+          className="form-control bg-gray-900 text-white border-red-500"
           value={fechaActual}
           disabled
         />
