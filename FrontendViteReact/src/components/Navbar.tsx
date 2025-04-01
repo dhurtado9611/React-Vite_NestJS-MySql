@@ -42,7 +42,7 @@ const Navbar = () => {
   if (loading || !rol) return null;
 
   const linkClass = (path: string) =>
-    `hover:scale-110 transition-transform p-2 rounded-lg bg-white/20 backdrop-blur-sm ${active === path ? 'text-red-500 scale-125' : 'text-white'}`;
+    `hover:scale-110 transition-transform p-3 rounded-full bg-black/40 backdrop-blur-sm ${active === path ? 'text-red-500 scale-125' : 'text-white'}`;
 
   return (
     <>
@@ -66,15 +66,20 @@ const Navbar = () => {
           )}
 
           {token && rol === 'invitado' && (
-            <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
-              <FaPlus />
-            </Link>
+            <>
+              <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
+                <FaPlus />
+              </Link>
+              <Link to="/historial-invitado" className={linkClass('/historial-invitado')} title="Historial">
+                <FaHistory />
+              </Link>
+            </>
           )}
         </div>
 
         <div className="text-white text-xl mb-4">
           {token ? (
-            <button onClick={handleLogout} className="hover:scale-110 transition-transform bg-white/20 backdrop-blur-sm p-2 rounded-lg" title="Cerrar sesión">
+            <button onClick={handleLogout} className="hover:scale-110 transition-transform bg-black/40 backdrop-blur-sm p-3 rounded-full" title="Cerrar sesión">
               <FaSignOutAlt />
             </button>
           ) : (
@@ -99,9 +104,14 @@ const Navbar = () => {
         )}
 
         {token && rol === 'invitado' && (
-          <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
-            <FaPlus />
-          </Link>
+          <>
+            <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
+              <FaPlus />
+            </Link>
+            <Link to="/historial-invitado" className={linkClass('/historial-invitado')} title="Historial">
+              <FaHistory />
+            </Link>
+          </>
         )}
 
         <div className="flex flex-col items-center">
@@ -110,15 +120,9 @@ const Navbar = () => {
           </div>
         </div>
 
-        {token && rol === 'admin' && (
-          <Link to="/historial" className={linkClass('/historial')} title="Historial">
-            <FaHistory />
-          </Link>
-        )}
-
         <div className="text-white text-2xl">
           {token ? (
-            <button onClick={handleLogout} className="hover:scale-105 transition-transform bg-white/20 backdrop-blur-sm p-2 rounded-lg" title="Cerrar sesión">
+            <button onClick={handleLogout} className="hover:scale-105 transition-transform bg-black/40 backdrop-blur-sm p-3 rounded-full" title="Cerrar sesión">
               <FaSignOutAlt />
             </button>
           ) : (
