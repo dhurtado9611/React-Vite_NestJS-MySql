@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import * as XLSX from 'xlsx';
+import api from '../services/api';
 
 interface Reserva {
   id: number;
@@ -66,11 +67,7 @@ const TableReservas = ({ reservas, fetchReservas, selectedId, setSelectedId }: P
         hour: '2-digit',
         minute: '2-digit',
       });
-      await fetch(`/reservas/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hsalida: horaActual }),
-      });
+      await api.put(`/reservas/${id}`, { hsalida: horaActual });
       fetchReservas();
     } catch (error) {
       console.error('Error al registrar la hora de salida:', error);
