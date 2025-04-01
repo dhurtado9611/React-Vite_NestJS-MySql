@@ -92,6 +92,12 @@ const Navbar = () => {
 
       {/* Navbar para móvil */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/10 backdrop-blur-md border-t border-red-800 z-50 flex justify-around items-center px-2 py-2 shadow-xl">
+        <div className="flex flex-col items-center">
+            <div className="bg-black p-1 rounded-full border-4 border-white transform scale-105 shadow-md">
+              <img src={Logo} alt="Logo" className="w-10 h-10 object-cover rounded-full" />
+            </div>
+        </div>
+        
         {token && rol === 'admin' && (
           <>
             <Link to="/" className={linkClass('/')} title="Inicio">
@@ -116,12 +122,6 @@ const Navbar = () => {
             </Link>
           </>
         )}
-
-        <div className="flex flex-col items-center">
-          <div className="bg-black p-1 rounded-full border-4 border-white transform scale-105 shadow-md">
-            <img src={Logo} alt="Logo" className="w-10 h-10 object-cover rounded-full" />
-          </div>
-        </div>
 
         <div className="text-white text-lg">
           {token ? (
