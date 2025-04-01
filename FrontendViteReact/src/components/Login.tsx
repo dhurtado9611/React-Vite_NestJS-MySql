@@ -1,22 +1,52 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/authService';
+import api from '../services/api';
+import FormularioTurno from './FormularioTurno';
 
-const Login: React.FC = () => {
+const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [rol, setRol] = useState<string | null>(null);
+  const [turnoIniciado, setTurnoIniciado] = useState(false);
+  const [datosTurno, setDatosTurno] = useState<null | {
+    colaborador: string;
+    turno: string;
+    fecha: string;
+  }>(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await login(username, password);
-    if (result) {
-      navigate('/reservas');
-    } else {
+    try {
+      const response = await api.post('/auth/login', { username, password });
+      const { token, rol } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('rol', rol);
+      setRol(rol);
+    } catch (error) {
       setError('Usuario o contraseña incorrectos');
     }
   };
+
+  const handleTurnoSubmit = (data: { colaborador: string; turno: string; fecha: string }) => {
+    setDatosTurno(data);
+    setTurnoIniciado(true);
+  };
+
+  if (rol === 'invitado' && !turnoIniciado) {
+    return <FormularioTurno onSubmit={handleTurnoSubmit} />;
+  }
+
+  if (rol === 'admin') {
+    navigate('/reservas');
+    return null;
+  }
+
+  if (rol === 'invitado' && turnoIniciado) {
+    navigate('/crear-reservas');
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
@@ -32,13 +62,13 @@ const Login: React.FC = () => {
 
           <div>
             <label htmlFor="username" className="block text-sm mb-1 text-white">
-              Nombre de usuario
+              Usuario
             </label>
             <input
               type="text"
               id="username"
               className="w-full px-4 py-2 bg-black border border-red-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
-              placeholder="usuario123"
+              placeholder="nombreusuario"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

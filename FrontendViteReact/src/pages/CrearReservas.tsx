@@ -16,10 +16,9 @@ interface Reserva {
   fecha: string;
 }
 
-const Reservas = () => {
+const CrearReservas = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [formData, setFormData] = useState<Partial<Reserva>>({});
-  const [editingId, setEditingId] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const fetchReservas = async () => {
@@ -37,17 +36,19 @@ const Reservas = () => {
 
   return (
     <div className="container mt-5">
-      <h2 className="mb-4">{editingId ? 'Editar Reserva' : 'Agregar Reserva'}</h2>
+      <h2 className="mb-4">Agregar Reserva - Invitado</h2>
 
       <ReservasForm
         fetchReservas={fetchReservas}
         formData={formData}
         setFormData={setFormData}
-        editingId={editingId}
-        setEditingId={setEditingId}
+        editingId={null} // no se permite editar
+        setEditingId={() => {}} // función vacía
         selectedId={selectedId}
         setSelectedId={setSelectedId}
         reservas={reservas}
+        disableEditButton={true}
+        disableDeleteButton={true}
       />
 
       <TableReservas
@@ -60,4 +61,4 @@ const Reservas = () => {
   );
 };
 
-export default Reservas;
+export default CrearReservas;
