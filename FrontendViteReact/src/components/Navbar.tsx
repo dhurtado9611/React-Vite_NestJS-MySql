@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -17,10 +18,12 @@ const Navbar = () => {
   const location = useLocation();
   const [active, setActive] = useState(location.pathname);
   const [rol, setRol] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedRol = localStorage.getItem('rol');
     setRol(storedRol);
+    setLoading(false);
   }, []);
 
   const handleClick = (path: string) => {
@@ -33,7 +36,7 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  if (token && !rol) return null;
+  if (loading) return null;
 
   return (
     <>
