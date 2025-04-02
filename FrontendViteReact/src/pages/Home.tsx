@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Carousel from "../components/Carousel";
 import fondo1 from "../assets/fondo1.jpg";
 import Footer from "../components/Footer";
+import { div } from "framer-motion/client";
 
 const Logo = () => {
   const [isAnimating, setIsAnimating] = useState(true);
@@ -73,7 +74,11 @@ const Home = () => {
       <div className="overflow-hidden w-full flex justify-center items-center z-10">
         <Carousel />
       </div>
+      
+      <div className="row">
       <Footer/>
+      </div>
+     
     </div>
   );
 };
