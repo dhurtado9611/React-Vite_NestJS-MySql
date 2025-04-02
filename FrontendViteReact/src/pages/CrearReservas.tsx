@@ -4,6 +4,7 @@ import ReservasForm from '../components/ReservasForm';
 import TableCrearReservas from '../components/TableCrearReservas';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import Caja from '../components/Caja';
 
 interface Reserva {
   id: number;
@@ -79,6 +80,8 @@ const CrearReservas = () => {
         disableEditButton={true}
         disableDeleteButton={true}
       />
+
+      <Caja />
 
       <TableCrearReservas
         reservas={reservas}
