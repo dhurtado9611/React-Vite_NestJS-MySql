@@ -54,7 +54,7 @@ const Historial = () => {
   
       // Si la diferencia entre la hora actual y la hora de entrada es >= 400, la habitación se marca como 'critica'
       const diferencia = currentTimeNum - hentradaNum;
-      console.log(`Diferencia entre la hora actual y la hora de entrada: ${diferencia}`);
+      //console.log(`Diferencia entre la hora actual y la hora de entrada: ${diferencia}`);
       return diferencia >= 400 ? 'critica' : 'ocupada';
     }
   
@@ -127,14 +127,6 @@ const Historial = () => {
           </div>
         </div>
 
-        <div className="col-md-6">
-          <h2 className="mb-4 text-center">Estadísticas</h2>
-          <div className="card shadow p-3">
-            <GraficaReservas reservas={reservas} />
-          </div>
-        </div>
-      </div>
-
       <style>
         {`
           @keyframes parpadeo {
@@ -171,6 +163,13 @@ const Historial = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+      <div className="col-md-6">
+          <h2 className="mb-4 text-center">Estadísticas</h2>
+          <div className="card shadow p-3">
+            <GraficaReservas reservas={reservas} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -53,7 +53,7 @@ const Historial = () => {
   
       // Si la diferencia entre la hora actual y la hora de entrada es >= 400, la habitación se marca como 'critica'
       const diferencia = currentTimeNum - hentradaNum;
-      console.log(`Diferencia entre la hora actual y la hora de entrada: ${currentTimeNum}-${hentradaNum}=${diferencia}`);
+      //console.log(`Diferencia entre la hora actual y la hora de entrada: ${currentTimeNum}-${hentradaNum}=${diferencia}`);
       return diferencia >= 400 ? 'critica' : 'ocupada';
     }
   
@@ -163,6 +163,7 @@ const Historial = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
     </div>
   );
 };
