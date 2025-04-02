@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 interface Props {
@@ -11,6 +12,7 @@ const FormularioTurno = ({ onSubmitSuccess }: Props) => {
   const [baseCaja, setBaseCaja] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
   const fechaActual = new Date().toISOString().split('T')[0];
+  const navigate = useNavigate();
 
   useEffect(() => {
     const username = localStorage.getItem('username');
@@ -45,6 +47,7 @@ const FormularioTurno = ({ onSubmitSuccess }: Props) => {
 
       alert('Turno registrado correctamente');
       if (onSubmitSuccess) onSubmitSuccess();
+      navigate('/');
     } catch (error) {
       console.error('Error al registrar el turno:', error);
       alert('No se pudo registrar el turno');
