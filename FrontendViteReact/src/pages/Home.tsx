@@ -29,7 +29,7 @@ const Logo = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const radius = 70;
+  const radius = 80;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
 
