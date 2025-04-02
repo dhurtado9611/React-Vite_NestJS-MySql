@@ -68,8 +68,6 @@ const CrearReservas = () => {
         Bienvenido {username || 'Invitado'} ¡aquí puedes hacer tus registros!
       </h2>
 
-      <Caja/>
-
       <ReservasForm
         fetchReservas={fetchReservas}
         formData={formData}
@@ -87,6 +85,8 @@ const CrearReservas = () => {
         reservas={reservas}
         fetchReservas={fetchReservas}
       />
+
+      <Caja/>
 
       <div className="text-center mt-4">
         <button onClick={exportarExcel} className="btn btn-success">

@@ -64,30 +64,32 @@ const Caja = () => {
   const totalCaja = baseCaja + totalReservas;
 
   return (
-    <div className="mt-5">
-      <h3 className="text-xl font-bold mb-3">Cuadre de Caja</h3>
-      <table className="table table-bordered table-striped w-auto mx-auto text-center">
-        <thead>
-          <tr>
-            <th>Colaborador</th>
-            <th>Fecha</th>
-            <th>Turno</th>
-            <th>Base Caja</th>
-            <th>Total Reservas</th>
-            <th>Total Caja</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{colaborador}</td>
-            <td>{fecha}</td>
-            <td>{turno}</td>
-            <td>${baseCaja.toLocaleString()}</td>
-            <td>${totalReservas.toLocaleString()}</td>
-            <td className="fw-bold">${totalCaja.toLocaleString()}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div className="mt-5 px-3">
+      <h3 className="text-2xl font-semibold mb-4 text-center">Cuadre de Caja</h3>
+      <div className="overflow-x-auto">
+        <table className="table table-bordered table-striped w-full max-w-4xl mx-auto text-center text-sm md:text-base">
+          <thead className="bg-light">
+            <tr>
+              <th>Colaborador</th>
+              <th>Fecha</th>
+              <th>Turno</th>
+              <th>Base Caja</th>
+              <th>Total Reservas</th>
+              <th>Total Caja</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{colaborador}</td>
+              <td>{fecha}</td>
+              <td>{turno}</td>
+              <td>${baseCaja.toLocaleString()}</td>
+              <td>${totalReservas.toLocaleString()}</td>
+              <td className="font-bold">${totalCaja.toLocaleString()}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
