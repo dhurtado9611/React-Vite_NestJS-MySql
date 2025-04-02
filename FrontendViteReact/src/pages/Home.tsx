@@ -54,7 +54,7 @@ const Home = () => {
   return (
     <>
       <div
-        className="pb-20 relative flex flex-col md:flex-row h-screen text-white pt-16 overflow-hidden bg-cover bg-center"
+        className="relative flex flex-col md:flex-row h-screen text-white pt-16 overflow-hidden bg-cover bg-center"
         style={{ backgroundImage: `url(${fondo1})` }}
       >
         {/* Overlay oscuro */}
