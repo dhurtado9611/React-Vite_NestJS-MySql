@@ -43,24 +43,24 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="container mt-5 max-w-md mx-auto bg-gray-900 text-white backdrop-blur-md p-6 rounded-xl shadow-lg border border-red-600">
+    <form onSubmit={handleSubmit} className="container mt-5 max-w-md mx-auto bg-gray-900 backdrop-blur-md p-6 rounded-xl shadow-lg border border-red-600">
       <h3 className="mb-4 text-xl font-semibold text-center text-red-500">Inicio de Turno - Invitado</h3>
 
       <div className="mb-4">
-        <label className="form-label text-white">Colaborador</label>
+        <label className="form-label">Colaborador</label>
         <input
           type="text"
-          className="form-control bg-gray-900 text-white border-red-500"
+          className="form-control bg-gray-900 border-red-500"
           value={colaborador}
           disabled
         />
       </div>
 
       <div className="mb-4">
-        <label className="form-label text-white">Turno</label>
+        <label className="form-label">Turno</label>
         <input
           type="time"
-          className="form-control bg-gray-900 text-white border-red-500"
+          className="form-control bg-gray-900 border-red-500"
           value={turno}
           onChange={(e) => setTurno(e.target.value)}
           required
@@ -68,10 +68,10 @@ const FormularioTurno = ({ onSubmit }: Props) => {
       </div>
 
       <div className="mb-4">
-        <label className="form-label text-white">Base de Caja</label>
+        <label className="form-label">Base de Caja</label>
         <input
           type="number"
-          className="form-control bg-gray-900 text-white border-red-500"
+          className="form-control bg-gray-900 border-red-500"
           value={baseCaja}
           onChange={(e) => setBaseCaja(e.target.value)}
           required
@@ -82,7 +82,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
         <label className="form-label text-white">Fecha</label>
         <input
           type="date"
-          className="form-control bg-gray-900 text-white border-red-500"
+          className="form-control bg-gray-900 border-red-500"
           value={fechaActual}
           disabled
         />
