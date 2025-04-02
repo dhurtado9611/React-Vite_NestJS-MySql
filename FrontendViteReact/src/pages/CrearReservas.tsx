@@ -1,4 +1,11 @@
+import { useEffect, useState } from 'react';
 import api from '../services/api';
+import ReservasForm from '../components/ReservasForm';
+import TableCrearReservas from '../components/TableCrearReservas';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import Caja from '../components/Caja';
+import Historial from './HistorialInvitado';
 
 interface Reserva {
   id: number;
@@ -11,92 +18,87 @@ interface Reserva {
   hsalida: string;
   observaciones: string;
   fecha: string;
-  colaborador?: string;
+  colaborador: string;
 }
 
-interface Props {
-  reservas: Reserva[];
-  fetchReservas: () => void;
-}
+const CrearReservas = () => {
+  const [reservas, setReservas] = useState<Reserva[]>([]);
+  const [formData, setFormData] = useState<Partial<Reserva>>({});
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
-const TableCrearReservas = ({ reservas, fetchReservas }: Props) => {
-  const handleDarSalida = async (id: number) => {
+  useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    setUsername(storedUsername);
+  }, []);
+
+  const fetchReservas = async () => {
     try {
-      const horaActual = new Date().toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      await api.put(`/reservas/${id}`, { hsalida: horaActual });
-      fetchReservas();
+      const response = await api.get('/reservas');
+      setReservas(response.data);
     } catch (error) {
-      console.error('Error al registrar la hora de salida:', error);
+      console.error('Error fetching reservas:', error);
     }
   };
 
-  // Obtener los datos del turno actual desde localStorage
-  const datosTurno = localStorage.getItem('datosTurno');
-  let reservasFiltradas = reservas;
-  if (datosTurno) {
-    try {
-      const { colaborador, fecha } = JSON.parse(datosTurno);
-      reservasFiltradas = reservas.filter(
-        (reserva) => reserva.fecha === fecha && reserva.colaborador === colaborador
-      );
-    } catch (error) {
-      console.error('Error al parsear datosTurno:', error);
-    }
-  }
+  useEffect(() => {
+    fetchReservas();
+  }, []);
+
+  const exportarExcel = () => {
+    const datosTurno = localStorage.getItem('datosTurno');
+    if (!datosTurno) return alert('No hay turno activo');
+
+    const { colaborador, fecha } = JSON.parse(datosTurno);
+
+    const reservasFiltradas = reservas.filter(
+      (reserva) => reserva.fecha === fecha && reserva.colaborador === colaborador
+    );
+
+    const worksheet = XLSX.utils.json_to_sheet(reservasFiltradas);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservas');
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(data, `reservas_${colaborador}_${fecha}.xlsx`);
+  };
 
   return (
-    <div className="mt-5">
-      <h2>Lista de Reservas</h2>
-      <div className="table-responsive overflow-auto" style={{ maxHeight: '400px' }}>
-        <table className="table table-striped text-center">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Vehículo</th>
-              <th>Placa</th>
-              <th>Habitación</th>
-              <th>Valor</th>
-              <th>Hora Entrada</th>
-              <th>Hora Salida Máxima</th>
-              <th>Hora Salida</th>
-              <th>Observaciones</th>
-              <th>Fecha</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reservasFiltradas.map((reserva) => (
-              <tr key={reserva.id}>
-                <td>{reserva.id}</td>
-                <td>{reserva.vehiculo}</td>
-                <td>{reserva.placa}</td>
-                <td>{reserva.habitacion}</td>
-                <td>{reserva.valor}</td>
-                <td>{reserva.hentrada}</td>
-                <td>{reserva.hsalidamax}</td>
-                <td>{reserva.hsalida || 'Pendiente'}</td>
-                <td>{reserva.observaciones}</td>
-                <td>{reserva.fecha || 'Sin fecha'}</td>
-                <td>
-                  {!reserva.hsalida && (
-                    <button
-                      className="btn btn-success btn-sm"
-                      onClick={() => handleDarSalida(reserva.id)}
-                    >
-                      Dar salida
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="pb-20 container mt-5">
+      <h2 className="text-2xl font-bold mb-4">
+        Bienvenido, {username || 'Invitado'}, ¡aquí puedes hacer tus registros!
+      </h2>
+
+      <ReservasForm
+        fetchReservas={fetchReservas}
+        formData={formData}
+        setFormData={setFormData}
+        editingId={null}
+        setEditingId={() => {}}
+        selectedId={selectedId}
+        setSelectedId={setSelectedId}
+        reservas={reservas}
+        disableEditButton={true}
+        disableDeleteButton={true}
+      />
+
+      <Historial/>
+
+      <TableCrearReservas
+        reservas={reservas}
+        fetchReservas={fetchReservas}
+      />
+
+      <div className="text-center mt-4">
+        <button onClick={exportarExcel} className="btn btn-success">
+          Exportar reservas del turno a Excel
+        </button>
       </div>
+
+      <Caja />
+      
     </div>
   );
 };
 
-export default TableCrearReservas;
+export default CrearReservas;
