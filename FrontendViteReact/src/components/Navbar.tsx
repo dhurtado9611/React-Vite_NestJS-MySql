@@ -11,7 +11,6 @@ import {
 import { getToken, logout } from '../services/authService';
 import Logo from '../assets/Logo-PNG.png';
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 
 const Navbar = () => {
   const token = getToken();
