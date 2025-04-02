@@ -42,12 +42,22 @@ const Historial = () => {
     const reservaActiva = reservas.find(
       (reserva) => reserva.habitacion === habitacion && !reserva.hsalida
     );
-
+  
     if (reservaActiva) {
-      const { hentradaNum, hsalidamaxNum } = reservaActiva;
-      return hsalidamaxNum - hentradaNum >= 400 ? 'critica' : 'ocupada';
+      const { hentradaNum } = reservaActiva;
+      // Obtenemos la hora actual en formato "HH:mm"
+      const now = new Date();
+      const currentHour = now.getHours().toString().padStart(2, '0');
+      const currentMinute = now.getMinutes().toString().padStart(2, '0');
+      const currentTimeString = `${currentHour}:${currentMinute}`;
+      const currentTimeNum = Math.abs(convertirHoraANumero(currentTimeString));
+  
+      // Si la diferencia entre la hora actual y la hora de entrada es >= 400, la habitación se marca como 'critica'
+      const diferencia = currentTimeNum - hentradaNum;
+      console.log(`Diferencia entre la hora actual y la hora de entrada: ${diferencia}`);
+      return diferencia >= 400 ? 'critica' : 'ocupada';
     }
-
+  
     return 'libre';
   };
 

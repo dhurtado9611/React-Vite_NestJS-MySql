@@ -49,7 +49,7 @@ const Historial = () => {
       const currentHour = now.getHours().toString().padStart(2, '0');
       const currentMinute = now.getMinutes().toString().padStart(2, '0');
       const currentTimeString = `${currentHour}:${currentMinute}`;
-      const currentTimeNum = convertirHoraANumero(currentTimeString);
+      const currentTimeNum = Math.abs(convertirHoraANumero(currentTimeString));
   
       // Si la diferencia entre la hora actual y la hora de entrada es >= 400, la habitación se marca como 'critica'
       const diferencia = currentTimeNum - hentradaNum;
@@ -58,7 +58,7 @@ const Historial = () => {
     }
   
     return 'libre';
-  };  
+  };
 
   const handleClickHabitacion = async (habitacion: number) => {
     setHabitacionSeleccionada(habitacion);
