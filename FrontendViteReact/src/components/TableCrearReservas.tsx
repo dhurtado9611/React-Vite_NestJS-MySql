@@ -11,6 +11,7 @@ interface Reserva {
   hsalida: string;
   observaciones: string;
   fecha: string;
+  colaborador?: string;
 }
 
 interface Props {
@@ -31,6 +32,20 @@ const TableCrearReservas = ({ reservas, fetchReservas }: Props) => {
       console.error('Error al registrar la hora de salida:', error);
     }
   };
+
+  // Filtrar reservas por el turno actual
+  const datosTurno = localStorage.getItem('datosTurno');
+  let reservasFiltradas = reservas;
+  if (datosTurno) {
+    try {
+      const { colaborador, fecha } = JSON.parse(datosTurno);
+      reservasFiltradas = reservas.filter(
+        (reserva) => reserva.fecha === fecha && reserva.colaborador === colaborador
+      );
+    } catch (error) {
+      console.error('Error al parsear datosTurno:', error);
+    }
+  }
 
   return (
     <div className="mt-5">
@@ -53,7 +68,7 @@ const TableCrearReservas = ({ reservas, fetchReservas }: Props) => {
             </tr>
           </thead>
           <tbody>
-            {reservas.map((reserva) => (
+            {reservasFiltradas.map((reserva) => (
               <tr key={reserva.id}>
                 <td>{reserva.id}</td>
                 <td>{reserva.vehiculo}</td>
