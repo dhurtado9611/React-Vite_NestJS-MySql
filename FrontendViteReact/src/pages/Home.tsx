@@ -29,7 +29,7 @@ const Logo = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const radius = 60;
+  const radius = 70;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
 
@@ -51,12 +51,12 @@ const Logo = () => {
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
             >
-              <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 160 160">
+                <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 160 160">
                 <circle
                   cx="80"
                   cy="80"
                   r={radius}
-                  stroke="#4ade80"
+                  stroke="#ef4444" // Red color
                   strokeWidth="6"
                   fill="transparent"
                   className="opacity-20"
@@ -65,7 +65,7 @@ const Logo = () => {
                   cx="80"
                   cy="80"
                   r={radius}
-                  stroke="#4ade80"
+                  stroke="#ef4444" // Red color
                   strokeWidth="6"
                   fill="transparent"
                   strokeDasharray={circumference}
@@ -74,7 +74,7 @@ const Logo = () => {
                   animate={{ strokeDashoffset: offset }}
                   transition={{ duration: 0.1 }}
                 />
-              </svg>
+                </svg>
               <img
                 src={logoSrc}
                 alt="Logo"
