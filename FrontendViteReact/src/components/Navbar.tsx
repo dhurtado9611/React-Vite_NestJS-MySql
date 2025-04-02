@@ -39,7 +39,7 @@ const Navbar = () => {
       if (!datosTurno) return alert('No hay datos del turno.');
 
       const { colaborador, fecha } = JSON.parse(datosTurno);
-      const response = await axios.get('https://esconditemotel.onrender.com/reservas');
+      const response = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/reservas');
       const reservas = response.data;
       const reservasFiltradas = reservas.filter(
         (r: any) => r.colaborador === colaborador && r.fecha === fecha
