@@ -1,0 +1,87 @@
+import api from '../services/api';
+
+interface Reserva {
+  id: number;
+  vehiculo: string;
+  placa: string;
+  habitacion: number;
+  valor: number;
+  hentrada: string;
+  hsalidamax: string;
+  hsalida: string;
+  observaciones: string;
+  fecha: string;
+}
+
+interface Props {
+  reservas: Reserva[];
+  fetchReservas: () => void;
+}
+
+const TableCrearReservas = ({ reservas, fetchReservas }: Props) => {
+  const handleDarSalida = async (id: number) => {
+    try {
+      const horaActual = new Date().toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      await api.put(`/reservas/${id}`, { hsalida: horaActual });
+      fetchReservas();
+    } catch (error) {
+      console.error('Error al registrar la hora de salida:', error);
+    }
+  };
+
+  return (
+    <div className="mt-5">
+      <h2>Lista de Reservas</h2>
+      <div className="table-responsive overflow-auto" style={{ maxHeight: '400px' }}>
+        <table className="table table-striped text-center">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Vehículo</th>
+              <th>Placa</th>
+              <th>Habitación</th>
+              <th>Valor</th>
+              <th>Hora Entrada</th>
+              <th>Hora Salida Máxima</th>
+              <th>Hora Salida</th>
+              <th>Observaciones</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reservas.map((reserva) => (
+              <tr key={reserva.id}>
+                <td>{reserva.id}</td>
+                <td>{reserva.vehiculo}</td>
+                <td>{reserva.placa}</td>
+                <td>{reserva.habitacion}</td>
+                <td>{reserva.valor}</td>
+                <td>{reserva.hentrada}</td>
+                <td>{reserva.hsalidamax}</td>
+                <td>{reserva.hsalida || 'Pendiente'}</td>
+                <td>{reserva.observaciones}</td>
+                <td>{reserva.fecha || 'Sin fecha'}</td>
+                <td>
+                  {!reserva.hsalida && (
+                    <button
+                      className="btn btn-success btn-sm"
+                      onClick={() => handleDarSalida(reserva.id)}
+                    >
+                      Dar salida
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default TableCrearReservas;

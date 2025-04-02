@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 import ReservasForm from '../components/ReservasForm';
-import TableReservas from '../components/TableReservas';
+import TableCrearReservas from '../components/TableCrearReservas';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -64,7 +64,7 @@ const CrearReservas = () => {
   return (
     <div className="pb-20 container mt-5">
       <h2 className="text-2xl font-bold mb-4">
-        Bienvenido, {username || 'Invitado'}
+        Bienvenido, {username || 'Invitado'}, ¡aquí puedes hacer tus registros!
       </h2>
 
       <ReservasForm
@@ -80,11 +80,9 @@ const CrearReservas = () => {
         disableDeleteButton={true}
       />
 
-      <TableReservas
+      <TableCrearReservas
         reservas={reservas}
         fetchReservas={fetchReservas}
-        selectedId={selectedId}
-        setSelectedId={setSelectedId}
       />
 
       <div className="text-center mt-4">

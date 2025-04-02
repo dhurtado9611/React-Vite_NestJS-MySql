@@ -44,7 +44,7 @@ const Reservas = () => {
   return (
     <div className="pb-20 container mt-5">
       <h2 className="text-2xl font-bold mb-4">
-        Bienvenido, {username || 'Invitado'}
+        Bienvenido, {username || 'Invitado'}, ¡aquí puedes hacer tus registros, modificarlos o eliminarlos!
       </h2>
       <h2 className="mb-4">{editingId ? 'Editar Reserva' : 'Agregar Reserva'}</h2>
       <ReservasForm
