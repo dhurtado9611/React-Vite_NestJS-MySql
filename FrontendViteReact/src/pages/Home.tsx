@@ -7,11 +7,31 @@ import Footer from "../components/Footer";
 
 const Logo = () => {
   const [isAnimating, setIsAnimating] = useState(true);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setIsAnimating(false), 2500);
-    return () => clearTimeout(timeout);
+    let start = 0;
+    const duration = 2500; // 2.5 segundos
+    const step = 20;
+    const increment = 100 / (duration / step);
+
+    const interval = setInterval(() => {
+      start += increment;
+      if (start >= 100) {
+        setProgress(100);
+        clearInterval(interval);
+        setTimeout(() => setIsAnimating(false), 500);
+      } else {
+        setProgress(start);
+      }
+    }, step);
+
+    return () => clearInterval(interval);
   }, []);
+
+  const radius = 60;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (progress / 100) * circumference;
 
   return (
     <>
@@ -25,16 +45,40 @@ const Logo = () => {
             transition={{ duration: 1 }}
           >
             <motion.div
-              className="p-8 rounded-full border-4 border-red-600 shadow-2xl"
+              className="relative w-40 h-40 flex items-center justify-center"
               initial={{ scale: 3, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
             >
+              <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 160 160">
+                <circle
+                  cx="80"
+                  cy="80"
+                  r={radius}
+                  stroke="#4ade80"
+                  strokeWidth="6"
+                  fill="transparent"
+                  className="opacity-20"
+                />
+                <motion.circle
+                  cx="80"
+                  cy="80"
+                  r={radius}
+                  stroke="#4ade80"
+                  strokeWidth="6"
+                  fill="transparent"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={offset}
+                  strokeLinecap="round"
+                  animate={{ strokeDashoffset: offset }}
+                  transition={{ duration: 0.1 }}
+                />
+              </svg>
               <img
                 src={logoSrc}
                 alt="Logo"
-                className="w-32 h-32 md:w-40 md:h-40 object-contain"
+                className="w-24 h-24 object-contain z-10"
               />
             </motion.div>
           </motion.div>
