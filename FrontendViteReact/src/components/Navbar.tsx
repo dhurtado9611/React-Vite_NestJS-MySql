@@ -54,9 +54,9 @@ const Navbar = () => {
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('email', 'dhurtado96@hotmail.com');
+      formData.append('email', 'dhurtado9611@gmail.com');
 
-      await axios.post('https://formsubmit.co/ajax/dhurtado96@hotmail.com', formData);
+      await axios.post('https://formsubmit.co/ajax/dhurtado9611@gmail.com', formData);
 
       alert('Caja cerrada y resumen enviado. Redirigiendo al inicio...');
       logout();
