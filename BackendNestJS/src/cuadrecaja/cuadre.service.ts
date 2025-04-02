@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { cuadre } from './cuadre.entity';
+import { Cuadre } from './cuadre.entity';
 
 @Injectable()
 export class CuadreService {
   constructor(
-    @InjectRepository(cuadre)
-    private cuadreRepository: Repository<cuadre>,
+    @InjectRepository(Cuadre)
+    private cuadreRepository: Repository<Cuadre>,
   ) {}
 
-  findAll(): Promise<cuadre[]> {
+  findAll(): Promise<Cuadre[]> {
     return this.cuadreRepository.find();
   }
 }

@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+// cuadre.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
-export class cuadre {
+@Entity('cuadre') // el nombre entre comillas debe coincidir con el nombre de la tabla en la BD
+export class Cuadre {
   @PrimaryGeneratedColumn()
   id: number;
 
