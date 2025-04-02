@@ -6,9 +6,11 @@ import { User } from './auth/user.entity'; // Asegúrate de que la ruta sea corr
 import { ReservaService } from './reservas/reserva.service';
 import { ReservaController } from './reservas/reserva.controller';
 import { AuthModule } from './auth/auth.module';
+import { CuadreModule } from './cuadrecaja/cuadre.module';
 
 @Module({
   imports: [
+    CuadreModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
