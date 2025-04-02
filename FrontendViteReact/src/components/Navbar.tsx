@@ -10,6 +10,8 @@ import {
 } from 'react-icons/fa';
 import { getToken, logout } from '../services/authService';
 import Logo from '../assets/Logo-PNG.png';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const Navbar = () => {
   const token = getToken();
@@ -31,12 +33,46 @@ const Navbar = () => {
     setActive(location.pathname);
   }, [location.pathname]);
 
+  const cerrarCaja = async () => {
+    try {
+      const datosTurno = localStorage.getItem('datosTurno');
+      if (!datosTurno) return alert('No hay datos del turno.');
+
+      const { colaborador, fecha } = JSON.parse(datosTurno);
+      const response = await fetch('https://esconditemotel.onrender.com/reservas');
+      const reservas = await response.json();
+      const reservasFiltradas = reservas.filter(
+        (r: any) => r.colaborador === colaborador && r.fecha === fecha
+      );
+
+      const worksheet = XLSX.utils.json_to_sheet(reservasFiltradas);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservas');
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+      const file = new File([blob], `resumen_turno_${colaborador}_${fecha}.xlsx`);
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('email', 'dhurtado96@hotmail.com');
+
+      await fetch('https://formsubmit.co/ajax/dhurtado96@hotmail.com', {
+        method: 'POST',
+        body: formData,
+      });
+
+      alert('Caja cerrada y resumen enviado. Redirigiendo al inicio...');
+      logout();
+      localStorage.clear();
+      navigate('/');
+    } catch (error) {
+      console.error('Error al cerrar caja:', error);
+      alert('Hubo un error al cerrar la caja.');
+    }
+  };
+
   const handleLogout = () => {
-    logout();
-    localStorage.removeItem('datosTurno');
-    localStorage.removeItem('rol');
-    localStorage.removeItem('nombre');
-    navigate('/login');
+    cerrarCaja();
   };
 
   if (loading) return null;
@@ -93,11 +129,11 @@ const Navbar = () => {
       {/* Navbar para móvil */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/10 backdrop-blur-md border-t border-red-800 z-50 flex justify-around items-center px-2 py-2 shadow-xl">
         <div className="flex flex-col items-center">
-            <div className="bg-black p-1 rounded-full border-4 border-white transform scale-105 shadow-md">
-              <img src={Logo} alt="Logo" className="w-10 h-10 object-cover rounded-full" />
-            </div>
+          <div className="bg-black p-1 rounded-full border-4 border-white transform scale-105 shadow-md">
+            <img src={Logo} alt="Logo" className="w-10 h-10 object-cover rounded-full" />
+          </div>
         </div>
-        
+
         {token && rol === 'admin' && (
           <>
             <Link to="/" className={linkClass('/')} title="Inicio">
@@ -107,7 +143,7 @@ const Navbar = () => {
               <FaListAlt className="text-lg" />
             </Link>
             <Link to="/historial" className={linkClass('/historial')} title="Historial">
-                <FaHistory />
+              <FaHistory />
             </Link>
           </>
         )}
