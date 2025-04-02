@@ -64,10 +64,10 @@ const Caja = () => {
   const totalCaja = baseCaja + totalReservas;
 
   return (
-    <div className="mt-5 px-3">
-      <h3 className="text-2xl font-semibold mb-4 text-center">Cuadre de Caja</h3>
+    <div className="mt-5">
+      <h3 className="text-2xl font-semibold">Cuadre de Caja</h3>
       <div className="overflow-x-auto">
-        <table className="table table-bordered table-striped w-full max-w-4xl mx-auto text-center text-sm md:text-base">
+        <table className="table table-bordered table-striped w-full max-w-4xl text-center text-sm md:text-base">
           <thead className="bg-light">
             <tr>
               <th>Colaborador</th>
