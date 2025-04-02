@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Carousel from "../components/Carousel";
 import fondo1 from "../assets/fondo1.jpg";
 import Footer from "../components/Footer";
-import { div } from "framer-motion/client";
 
 const Logo = () => {
   const [isAnimating, setIsAnimating] = useState(true);
@@ -53,33 +52,33 @@ const Logo = () => {
 
 const Home = () => {
   return (
-    <div
-      className="relative flex flex-col md:flex-row h-screen text-white pt-16 overflow-hidden bg-cover bg-center"
-      style={{ backgroundImage: `url(${fondo1})` }}
-    >
-      {/* Overlay oscuro */}
-      <div className="absolute inset-0 bg-black/60 z-0"></div>
+    <>
+      <div
+        className="relative flex flex-col md:flex-row h-screen text-white pt-16 overflow-hidden bg-cover bg-center"
+        style={{ backgroundImage: `url(${fondo1})` }}
+      >
+        {/* Overlay oscuro */}
+        <div className="absolute inset-0 bg-black/60 z-0"></div>
 
-      {/* Logo animado */}
-      <Logo />
+        {/* Logo animado */}
+        <Logo />
 
-      {/* Saludo */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8 z-10">
-        <h1 className="text-3xl md:text-4xl font-bold text-center md:text-left pt-4">
-          ¡Bienvenido a nuestra plataforma de reservas!
-        </h1>
+        {/* Saludo */}
+        <div className="w-full md:w-1/2 flex items-center justify-center p-8 z-10">
+          <h1 className="text-3xl md:text-4xl font-bold text-center md:text-left pt-4">
+            ¡Bienvenido a nuestra plataforma de reservas!
+          </h1>
+        </div>
+
+        {/* Carrusel */}
+        <div className="overflow-hidden w-full flex justify-center items-center z-10">
+          <Carousel />
+        </div>
       </div>
 
-      {/* Carrusel */}
-      <div className="overflow-hidden w-full flex justify-center items-center z-10">
-        <Carousel />
-      </div>
-      
-      <div className="row">
-      <Footer/>
-      </div>
-     
-    </div>
+      {/* Footer FUERA del flex-row */}
+      <Footer />
+    </>
   );
 };
 
