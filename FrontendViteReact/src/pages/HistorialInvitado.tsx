@@ -81,7 +81,7 @@ const Historial = () => {
   }, []);
 
   return (
-    <div className="container mt-4">
+    <div className="pb-20 container mt-4">
       <div className="row">
         <div className="col-md-6">
           <h2 className="mb-4 text-center">Estado de las Habitaciones</h2>

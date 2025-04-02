@@ -42,7 +42,7 @@ const Reservas = () => {
   }, []);
 
   return (
-    <div className="container mt-5">
+    <div className="pb-20 container mt-5">
       <h2 className="text-2xl font-bold mb-4">
         Bienvenido, {username || 'Invitado'}
       </h2>
