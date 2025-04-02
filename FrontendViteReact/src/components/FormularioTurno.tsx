@@ -35,32 +35,32 @@ const FormularioTurno = ({ onSubmit }: Props) => {
     // Guardar turno en localStorage
     localStorage.setItem('datosTurno', JSON.stringify({
       colaborador,
-      fecha: fechaActual
+      fecha: fechaActual,
+      turno
     }));
 
-    // Enviar datos
     onSubmit({ colaborador, turno, fecha: fechaActual, userId, basecaja: baseCajaNum });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="container mt-5 max-w-md mx-auto bg-gray-900 backdrop-blur-md p-6 rounded-xl shadow-lg border border-red-600">
-      <h3 className="mb-4 text-xl font-semibold text-center text-red-500">Inicio de Turno - Invitado</h3>
+    <form onSubmit={handleSubmit} className="container mt-5 max-w-md mx-auto bg-[#1f2937] text-white p-6 rounded-lg shadow-lg border border-gray-600">
+      <h3 className="mb-6 text-2xl font-semibold text-center text-[#38bdf8]">Inicio de Turno - Invitado</h3>
 
       <div className="mb-4">
-        <label className="form-label">Colaborador</label>
+        <label className="block mb-1 text-sm text-gray-300">Colaborador</label>
         <input
           type="text"
-          className="form-control bg-gray-900 border-red-500"
+          className="w-full p-2 rounded bg-[#111827] border border-gray-600 text-white"
           value={colaborador}
           disabled
         />
       </div>
 
       <div className="mb-4">
-        <label className="form-label">Turno</label>
+        <label className="block mb-1 text-sm text-gray-300">Turno</label>
         <input
           type="time"
-          className="form-control bg-gray-900 border-red-500"
+          className="w-full p-2 rounded bg-[#111827] border border-gray-600 text-white"
           value={turno}
           onChange={(e) => setTurno(e.target.value)}
           required
@@ -68,28 +68,31 @@ const FormularioTurno = ({ onSubmit }: Props) => {
       </div>
 
       <div className="mb-4">
-        <label className="form-label">Base de Caja</label>
+        <label className="block mb-1 text-sm text-gray-300">Base de Caja</label>
         <input
           type="number"
-          className="form-control bg-gray-900 border-red-500"
+          className="w-full p-2 rounded bg-[#111827] border border-gray-600 text-white"
           value={baseCaja}
           onChange={(e) => setBaseCaja(e.target.value)}
           required
         />
       </div>
 
-      <div className="mb-4">
-        <label className="form-label text-white">Fecha</label>
+      <div className="mb-6">
+        <label className="block mb-1 text-sm text-gray-300">Fecha</label>
         <input
           type="date"
-          className="form-control bg-gray-900 border-red-500"
+          className="w-full p-2 rounded bg-[#111827] border border-gray-600 text-white"
           value={fechaActual}
           disabled
         />
       </div>
 
       <div className="text-center">
-        <button type="submit" className="btn btn-danger px-4 py-2 font-semibold rounded">
+        <button
+          type="submit"
+          className="bg-[#38bdf8] text-black hover:bg-[#0ea5e9] font-semibold px-6 py-2 rounded transition-colors"
+        >
           Iniciar Turno
         </button>
       </div>

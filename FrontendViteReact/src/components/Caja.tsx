@@ -6,6 +6,7 @@ interface Cuadre {
   basecaja: number;
   colaborador: string;
   fecha: string;
+  turno: string;
 }
 
 interface Reserva {
@@ -20,6 +21,7 @@ const Caja = () => {
   const [totalReservas, setTotalReservas] = useState<number>(0);
   const [colaborador, setColaborador] = useState<string>('');
   const [fecha, setFecha] = useState<string>('');
+  const [turno, setTurno] = useState<string>('');
 
   useEffect(() => {
     const datosTurno = localStorage.getItem('datosTurno');
@@ -27,8 +29,9 @@ const Caja = () => {
     setFecha(hoy);
 
     if (datosTurno) {
-      const { colaborador } = JSON.parse(datosTurno);
+      const { colaborador, turno } = JSON.parse(datosTurno);
       setColaborador(colaborador);
+      setTurno(turno);
       obtenerBaseCaja(colaborador, hoy);
       calcularTotalReservas(colaborador, hoy);
     }
@@ -68,6 +71,7 @@ const Caja = () => {
           <tr>
             <th>Colaborador</th>
             <th>Fecha</th>
+            <th>Turno</th>
             <th>Base Caja</th>
             <th>Total Reservas</th>
             <th>Total Caja</th>
@@ -77,6 +81,7 @@ const Caja = () => {
           <tr>
             <td>{colaborador}</td>
             <td>{fecha}</td>
+            <td>{turno}</td>
             <td>${baseCaja.toLocaleString()}</td>
             <td>${totalReservas.toLocaleString()}</td>
             <td className="fw-bold">${totalCaja.toLocaleString()}</td>
