@@ -81,8 +81,6 @@ const CrearReservas = () => {
         disableDeleteButton={true}
       />
 
-      <Caja />
-
       <TableCrearReservas
         reservas={reservas}
         fetchReservas={fetchReservas}
@@ -93,6 +91,9 @@ const CrearReservas = () => {
           Exportar reservas del turno a Excel
         </button>
       </div>
+
+      <Caja />
+      
     </div>
   );
 };

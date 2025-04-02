@@ -23,12 +23,14 @@ const Caja = () => {
 
   useEffect(() => {
     const datosTurno = localStorage.getItem('datosTurno');
+    const hoy = new Date().toISOString().split('T')[0];
+    setFecha(hoy);
+
     if (datosTurno) {
-      const { colaborador, fecha } = JSON.parse(datosTurno);
+      const { colaborador } = JSON.parse(datosTurno);
       setColaborador(colaborador);
-      setFecha(fecha);
-      obtenerBaseCaja(colaborador, fecha);
-      calcularTotalReservas(colaborador, fecha);
+      obtenerBaseCaja(colaborador, hoy);
+      calcularTotalReservas(colaborador, hoy);
     }
   }, []);
 
