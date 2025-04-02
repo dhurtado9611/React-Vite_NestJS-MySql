@@ -12,6 +12,9 @@ export class Cuadre {
   @Column()
   fecha: string;
 
+  @Column()
+  turno: string;
+
   @Column('int')
   basecaja: number;
 }
