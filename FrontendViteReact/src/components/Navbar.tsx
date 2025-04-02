@@ -11,6 +11,7 @@ import {
 import { getToken, logout } from '../services/authService';
 import Logo from '../assets/Logo-PNG.png';
 import * as XLSX from 'xlsx';
+import axios from 'axios';
 
 const Navbar = () => {
   const token = getToken();
@@ -38,8 +39,8 @@ const Navbar = () => {
       if (!datosTurno) return alert('No hay datos del turno.');
 
       const { colaborador, fecha } = JSON.parse(datosTurno);
-      const response = await fetch('https://esconditemotel.onrender.com/reservas');
-      const reservas = await response.json();
+      const response = await axios.get('https://esconditemotel.onrender.com/reservas');
+      const reservas = response.data;
       const reservasFiltradas = reservas.filter(
         (r: any) => r.colaborador === colaborador && r.fecha === fecha
       );
@@ -55,10 +56,7 @@ const Navbar = () => {
       formData.append('file', file);
       formData.append('email', 'dhurtado96@hotmail.com');
 
-      await fetch('https://formsubmit.co/ajax/dhurtado96@hotmail.com', {
-        method: 'POST',
-        body: formData,
-      });
+      await axios.post('https://formsubmit.co/ajax/dhurtado96@hotmail.com', formData);
 
       alert('Caja cerrada y resumen enviado. Redirigiendo al inicio...');
       logout();
