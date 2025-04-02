@@ -2,7 +2,7 @@ import { FaFacebookF, FaInstagram, FaWhatsapp, FaMapMarkerAlt } from 'react-icon
 
 const Footer = () => {
   return (
-    <footer className="fixed bottom-0 left-0 w-full bg-white/10 backdrop-blur-md text-white py-4 z-30 shadow-inner">
+    <footer className="w-full bg-white/10 backdrop-blur-md text-white py-4 shadow-inner mt-10">
       <div className="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
         <p className="text-xs text-gray-300 mb-2 md:mb-0">
           © {new Date().getFullYear()} Reservas App. Todos los derechos reservados.
