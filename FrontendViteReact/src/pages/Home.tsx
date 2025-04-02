@@ -9,7 +9,7 @@ const Logo = () => {
   const [isAnimating, setIsAnimating] = useState(true);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setIsAnimating(false), 2000); // Animación dura 2s
+    const timeout = setTimeout(() => setIsAnimating(false), 2500);
     return () => clearTimeout(timeout);
   }, []);
 
@@ -18,24 +18,29 @@ const Logo = () => {
       <AnimatePresence>
         {isAnimating && (
           <motion.div
-            className="fixed inset-0 flex items-center justify-center bg-black z-[100]"
+            className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-md z-[100]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1 }}
           >
-            <motion.img
-              src={logoSrc}
-              alt="Logo"
-              className="w-32 h-32 md:w-24 md:h-24"
-              initial={{ scale: 5, opacity: 0 }}
+            <motion.div
+              className="p-8 rounded-full border-4 border-red-600 shadow-2xl"
+              initial={{ scale: 3, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
-            />
+            >
+              <img
+                src={logoSrc}
+                alt="Logo"
+                className="w-32 h-32 md:w-40 md:h-40 object-contain"
+              />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
       {!isAnimating && (
         <motion.img
           src={logoSrc}
@@ -54,7 +59,7 @@ const Home = () => {
   return (
     <>
       <div
-        className="relative flex flex-col md:flex-row h-screen text-white pt-16 overflow-hidden bg-cover bg-center"
+        className="relative flex flex-col md:flex-row min-h-screen text-white pt-16 overflow-hidden bg-cover bg-center pb-20"
         style={{ backgroundImage: `url(${fondo1})` }}
       >
         {/* Overlay oscuro */}
