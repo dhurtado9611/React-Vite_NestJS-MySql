@@ -4,29 +4,32 @@ import { motion, AnimatePresence } from "framer-motion";
 import Carousel from "../components/Carousel";
 import fondo1 from "../assets/fondo1.jpg";
 import Footer from "../components/Footer";
+import axios from "axios";
 
 const Logo = () => {
   const [isAnimating, setIsAnimating] = useState(true);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    let start = 0;
-    const duration = 2500; // 2.5 segundos
-    const step = 20;
-    const increment = 100 / (duration / step);
+    const fetchReservas = async () => {
+      try {
+        setProgress(30); // Inicio
+        await new Promise((res) => setTimeout(res, 500)); // Simulación: inicio carga
+        setProgress(60);
 
-    const interval = setInterval(() => {
-      start += increment;
-      if (start >= 100) {
+        const response = await axios.get("https://esconditemotel.onrender.com/reservas"); // Ajusta URL si es necesario
+        if (response.status === 200) {
+          setProgress(100);
+          setTimeout(() => setIsAnimating(false), 500); // Espera breve antes de desaparecer
+        }
+      } catch (error) {
+        console.error("Error al cargar reservas:", error);
         setProgress(100);
-        clearInterval(interval);
-        setTimeout(() => setIsAnimating(false), 500);
-      } else {
-        setProgress(start);
+        setTimeout(() => setIsAnimating(false), 500); // Aun con error, continúa
       }
-    }, step);
+    };
 
-    return () => clearInterval(interval);
+    fetchReservas();
   }, []);
 
   const radius = 75;
