@@ -34,7 +34,7 @@ const Historial = () => {
   const convertirHoraANumero = (hora: string): number => {
     if (!hora) return 0;
     const [h, m] = hora.split(':').map(Number);
-    return h * 1000 + m;
+    return h * 100 + m;
   };
 
   const getEstadoHabitacion = (habitacion: number) => {
@@ -49,7 +49,7 @@ const Historial = () => {
       const currentHour = now.getHours().toString().padStart(2, '0');
       const currentMinute = now.getMinutes().toString().padStart(2, '0');
       const currentTimeString = `${currentHour}:${currentMinute}`;
-      const currentTimeNum = convertirHoraANumero(currentTimeString);
+      const currentTimeNum = Math.abs(convertirHoraANumero(currentTimeString));
   
       // Si la diferencia entre la hora actual y la hora de entrada es >= 400, la habitación se marca como 'critica'
       const diferencia = currentTimeNum - hentradaNum;
