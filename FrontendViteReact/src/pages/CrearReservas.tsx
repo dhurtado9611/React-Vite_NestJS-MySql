@@ -5,6 +5,7 @@ import TableCrearReservas from '../components/TableCrearReservas';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Caja from '../components/Caja';
+import Historial from './HistorialInvitado';
 
 interface Reserva {
   id: number;
@@ -17,7 +18,7 @@ interface Reserva {
   hsalida: string;
   observaciones: string;
   fecha: string;
-  colaborador?: string;
+  colaborador: string;
 }
 
 const CrearReservas = () => {
@@ -80,6 +81,8 @@ const CrearReservas = () => {
         disableEditButton={true}
         disableDeleteButton={true}
       />
+
+      <Historial/>
 
       <TableCrearReservas
         reservas={reservas}

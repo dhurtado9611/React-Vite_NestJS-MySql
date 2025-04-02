@@ -34,21 +34,29 @@ const Historial = () => {
   const convertirHoraANumero = (hora: string): number => {
     if (!hora) return 0;
     const [h, m] = hora.split(':').map(Number);
-    return h * 100 + m;
+    return h * 1000 + m;
   };
 
   const getEstadoHabitacion = (habitacion: number) => {
     const reservaActiva = reservas.find(
       (reserva) => reserva.habitacion === habitacion && !reserva.hsalida
     );
-
+  
     if (reservaActiva) {
-      const { hentradaNum, hsalidamaxNum } = reservaActiva;
-      return hsalidamaxNum - hentradaNum >= 400 ? 'critica' : 'ocupada';
+      const { hentradaNum } = reservaActiva;
+      // Obtenemos la hora actual en formato "HH:mm"
+      const now = new Date();
+      const currentHour = now.getHours().toString().padStart(2, '0');
+      const currentMinute = now.getMinutes().toString().padStart(2, '0');
+      const currentTimeString = `${currentHour}:${currentMinute}`;
+      const currentTimeNum = convertirHoraANumero(currentTimeString);
+  
+      // Si la diferencia entre la hora actual y la hora de entrada es >= 400, la habitación se marca como 'critica'
+      return (currentTimeNum - hentradaNum) >= 400 ? 'critica' : 'ocupada';
     }
-
+  
     return 'libre';
-  };
+  };  
 
   const handleClickHabitacion = async (habitacion: number) => {
     setHabitacionSeleccionada(habitacion);

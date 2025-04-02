@@ -14,6 +14,7 @@ interface Reserva {
   hsalida: string;
   observaciones: string;
   fecha: string;
+  colaborador: string;
 }
 
 const Reservas = () => {
