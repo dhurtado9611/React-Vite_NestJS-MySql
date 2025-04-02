@@ -5,7 +5,6 @@ import TableCrearReservas from '../components/TableCrearReservas';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Caja from '../components/Caja';
-import Historial from './HistorialInvitado';
 
 interface Reserva {
   id: number;
@@ -69,6 +68,8 @@ const CrearReservas = () => {
         Bienvenido, {username || 'Invitado'}, ¡aquí puedes hacer tus registros!
       </h2>
 
+      <Caja/>
+
       <ReservasForm
         fetchReservas={fetchReservas}
         formData={formData}
@@ -82,8 +83,6 @@ const CrearReservas = () => {
         disableDeleteButton={true}
       />
 
-      <Historial/>
-
       <TableCrearReservas
         reservas={reservas}
         fetchReservas={fetchReservas}
@@ -95,8 +94,6 @@ const CrearReservas = () => {
         </button>
       </div>
 
-      <Caja />
-      
     </div>
   );
 };
