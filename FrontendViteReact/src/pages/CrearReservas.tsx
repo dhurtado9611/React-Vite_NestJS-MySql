@@ -65,7 +65,7 @@ const CrearReservas = () => {
   return (
     <div className="pb-20 container mt-5">
       <h2 className="text-2xl font-bold mb-4">
-        Bienvenido, {username || 'Invitado'}, ¡aquí puedes hacer tus registros!
+        Bienvenido {username || 'Invitado'} ¡aquí puedes hacer tus registros!
       </h2>
 
       <Caja/>
