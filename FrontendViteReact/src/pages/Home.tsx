@@ -17,7 +17,7 @@ const Logo = () => {
         await new Promise((res) => setTimeout(res, 500)); // Simulación: inicio carga
         setProgress(60);
 
-        const response = await axios.get("https://esconditemotel.onrender.com/reservas"); // Ajusta URL si es necesario
+        const response = await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/reservas"); // Ajusta URL si es necesario
         if (response.status === 200) {
           setProgress(100);
           setTimeout(() => setIsAnimating(false), 500); // Espera breve antes de desaparecer
