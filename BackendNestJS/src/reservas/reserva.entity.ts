@@ -31,4 +31,7 @@ export class Reserva {
 
   @Column({ nullable: true })
   fecha: string;
+
+  @Column()
+  colaborador: string;
 }
