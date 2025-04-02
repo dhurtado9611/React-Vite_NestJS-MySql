@@ -13,4 +13,10 @@ export class CuadreService {
   findAll(): Promise<Cuadre[]> {
     return this.cuadreRepository.find();
   }
+
+  async create(data: Partial<Cuadre>): Promise<Cuadre> {
+    const nuevoCuadre = this.cuadreRepository.create(data);
+    return await this.cuadreRepository.save(nuevoCuadre);
+  }
+  
 }

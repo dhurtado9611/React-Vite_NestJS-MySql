@@ -1,16 +1,11 @@
 import { useState, useEffect } from 'react';
+import api from '../services/api';
 
 interface Props {
-  onSubmit: (data: {
-    colaborador: string;
-    turno: string;
-    fecha: string;
-    userId: number;
-    basecaja: number;
-  }) => void;
+  onSubmitSuccess?: () => void;
 }
 
-const FormularioTurno = ({ onSubmit }: Props) => {
+const FormularioTurno = ({ onSubmitSuccess }: Props) => {
   const [colaborador, setColaborador] = useState('');
   const [turno, setTurno] = useState('');
   const [baseCaja, setBaseCaja] = useState('');
@@ -24,7 +19,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
     if (id) setUserId(Number(id));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const baseCajaNum = Number(baseCaja);
     if (!colaborador || !turno || userId === null || isNaN(baseCajaNum)) {
@@ -32,14 +27,28 @@ const FormularioTurno = ({ onSubmit }: Props) => {
       return;
     }
 
-    // Guardar turno en localStorage
-    localStorage.setItem('datosTurno', JSON.stringify({
-      colaborador,
-      fecha: fechaActual,
-      turno
-    }));
+    try {
+      // Guardar en base de datos
+      await api.post('/cuadre', {
+        colaborador,
+        fecha: fechaActual,
+        turno,
+        basecaja: baseCajaNum,
+      });
 
-    onSubmit({ colaborador, turno, fecha: fechaActual, userId, basecaja: baseCajaNum });
+      // Guardar en localStorage
+      localStorage.setItem('datosTurno', JSON.stringify({
+        colaborador,
+        fecha: fechaActual,
+        turno
+      }));
+
+      alert('Turno registrado correctamente');
+      if (onSubmitSuccess) onSubmitSuccess();
+    } catch (error) {
+      console.error('Error al registrar el turno:', error);
+      alert('No se pudo registrar el turno');
+    }
   };
 
   return (
