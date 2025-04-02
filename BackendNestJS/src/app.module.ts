@@ -7,10 +7,10 @@ import { ReservaService } from './reservas/reserva.service';
 import { ReservaController } from './reservas/reserva.controller';
 import { AuthModule } from './auth/auth.module';
 import { CuadreModule } from './cuadrecaja/cuadre.module';
+import { Cuadre } from './cuadrecaja/cuadre.entity';
 
 @Module({
   imports: [
-    CuadreModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -20,9 +20,10 @@ import { CuadreModule } from './cuadrecaja/cuadre.module';
       //username: process.env.DB_USERNAME,
       //password: process.env.DB_PASSWORD,
       //database: process.env.DB_NAME,
-      entities: [Reserva, User], // Se incluye la entidad User
+      entities: [Reserva, User, Cuadre], // Se incluye la entidad User
       synchronize: true, // Solo para desarrollo
     }),
+    CuadreModule,
     TypeOrmModule.forFeature([Reserva]),
     AuthModule,
   ],
