@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
 
 interface Props {
-  onSubmit: (data: { colaborador: string; turno: string; fecha: string; userId: number }) => void;
+  onSubmit: (data: {
+    colaborador: string;
+    turno: string;
+    fecha: string;
+    userId: number;
+    basecaja: number;
+  }) => void;
 }
 
 const FormularioTurno = ({ onSubmit }: Props) => {
   const [colaborador, setColaborador] = useState('');
   const [turno, setTurno] = useState('');
+  const [baseCaja, setBaseCaja] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
   const fechaActual = new Date().toISOString().split('T')[0];
 
@@ -19,11 +26,20 @@ const FormularioTurno = ({ onSubmit }: Props) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!colaborador || !turno || userId === null) {
+    const baseCajaNum = Number(baseCaja);
+    if (!colaborador || !turno || userId === null || isNaN(baseCajaNum)) {
       alert('Por favor complete todos los campos');
       return;
     }
-    onSubmit({ colaborador, turno, fecha: fechaActual, userId });
+
+    // Guardar turno en localStorage
+    localStorage.setItem('datosTurno', JSON.stringify({
+      colaborador,
+      fecha: fechaActual
+    }));
+
+    // Enviar datos
+    onSubmit({ colaborador, turno, fecha: fechaActual, userId, basecaja: baseCajaNum });
   };
 
   return (
@@ -47,6 +63,17 @@ const FormularioTurno = ({ onSubmit }: Props) => {
           className="form-control bg-gray-900 text-white border-red-500"
           value={turno}
           onChange={(e) => setTurno(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="form-label text-white">Base de Caja</label>
+        <input
+          type="number"
+          className="form-control bg-gray-900 text-white border-red-500"
+          value={baseCaja}
+          onChange={(e) => setBaseCaja(e.target.value)}
           required
         />
       </div>
