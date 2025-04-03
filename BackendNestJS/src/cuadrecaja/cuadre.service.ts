@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cuadre } from './cuadre.entity';
+import { NotFoundException } from '@nestjs/common';
+
 
 @Injectable()
 export class CuadreService {
@@ -19,9 +21,11 @@ export class CuadreService {
     return await this.cuadreRepository.save(nuevoCuadre);
   }
   
-  async update(id: number, data: Partial<Cuadre>): Promise<Cuadre | null> {
+  async update(id: number, data: Partial<Cuadre>): Promise<Cuadre> {
     await this.cuadreRepository.update(id, data);
-    return this.cuadreRepository.findOneBy({ id });
-  }  
+    const updated = await this.cuadreRepository.findOneBy({ id });
+    if (!updated) throw new NotFoundException(`No se encontró el registro con id ${id}`);
+    return updated;
+  } 
   
 }
