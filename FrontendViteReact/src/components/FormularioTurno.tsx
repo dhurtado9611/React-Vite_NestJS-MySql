@@ -36,7 +36,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
           navigate('/');
         }, 3000);
       } else {
-        localStorage.removeItem('datosTurno'); // Turno expirado
+        localStorage.removeItem('datosTurno');
       }
     }
   }, [navigate]);
@@ -74,84 +74,85 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div className="bg-white/30 backdrop-blur-lg rounded-2xl shadow-2xl p-6 w-full max-w-sm relative">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 animate-fade-in">
+      <div className="bg-white/30 backdrop-blur-lg rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-slide-up">
         {showAlert && (
-          <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50">
+          <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50 text-lg text-center">
             Ya hay un turno abierto. No puedes iniciar uno nuevo hasta que finalice el actual.
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <h3 className="text-center text-xl font-semibold text-gray-800 mb-6">
+          <h3 className="text-center text-2xl font-bold text-gray-800 mb-8">
             Inicio de Turno - Invitado
           </h3>
 
-          <div className="relative z-0 w-full mb-5 group">
+          <div className="relative z-0 w-full mb-6 group">
             <input
               type="text"
               id="colaborador"
               disabled
               value={colaborador}
-              className="block py-2.5 px-0 w-full text-sm text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
+              className="block py-3 px-0 w-full text-base text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
               placeholder=" "
             />
             <label
               htmlFor="colaborador"
-              className="absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-2.5 peer-focus:scale-75 peer-focus:-translate-y-6"
+              className="absolute text-base text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-3 peer-focus:scale-75 peer-focus:-translate-y-6"
             >
               Colaborador
             </label>
           </div>
 
-          <div className="relative z-0 w-full mb-5 group">
+          <div className="relative z-0 w-full mb-6 group">
             <input
               type="time"
               id="turno"
               value={turno}
               onChange={(e) => setTurno(e.target.value)}
               required
-              className="block py-2.5 px-0 w-full text-sm text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
+              step="1"
+              className="block py-3 px-0 w-full text-base text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
               placeholder=" "
             />
             <label
               htmlFor="turno"
-              className="absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-2.5 peer-focus:scale-75 peer-focus:-translate-y-6"
+              className="absolute text-base text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-3 peer-focus:scale-75 peer-focus:-translate-y-6"
             >
-              Turno
+              Turno (24 horas)
             </label>
           </div>
 
-          <div className="relative z-0 w-full mb-5 group">
+          <div className="relative z-0 w-full mb-6 group">
             <input
               type="number"
               id="baseCaja"
               value={baseCaja}
               onChange={(e) => setBaseCaja(e.target.value)}
               required
-              className="block py-2.5 px-0 w-full text-sm text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
+              className="block py-3 px-3 w-full text-base text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder=" "
             />
             <label
               htmlFor="baseCaja"
-              className="absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-2.5 peer-focus:scale-75 peer-focus:-translate-y-6"
+              className="absolute left-3 top-2 text-base text-gray-600 duration-300 transform -translate-y-3 scale-75 origin-[0] peer-focus:left-3 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-3 peer-focus:scale-75 peer-focus:-translate-y-3"
             >
               Base de Caja
             </label>
           </div>
 
-          <div className="relative z-0 w-full mb-6 group">
+          <div className="relative z-0 w-full mb-8 group">
             <input
               type="date"
               id="fecha"
               value={fechaActual}
               disabled
-              className="block py-2.5 px-0 w-full text-sm text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
+              className="block py-3 px-0 w-full text-base text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
               placeholder=" "
             />
             <label
               htmlFor="fecha"
-              className="absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-2.5 peer-focus:scale-75 peer-focus:-translate-y-6"
+              className="absolute text-base text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-3 peer-focus:scale-75 peer-focus:-translate-y-6"
             >
               Fecha
             </label>
@@ -159,7 +160,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
 
           <button
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold py-3 px-4 rounded-lg shadow-md transition-colors"
           >
             Iniciar Turno
           </button>
