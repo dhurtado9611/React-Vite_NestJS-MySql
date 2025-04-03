@@ -63,27 +63,6 @@ const Caja = () => {
     }
   };
 
-  const exportarExcel = () => {
-    const data = [
-      {
-        Colaborador: colaborador,
-        Fecha: fecha,
-        Turno: turno,
-        'Base Caja': baseCaja,
-        'Total Reservas': totalReservas,
-        'Total Caja': baseCaja + totalReservas,
-      },
-    ];
-
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Cuadre');
-
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const fileData = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(fileData, `cuadre_${fecha}_${turno}.xlsx`);
-  };
-
   if (!localStorage.getItem('datosTurno')) {
     return <p className="text-center text-white mt-10">No hay turno activo para mostrar caja.</p>;
   }
@@ -116,15 +95,6 @@ const Caja = () => {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div className="text-center mt-6">
-        <button
-          onClick={exportarExcel}
-          className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded shadow font-semibold transition-colors"
-        >
-          Exportar a Excel
-        </button>
       </div>
     </div>
   );
