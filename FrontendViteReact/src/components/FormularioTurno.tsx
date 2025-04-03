@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 interface Props {
-  onSubmitSuccess?: () => void;
+  onSubmit: (data: { colaborador: string; turno: string; fecha: string }) => void;
 }
 
-const FormularioTurno = ({ onSubmitSuccess }: Props) => {
+const FormularioTurno = ({ onSubmit }: Props) => {
   const [colaborador, setColaborador] = useState('');
   const [turno, setTurno] = useState('');
   const [turnoCerrado, setTurnoCerrado] = useState(0);
@@ -49,8 +49,10 @@ const FormularioTurno = ({ onSubmitSuccess }: Props) => {
       }));
 
       alert('Turno registrado correctamente');
-      if (onSubmitSuccess) onSubmitSuccess();
-      navigate('/');
+
+      // Enviar datos al componente padre (Login)
+      onSubmit({ colaborador, turno, fecha: fechaActual });
+
     } catch (error) {
       console.error('Error al registrar el turno:', error);
       alert('No se pudo registrar el turno');

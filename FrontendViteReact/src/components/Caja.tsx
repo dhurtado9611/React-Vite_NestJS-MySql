@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 interface Cuadre {
   id: number;
@@ -61,11 +63,36 @@ const Caja = () => {
     }
   };
 
+  const exportarExcel = () => {
+    const data = [
+      {
+        Colaborador: colaborador,
+        Fecha: fecha,
+        Turno: turno,
+        'Base Caja': baseCaja,
+        'Total Reservas': totalReservas,
+        'Total Caja': baseCaja + totalReservas,
+      },
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Cuadre');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const fileData = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(fileData, `cuadre_${fecha}_${turno}.xlsx`);
+  };
+
+  if (!localStorage.getItem('datosTurno')) {
+    return <p className="text-center text-white mt-10">No hay turno activo para mostrar caja.</p>;
+  }
+
   const totalCaja = baseCaja + totalReservas;
 
   return (
-    <div className="mt-5">
-      <h3 className="text-2xl font-semibold">Cuadre de Caja</h3>
+    <div className="mt-5 p-4 text-white">
+      <h3 className="text-2xl font-semibold mb-4">Cuadre de Caja</h3>
       <div className="overflow-x-auto">
         <table className="table table-bordered table-striped w-full max-w-4xl text-center text-sm md:text-base">
           <thead className="bg-light">
@@ -89,6 +116,15 @@ const Caja = () => {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div className="text-center mt-6">
+        <button
+          onClick={exportarExcel}
+          className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded shadow font-semibold transition-colors"
+        >
+          Exportar a Excel
+        </button>
       </div>
     </div>
   );
