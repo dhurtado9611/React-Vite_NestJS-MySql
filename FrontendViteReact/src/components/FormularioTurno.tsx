@@ -31,7 +31,6 @@ const FormularioTurno = ({ onSubmit }: Props) => {
     }
 
     try {
-      // Guardar en base de datos
       await api.post('/cuadre', {
         colaborador,
         fecha: fechaActual,
@@ -40,7 +39,6 @@ const FormularioTurno = ({ onSubmit }: Props) => {
         basecaja: baseCajaNum,
       });
 
-      // Guardar en localStorage
       localStorage.setItem('datosTurno', JSON.stringify({
         colaborador,
         fecha: fechaActual,
@@ -49,10 +47,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
       }));
 
       alert('Turno registrado correctamente');
-
-      // Enviar datos al componente padre (Login)
       onSubmit({ colaborador, turno, fecha: fechaActual });
-
     } catch (error) {
       console.error('Error al registrar el turno:', error);
       alert('No se pudo registrar el turno');
@@ -60,60 +55,93 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="container mt-5 max-w-md mx-auto bg-[#1f2937] text-white p-6 rounded-lg shadow-lg border border-gray-600">
-      <h3 className="mb-6 text-2xl font-semibold text-center text-[#38bdf8]">Inicio de Turno - Invitado</h3>
+    <div className="min-h-screen flex items-center justify-center px-4 py-10">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white/30 backdrop-blur-lg shadow-xl p-6 rounded-2xl w-full max-w-sm"
+      >
+        <h3 className="text-center text-xl font-semibold text-gray-800 mb-6">
+          Inicio de Turno - Invitado
+        </h3>
 
-      <div className="mb-4">
-        <label className="block mb-1 text-sm text-gray-300">Colaborador</label>
-        <input
-          type="text"
-          className="w-full p-2 rounded bg-[#111827] border border-gray-600 text-white"
-          value={colaborador}
-          disabled
-        />
-      </div>
+        <div className="relative z-0 w-full mb-5 group">
+          <input
+            type="text"
+            id="colaborador"
+            disabled
+            value={colaborador}
+            className="block py-2.5 px-0 w-full text-sm text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
+            placeholder=" "
+          />
+          <label
+            htmlFor="colaborador"
+            className="absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-2.5 peer-focus:scale-75 peer-focus:-translate-y-6"
+          >
+            Colaborador
+          </label>
+        </div>
 
-      <div className="mb-4">
-        <label className="block mb-1 text-sm text-gray-300">Turno</label>
-        <input
-          type="time"
-          className="w-full p-2 rounded bg-[#111827] border border-gray-600 text-white"
-          value={turno}
-          onChange={(e) => setTurno(e.target.value)}
-          required
-        />
-      </div>
+        <div className="relative z-0 w-full mb-5 group">
+          <input
+            type="time"
+            id="turno"
+            value={turno}
+            onChange={(e) => setTurno(e.target.value)}
+            required
+            className="block py-2.5 px-0 w-full text-sm text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
+            placeholder=" "
+          />
+          <label
+            htmlFor="turno"
+            className="absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-2.5 peer-focus:scale-75 peer-focus:-translate-y-6"
+          >
+            Turno
+          </label>
+        </div>
 
-      <div className="mb-4">
-        <label className="block mb-1 text-sm text-gray-300">Base de Caja</label>
-        <input
-          type="number"
-          className="w-full p-2 rounded bg-[#111827] border border-gray-600 text-white"
-          value={baseCaja}
-          onChange={(e) => setBaseCaja(e.target.value)}
-          required
-        />
-      </div>
+        <div className="relative z-0 w-full mb-5 group">
+          <input
+            type="number"
+            id="baseCaja"
+            value={baseCaja}
+            onChange={(e) => setBaseCaja(e.target.value)}
+            required
+            className="block py-2.5 px-0 w-full text-sm text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
+            placeholder=" "
+          />
+          <label
+            htmlFor="baseCaja"
+            className="absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-2.5 peer-focus:scale-75 peer-focus:-translate-y-6"
+          >
+            Base de Caja
+          </label>
+        </div>
 
-      <div className="mb-6">
-        <label className="block mb-1 text-sm text-gray-300">Fecha</label>
-        <input
-          type="date"
-          className="w-full p-2 rounded bg-[#111827] border border-gray-600 text-white"
-          value={fechaActual}
-          disabled
-        />
-      </div>
+        <div className="relative z-0 w-full mb-6 group">
+          <input
+            type="date"
+            id="fecha"
+            value={fechaActual}
+            disabled
+            className="block py-2.5 px-0 w-full text-sm text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
+            placeholder=" "
+          />
+          <label
+            htmlFor="fecha"
+            className="absolute text-sm text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-2.5 peer-focus:scale-75 peer-focus:-translate-y-6"
+          >
+            Fecha
+          </label>
+        </div>
 
-      <div className="text-center">
         <button
           type="submit"
-          className="bg-[#38bdf8] text-black hover:bg-[#0ea5e9] font-semibold px-6 py-2 rounded transition-colors"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
         >
           Iniciar Turno
         </button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 
