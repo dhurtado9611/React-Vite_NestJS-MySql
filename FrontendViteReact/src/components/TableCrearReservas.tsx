@@ -49,7 +49,44 @@ const TableCrearReservas = ({ reservas, fetchReservas }: Props) => {
 
   return (
     <div className="mt-5">
-      <h2>Lista de Reservas</h2>
+      {/* Habitaciones Ocupadas */}
+      <h2>Habitaciones Ocupadas</h2>
+      <div className="table-responsive overflow-auto" style={{ maxHeight: '400px' }}>
+        <table className="table table-striped text-center">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Vehículo</th>
+              <th>Placa</th>
+              <th>Habitación</th>
+              <th>Hora Entrada</th>
+              <th>Dar Salida</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reservasFiltradas.filter((r) => !r.hsalida).map((reserva) => (
+              <tr key={reserva.id}>
+                <td>{reserva.id}</td>
+                <td>{reserva.vehiculo}</td>
+                <td>{reserva.placa}</td>
+                <td>{reserva.habitacion}</td>
+                <td>{reserva.hentrada}</td>
+                <td>
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={() => handleDarSalida(reserva.id)}
+                  >
+                    Dar salida
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+  
+      {/* Lista de Reservas */}
+      <h2 className="mt-5">Lista de Reservas</h2>
       <div className="table-responsive overflow-auto" style={{ maxHeight: '400px' }}>
         <table className="table table-striped text-center">
           <thead>
@@ -97,6 +134,7 @@ const TableCrearReservas = ({ reservas, fetchReservas }: Props) => {
       </div>
     </div>
   );
+  
 };
 
 export default TableCrearReservas;
