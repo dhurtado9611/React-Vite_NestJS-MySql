@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/FrontendViteReact/(.*)", "destination": "/$1" }
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
-  

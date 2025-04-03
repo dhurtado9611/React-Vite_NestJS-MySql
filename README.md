@@ -20,3 +20,9 @@ src/
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwic3ViIjoxLCJpYXQiOjE3NDM0NDAyOTQsImV4cCI6MTc0MzUyNjY5NH0.3PlS1YYt31nPYEepQ-Un0fYhh6KvtU4j37R9JYzE94I"
 }
+
+{
+  "rewrites": [
+    { "source": "/FrontendViteReact/(.*)", "destination": "/$1" }
+  ]
+}
