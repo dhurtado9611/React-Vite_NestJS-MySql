@@ -25,19 +25,26 @@ const Caja = () => {
   const [fecha, setFecha] = useState<string>('');
   const [turno, setTurno] = useState<string>('');
 
+  const rol = localStorage.getItem('rol');
+
   useEffect(() => {
     const datosTurno = localStorage.getItem('datosTurno');
     const hoy = new Date().toISOString().split('T')[0];
     setFecha(hoy);
 
-    if (datosTurno) {
+    if (rol === 'invitado' && datosTurno) {
       const { colaborador, turno } = JSON.parse(datosTurno);
       setColaborador(colaborador);
       setTurno(turno);
       obtenerBaseCaja(colaborador, hoy);
       calcularTotalReservas(colaborador, hoy);
+    } else if (rol === 'admin') {
+      const admin = localStorage.getItem('username') || '';
+      setColaborador(admin);
+      obtenerBaseCaja(admin, hoy);
+      calcularTotalReservas(admin, hoy);
     }
-  }, []);
+  }, [rol]);
 
   const obtenerBaseCaja = async (colaborador: string, fecha: string) => {
     try {
@@ -63,8 +70,8 @@ const Caja = () => {
     }
   };
 
-  if (!localStorage.getItem('datosTurno')) {
-    return <p className="text-center text-white mt-10">No hay turno activo para mostrar caja.</p>;
+  if (rol === 'invitado' && !localStorage.getItem('datosTurno')) {
+    return <p className="text-center text-white mt-10">Debes iniciar turno para ver el cuadre.</p>;
   }
 
   const totalCaja = baseCaja + totalReservas;
