@@ -40,8 +40,8 @@ const Navbar = () => {
 
       const { colaborador, fecha } = JSON.parse(datosTurno);
       const response = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/cuadre');
-      const reservas = response.data;
-      const reservasFiltradas = reservas.filter(
+      const cuadre = response.data;
+      const reservasFiltradas = cuadre.filter(
         (r: any) => r.colaborador === colaborador && r.fecha === fecha
       );
 
@@ -58,10 +58,43 @@ const Navbar = () => {
 
       await axios.post('https://formsubmit.co/ajax/dhurtado9611@gmail.com', formData);
 
-      alert('Caja cerrada y resumen enviado. Redirigiendo al inicio...');
-      logout();
-      localStorage.clear();
-      navigate('/');
+      // Obtener la hora actual
+      const horaActual = new Date().toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      // Obtener el último registro del cuadre para actualizar
+      const ultimoCuadre = cuadre[cuadre.length - 1];
+      if (ultimoCuadre && ultimoCuadre.id) {
+        await axios.put(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${ultimoCuadre.id}`, {
+          turnoCerrado: horaActual
+        });
+      }
+
+      const alertBox = document.createElement('div');
+      alertBox.textContent = 'Caja cerrada y resumen enviado. Redirigiendo al inicio...';
+      alertBox.style.position = 'fixed';
+      alertBox.style.top = '20px';
+      alertBox.style.left = '50%';
+      alertBox.style.transform = 'translateX(-50%)';
+      alertBox.style.backgroundColor = '#38a169';
+      alertBox.style.color = 'white';
+      alertBox.style.padding = '12px 24px';
+      alertBox.style.borderRadius = '8px';
+      alertBox.style.zIndex = '9999';
+      alertBox.style.fontSize = '16px';
+      alertBox.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+
+      document.body.appendChild(alertBox);
+
+      setTimeout(() => {
+        document.body.removeChild(alertBox);
+        logout();
+        localStorage.clear();
+        navigate('/');
+      }, 3000);
+
     } catch (error) {
       console.error('Error al cerrar caja:', error);
       alert('Hubo un error al cerrar la caja.');
