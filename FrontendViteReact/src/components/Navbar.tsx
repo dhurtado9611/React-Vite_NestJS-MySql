@@ -67,7 +67,7 @@ const Navbar = () => {
       // Obtener el último registro del cuadre para actualizar
       const ultimoCuadre = cuadre[cuadre.length - 1];
       if (ultimoCuadre && ultimoCuadre.id) {
-        await axios.put(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${ultimoCuadre.id}`, {
+        await axios.put(`https://react-vitenestjs-mysql-production.up.railway.app/Cuadre/${ultimoCuadre.id}`, {
           turnoCerrado: horaActual
         });
       }

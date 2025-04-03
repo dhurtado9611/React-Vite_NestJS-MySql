@@ -8,6 +8,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [rol, setRol] = useState<string | null>(null);
   const [turnoIniciado, setTurnoIniciado] = useState(false);
+  
   const [datosTurno, setDatosTurno] = useState<null | {
     colaborador: string;
     turno: string;
