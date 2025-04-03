@@ -35,43 +35,53 @@ const Navbar = () => {
 
   const cerrarCaja = async () => {
     try {
+      const rol = localStorage.getItem('rol');
       const datosTurno = localStorage.getItem('datosTurno');
-      if (!datosTurno) return alert('No hay datos del turno.');
-
-      const { colaborador, fecha } = JSON.parse(datosTurno);
+  
+      if (rol === 'invitado' && !datosTurno) {
+        return alert('No hay datos del turno.');
+      }
+  
+      const { colaborador, fecha } =
+        rol === 'invitado'
+          ? JSON.parse(datosTurno!)
+          : {
+              colaborador: localStorage.getItem('username') || 'admin',
+              fecha: new Date().toISOString().split('T')[0],
+            };
+  
       const response = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/cuadre');
       const cuadre = response.data;
       const reservasFiltradas = cuadre.filter(
         (r: any) => r.colaborador === colaborador && r.fecha === fecha
       );
-
+  
       const worksheet = XLSX.utils.json_to_sheet(reservasFiltradas);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservas');
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
       const file = new File([blob], `resumen_turno_${colaborador}_${fecha}.xlsx`);
-
+  
       const formData = new FormData();
       formData.append('file', file);
       formData.append('email', 'dhurtado9611@gmail.com');
-
+  
       await axios.post('https://formsubmit.co/ajax/dhurtado9611@gmail.com', formData);
-
-      // Obtener la hora actual
+  
+      // Hora actual
       const horaActual = new Date().toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit'
       });
-
-      // Obtener el último registro del cuadre para actualizar
+  
       const ultimoCuadre = cuadre[cuadre.length - 1];
       if (ultimoCuadre && ultimoCuadre.id) {
         await axios.put(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${ultimoCuadre.id}`, {
           turnoCerrado: horaActual
         });
       }
-
+  
       const alertBox = document.createElement('div');
       alertBox.textContent = 'Caja cerrada y resumen enviado. Redirigiendo al inicio...';
       alertBox.style.position = 'fixed';
@@ -85,9 +95,9 @@ const Navbar = () => {
       alertBox.style.zIndex = '9999';
       alertBox.style.fontSize = '16px';
       alertBox.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-
+  
       document.body.appendChild(alertBox);
-
+  
       setTimeout(() => {
         document.body.removeChild(alertBox);
         logout();
@@ -97,7 +107,7 @@ const Navbar = () => {
         localStorage.removeItem('datosTurno');
         navigate('/');
       }, 3000);
-
+  
     } catch (error: any) {
       console.error('Error al cerrar caja:', error);
       if (error.response) {
@@ -106,7 +116,7 @@ const Navbar = () => {
       alert('Hubo un error al cerrar la caja.');
     }
   };
-
+  
   const handleLogout = () => {
     cerrarCaja();
   };

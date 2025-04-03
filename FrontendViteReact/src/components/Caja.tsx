@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 
 interface Cuadre {
   id: number;
@@ -41,6 +39,7 @@ const Caja = () => {
     } else if (rol === 'admin') {
       const admin = localStorage.getItem('username') || '';
       setColaborador(admin);
+      setTurno('');
       obtenerBaseCaja(admin, hoy);
       calcularTotalReservas(admin, hoy);
     }
