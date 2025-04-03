@@ -9,6 +9,7 @@ interface Props {
 const FormularioTurno = ({ onSubmitSuccess }: Props) => {
   const [colaborador, setColaborador] = useState('');
   const [turno, setTurno] = useState('');
+  const [turnoCerrado, setTurnoCerrado] = useState(0);
   const [baseCaja, setBaseCaja] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
   const fechaActual = new Date().toISOString().split('T')[0];
@@ -35,6 +36,7 @@ const FormularioTurno = ({ onSubmitSuccess }: Props) => {
         colaborador,
         fecha: fechaActual,
         turno,
+        turnoCerrado,
         basecaja: baseCajaNum,
       });
 
@@ -42,7 +44,8 @@ const FormularioTurno = ({ onSubmitSuccess }: Props) => {
       localStorage.setItem('datosTurno', JSON.stringify({
         colaborador,
         fecha: fechaActual,
-        turno
+        turno,
+        turnoCerrado
       }));
 
       alert('Turno registrado correctamente');
