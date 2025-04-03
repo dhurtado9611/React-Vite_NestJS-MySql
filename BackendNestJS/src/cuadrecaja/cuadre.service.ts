@@ -19,9 +19,9 @@ export class CuadreService {
     return await this.cuadreRepository.save(nuevoCuadre);
   }
   
-  async update(id: number, data: Partial<Cuadre>): Promise<Cuadre> {
+  async update(id: number, data: Partial<Cuadre>): Promise<Cuadre | null> {
     await this.cuadreRepository.update(id, data);
     return this.cuadreRepository.findOneBy({ id });
-  }
+  }  
   
 }

@@ -21,5 +21,4 @@ export class CuadreController {
   return this.cuadreService.update(id, data);
 }
 
-
 }
