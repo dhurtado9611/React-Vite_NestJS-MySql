@@ -67,7 +67,7 @@ const Navbar = () => {
       // Obtener el último registro del cuadre para actualizar
       const ultimoCuadre = cuadre[cuadre.length - 1];
       if (ultimoCuadre && ultimoCuadre.id) {
-        await axios.put(`https://react-vitenestjs-mysql-production.up.railway.app/Cuadre/${ultimoCuadre.id}`, {
+        await axios.put(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${ultimoCuadre.id}`, {
           turnoCerrado: horaActual
         });
       }
@@ -91,12 +91,18 @@ const Navbar = () => {
       setTimeout(() => {
         document.body.removeChild(alertBox);
         logout();
-        localStorage.clear();
+        localStorage.removeItem('rol');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('datosTurno');
         navigate('/');
       }, 3000);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al cerrar caja:', error);
+      if (error.response) {
+        console.error('Respuesta del servidor:', error.response.data);
+      }
       alert('Hubo un error al cerrar la caja.');
     }
   };
