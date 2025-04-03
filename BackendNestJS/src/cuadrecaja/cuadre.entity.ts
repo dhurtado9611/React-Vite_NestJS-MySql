@@ -15,6 +15,9 @@ export class Cuadre {
   @Column()
   turno: string;
 
+  @Column()
+  turnoCerrado: string;
+
   @Column('int')
   basecaja: number;
 }
