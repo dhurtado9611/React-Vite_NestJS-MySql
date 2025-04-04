@@ -8,9 +8,11 @@ import { ReservaController } from './reservas/reserva.controller';
 import { AuthModule } from './auth/auth.module';
 import { CuadreModule } from './cuadrecaja/cuadre.module';
 import { Cuadre } from './cuadrecaja/cuadre.entity';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
+    AdminModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
