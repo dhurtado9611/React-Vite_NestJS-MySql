@@ -1,6 +1,7 @@
+import React, { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 
-const RutaProtegidaAdmin = ({ children }: { children: JSX.Element }) => {
+const RutaProtegidaAdmin = ({ children }: { children: ReactNode }) => {
   const token = localStorage.getItem('token');
   const rol = localStorage.getItem('rol');
 
@@ -9,7 +10,7 @@ const RutaProtegidaAdmin = ({ children }: { children: JSX.Element }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export default RutaProtegidaAdmin;

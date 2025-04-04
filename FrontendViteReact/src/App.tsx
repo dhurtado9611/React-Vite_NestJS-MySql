@@ -7,7 +7,7 @@ import Historial from './pages/Historial';
 import CrearReservas from './pages/CrearReservas';
 import HistorialInvitado from './pages/HistorialInvitado';
 import RutaProtegidaInvitado from './components/RutaProtegidaInvitado';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from './admin/AdminDashboard';
 import RutaProtegidaAdmin from './components/RutaProtegidaAdmin';
 
 function App() {

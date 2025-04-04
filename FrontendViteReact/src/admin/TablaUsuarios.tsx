@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+type Usuario = {
+  id: number;
+  nombre: string;
+  email: string;
+  password?: string;
+  role: 'admin' | 'invitado' | string;
+};
+
 const TablaUsuarios = () => {
-  const [usuarios, setUsuarios] = useState([]);
-  const [editando, setEditando] = useState(null);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [editando, setEditando] = useState<Usuario | null>(null);
   const [creando, setCreando] = useState(false);
-  const [creandoUsuario, setCreandoUsuario] = useState({
+  const [creandoUsuario, setCreandoUsuario] = useState<Omit<Usuario, 'id'>>({
     nombre: '',
     email: '',
     password: '',
@@ -14,7 +22,7 @@ const TablaUsuarios = () => {
 
   const cargarUsuarios = async () => {
     try {
-      const res = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/admin/users', {
+      const res = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/users', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setUsuarios(res.data);
@@ -23,9 +31,9 @@ const TablaUsuarios = () => {
     }
   };
 
-  const eliminarUsuario = async (id) => {
+  const eliminarUsuario = async (id: number) => {
     if (confirm('¿Seguro que deseas eliminar este usuario?')) {
-      await axios.delete(`https://react-vitenestjs-mysql-production.up.railway.app/admin/users/${id}`, {
+      await axios.delete(`https://react-vitenestjs-mysql-production.up.railway.app/users/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       cargarUsuarios();
@@ -33,8 +41,9 @@ const TablaUsuarios = () => {
   };
 
   const actualizarUsuario = async () => {
+    if (!editando) return;
     await axios.put(
-      `https://react-vitenestjs-mysql-production.up.railway.app/admin/users/${editando.id}`,
+      `https://react-vitenestjs-mysql-production.up.railway.app/users/${editando.id}`,
       editando,
       {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -46,7 +55,7 @@ const TablaUsuarios = () => {
 
   const crearUsuario = async () => {
     await axios.post(
-      'https://react-vitenestjs-mysql-production.up.railway.app/admin/users',
+      'https://react-vitenestjs-mysql-production.up.railway.app/users',
       creandoUsuario,
       {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -100,18 +109,21 @@ const TablaUsuarios = () => {
           <div className="bg-white p-4 rounded shadow w-[300px]">
             <h4 className="text-lg font-semibold mb-2">Editar Usuario</h4>
             <input
+              type="text"
               value={editando.nombre}
               onChange={(e) => setEditando({ ...editando, nombre: e.target.value })}
               className="border p-1 mb-2 w-full"
               placeholder="Nombre"
             />
             <input
+              type="email"
               value={editando.email}
               onChange={(e) => setEditando({ ...editando, email: e.target.value })}
               className="border p-1 mb-2 w-full"
               placeholder="Correo"
             />
             <input
+              type="text"
               value={editando.role}
               onChange={(e) => setEditando({ ...editando, role: e.target.value })}
               className="border p-1 mb-2 w-full"
@@ -131,23 +143,30 @@ const TablaUsuarios = () => {
           <div className="bg-white p-4 rounded shadow w-[300px]">
             <h4 className="text-lg font-semibold mb-2">Crear Usuario</h4>
             <input
+              type="text"
               placeholder="Nombre"
+              value={creandoUsuario.nombre}
               onChange={(e) => setCreandoUsuario({ ...creandoUsuario, nombre: e.target.value })}
               className="border p-1 mb-2 w-full"
             />
             <input
+              type="email"
               placeholder="Correo"
+              value={creandoUsuario.email}
               onChange={(e) => setCreandoUsuario({ ...creandoUsuario, email: e.target.value })}
               className="border p-1 mb-2 w-full"
             />
             <input
-              placeholder="Contraseña"
               type="password"
+              placeholder="Contraseña"
+              value={creandoUsuario.password}
               onChange={(e) => setCreandoUsuario({ ...creandoUsuario, password: e.target.value })}
               className="border p-1 mb-2 w-full"
             />
             <input
+              type="text"
               placeholder="Rol (admin o invitado)"
+              value={creandoUsuario.role}
               onChange={(e) => setCreandoUsuario({ ...creandoUsuario, role: e.target.value })}
               className="border p-1 mb-2 w-full"
             />
