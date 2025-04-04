@@ -6,15 +6,15 @@ export class MailService {
   private transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'tucorreo@gmail.com', // Reemplaza con tu correo real
-      pass: 'tupasswordoappkey',  // Usa una App Password si tienes 2FA
+      user: 'dhurtado9611@gmail.com', // Reemplaza con tu correo real
+      pass: 'Mauroh918*',  // Usa una App Password si tienes 2FA
     },
   });
 
   async enviarCorreoConAdjunto(destinatario: string, archivo: Express.Multer.File) {
     const mailOptions = {
-      from: '"Sistema de Turnos" <tucorreo@gmail.com>',
-      to: destinatario,
+      from: '"Sistema de Turnos" <dhurtado9611@gmail.com>',
+      to: dhurtado96@hotmail.com,
       subject: 'Resumen de Turno',
       text: 'Adjunto encontrarás el resumen del turno.',
       attachments: [
