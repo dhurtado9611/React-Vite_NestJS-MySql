@@ -14,7 +14,7 @@ export class MailService {
   async enviarCorreoConAdjunto(destinatario: string, archivo: Express.Multer.File) {
     const mailOptions = {
       from: '"Sistema de Turnos" <dhurtado9611@gmail.com>',
-      to: dhurtado9611@gmail.com,
+      to: 'dhurtado9611@gmail.com',
       subject: 'Resumen de Turno',
       text: 'Adjunto encontrarás el resumen del turno.',
       attachments: [
