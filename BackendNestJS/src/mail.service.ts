@@ -7,14 +7,14 @@ export class MailService {
     service: 'gmail',
     auth: {
       user: 'dhurtado9611@gmail.com', // Reemplaza con tu correo real
-      pass: 'Mauroh918*',  // Usa una App Password si tienes 2FA
+      pass: 'Mauroh918*',    // Usa una App Password si tienes 2FA en Gmail
     },
   });
 
   async enviarCorreoConAdjunto(destinatario: string, archivo: Express.Multer.File) {
     const mailOptions = {
       from: '"Sistema de Turnos" <dhurtado9611@gmail.com>',
-      to: dhurtado96@hotmail.com,
+      to: dhurtado9611@gmail.com,
       subject: 'Resumen de Turno',
       text: 'Adjunto encontrarás el resumen del turno.',
       attachments: [
