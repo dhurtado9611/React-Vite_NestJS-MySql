@@ -38,21 +38,13 @@ const Navbar = () => {
       const rol = localStorage.getItem('rol');
       const datosTurno = localStorage.getItem('datosTurno');
 
-      if (rol === 'invitado' && !datosTurno) {
-        return alert('No hay datos del turno.');
+      if (rol !== 'invitado' || !datosTurno) {
+        return alert('No hay datos del turno o el usuario no es invitado.');
       }
 
-      const { colaborador, fecha } =
-        rol === 'invitado'
-          ? JSON.parse(datosTurno!)
-          : {
-              colaborador: localStorage.getItem('username') || 'admin',
-              fecha: new Date().toISOString().split('T')[0],
-            };
-
+      const { colaborador, fecha } = JSON.parse(datosTurno);
       const response = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/cuadre');
-      const cuadre = response.data;
-      const reservasFiltradas = cuadre.filter(
+      const reservasFiltradas = response.data.filter(
         (r: any) => r.colaborador === colaborador && r.fecha === fecha
       );
 
@@ -63,38 +55,36 @@ const Navbar = () => {
       const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
       const file = new File([blob], `resumen_turno_${colaborador}_${fecha}.xlsx`);
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('email', 'dhurtado9611@gmail.com');
-
-      await axios.post('https://formsubmit.co/ajax/dhurtado9611@gmail.com', formData);
+      // Aquí se intentaba enviar por formsubmit (ya no recomendado)
+      // Se eliminará esta parte y se sustituirá por backend personalizado en la siguiente fase
 
       const horaActual = new Date().toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit'
       });
 
-      const ultimoCuadre = cuadre[cuadre.length - 1];
-      if (ultimoCuadre && ultimoCuadre.id) {
+      const ultimoCuadre = response.data[response.data.length - 1];
+      if (ultimoCuadre?.id) {
         await axios.put(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${ultimoCuadre.id}`, {
           turnoCerrado: horaActual
         });
       }
 
       const alertBox = document.createElement('div');
-      alertBox.textContent = 'Caja cerrada y resumen enviado. Redirigiendo al inicio...';
-      alertBox.style.position = 'fixed';
-      alertBox.style.top = '20px';
-      alertBox.style.left = '50%';
-      alertBox.style.transform = 'translateX(-50%)';
-      alertBox.style.backgroundColor = '#38a169';
-      alertBox.style.color = 'white';
-      alertBox.style.padding = '12px 24px';
-      alertBox.style.borderRadius = '8px';
-      alertBox.style.zIndex = '9999';
-      alertBox.style.fontSize = '16px';
-      alertBox.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-
+      alertBox.textContent = 'Caja cerrada. Redirigiendo al inicio...';
+      Object.assign(alertBox.style, {
+        position: 'fixed',
+        top: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        backgroundColor: '#38a169',
+        color: 'white',
+        padding: '12px 24px',
+        borderRadius: '8px',
+        zIndex: '9999',
+        fontSize: '16px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+      });
       document.body.appendChild(alertBox);
 
       setTimeout(() => {
@@ -106,18 +96,24 @@ const Navbar = () => {
         localStorage.removeItem('datosTurno');
         navigate('/');
       }, 3000);
-
     } catch (error: any) {
       console.error('Error al cerrar caja:', error);
-      if (error.response) {
-        console.error('Respuesta del servidor:', error.response.data);
-      }
       alert('Hubo un error al cerrar la caja.');
     }
   };
 
   const handleLogout = () => {
-    cerrarCaja();
+    const rol = localStorage.getItem('rol');
+    if (rol === 'invitado') {
+      cerrarCaja();
+    } else {
+      logout();
+      localStorage.removeItem('rol');
+      localStorage.removeItem('username');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('datosTurno');
+      navigate('/');
+    }
   };
 
   if (loading) return null;
@@ -134,29 +130,17 @@ const Navbar = () => {
 
           {token && rol === 'admin' && (
             <>
-              <Link to="/" className={linkClass('/')} title="Inicio">
-                <FaHome />
-              </Link>
-              <Link to="/reservas" className={linkClass('/reservas')} title="Reservas">
-                <FaListAlt />
-              </Link>
-              <Link to="/historial" className={linkClass('/historial')} title="Historial">
-                <FaHistory />
-              </Link>
-              <Link to="/admin" className={linkClass('/admin')} title="Dashboard">
-                <FaListAlt />
-              </Link>
+              <Link to="/" className={linkClass('/')} title="Inicio"><FaHome /></Link>
+              <Link to="/reservas" className={linkClass('/reservas')} title="Reservas"><FaListAlt /></Link>
+              <Link to="/historial" className={linkClass('/historial')} title="Historial"><FaHistory /></Link>
+              <Link to="/admin" className={linkClass('/admin')} title="Dashboard"><FaListAlt /></Link>
             </>
           )}
 
           {token && rol === 'invitado' && (
             <>
-              <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
-                <FaPlus />
-              </Link>
-              <Link to="/historial-invitado" className={linkClass('/historial-invitado')} title="Historial">
-                <FaHistory />
-              </Link>
+              <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva"><FaPlus /></Link>
+              <Link to="/historial-invitado" className={linkClass('/historial-invitado')} title="Historial"><FaHistory /></Link>
             </>
           )}
         </div>
@@ -184,29 +168,17 @@ const Navbar = () => {
 
         {token && rol === 'admin' && (
           <>
-            <Link to="/" className={linkClass('/')} title="Inicio">
-              <FaHome className="text-lg" />
-            </Link>
-            <Link to="/reservas" className={linkClass('/reservas')} title="Reservas">
-              <FaListAlt className="text-lg" />
-            </Link>
-            <Link to="/historial" className={linkClass('/historial')} title="Historial">
-              <FaHistory />
-            </Link>
-            <Link to="/admin" className={linkClass('/admin')} title="Dashboard">
-              <FaListAlt className="text-lg" />
-            </Link>
+            <Link to="/" className={linkClass('/')} title="Inicio"><FaHome className="text-lg" /></Link>
+            <Link to="/reservas" className={linkClass('/reservas')} title="Reservas"><FaListAlt className="text-lg" /></Link>
+            <Link to="/historial" className={linkClass('/historial')} title="Historial"><FaHistory /></Link>
+            <Link to="/admin" className={linkClass('/admin')} title="Dashboard"><FaListAlt className="text-lg" /></Link>
           </>
         )}
 
         {token && rol === 'invitado' && (
           <>
-            <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva">
-              <FaPlus className="text-lg" />
-            </Link>
-            <Link to="/historial-invitado" className={linkClass('/historial-invitado')} title="Historial">
-              <FaHistory className="text-lg" />
-            </Link>
+            <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva"><FaPlus className="text-lg" /></Link>
+            <Link to="/historial-invitado" className={linkClass('/historial-invitado')} title="Historial"><FaHistory className="text-lg" /></Link>
           </>
         )}
 
