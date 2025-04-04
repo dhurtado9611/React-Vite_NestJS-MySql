@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-// Tipado de cuadre
 type Cuadre = {
   id: number;
   colaborador: string;
@@ -13,62 +12,29 @@ type Cuadre = {
 
 const TablaCuadre = () => {
   const [cuadres, setCuadres] = useState<Cuadre[]>([]);
-  const [editando, setEditando] = useState<Cuadre | null>(null);
-  const [creando, setCreando] = useState(false);
-
-  const [nuevoCuadre, setNuevoCuadre] = useState<Cuadre>({
-    id: 0,
-    basecaja: 0,
-    fecha: '',
-    turno: '',
-    turnoCerrado: '',
-    colaborador: '',
-  });
+  const [error, setError] = useState<string | null>(null);
 
   const cargarCuadres = async () => {
     try {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        setError('No hay token disponible.');
+        return;
+      }
+
       const res = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/cuadre', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       setCuadres(res.data);
-    } catch (err) {
+      setError(null);
+    } catch (err: any) {
       console.error('Error al cargar cuadre:', err);
+      setError(err.response?.data?.message || 'Error desconocido');
     }
-  };
-
-  const eliminarCuadre = async (id: number) => {
-    if (confirm('¿Seguro que deseas eliminar este cuadre?')) {
-      await axios.delete(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      });
-      cargarCuadres();
-    }
-  };
-
-  const actualizarCuadre = async () => {
-    if (!editando) return;
-    await axios.put(
-      `https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${editando.id}`,
-      editando,
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      }
-    );
-    setEditando(null);
-    cargarCuadres();
-  };
-
-  const crearCuadre = async () => {
-    await axios.post(
-      'https://react-vitenestjs-mysql-production.up.railway.app/cuadre',
-      nuevoCuadre,
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      }
-    );
-    setCreando(false);
-    setNuevoCuadre({ id: 0, basecaja: 0, fecha: '', turno: '', turnoCerrado: '', colaborador: '' });
-    cargarCuadres();
   };
 
   useEffect(() => {
@@ -77,86 +43,38 @@ const TablaCuadre = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Cuadre</h3>
-        <button onClick={() => setCreando(true)} className="bg-blue-500 text-white px-3 py-1 rounded">
-          ➕ Crear Cuadre
-        </button>
-      </div>
+      <h2 className="text-lg font-semibold mb-4">Tabla Cuadre</h2>
+
+      {error && (
+        <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
+          Error: {error}
+        </div>
+      )}
 
       <table className="table-auto w-full border text-sm">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Base Caja</th>
-            <th>Fecha</th>
-            <th>Turno</th>
-            <th>Turno Cerrado</th>
-            <th>Colaborador</th>
-            <th>Acciones</th>
+            <th className="border p-1">ID</th>
+            <th className="border p-1">Colaborador</th>
+            <th className="border p-1">Fecha</th>
+            <th className="border p-1">Turno</th>
+            <th className="border p-1">Hora Cierre</th>
+            <th className="border p-1">Base Caja</th>
           </tr>
         </thead>
         <tbody>
-          {cuadres.map((c) => (
-            <tr key={c.id}>
-              <td>{c.id}</td>
-              <td>{c.basecaja}</td>
-              <td>{c.fecha}</td>
-              <td>{c.turno}</td>
-              <td>{c.turnoCerrado}</td>
-              <td>{c.colaborador}</td>
-              <td className="space-x-2">
-                <button onClick={() => setEditando(c)} className="text-blue-600">✏️</button>
-                <button onClick={() => eliminarCuadre(c.id)} className="text-red-600">🗑️</button>
-              </td>
+          {cuadres.map((cuadre) => (
+            <tr key={cuadre.id}>
+              <td className="border p-1">{cuadre.id}</td>
+              <td className="border p-1">{cuadre.colaborador}</td>
+              <td className="border p-1">{cuadre.fecha}</td>
+              <td className="border p-1">{cuadre.turno}</td>
+              <td className="border p-1">{cuadre.turnoCerrado || 'Pendiente'}</td>
+              <td className="border p-1">{cuadre.basecaja}</td>
             </tr>
           ))}
         </tbody>
       </table>
-
-      {/* Modal editar */}
-      {editando && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded shadow w-[350px]">
-            <h4 className="text-lg font-semibold mb-2">Editar Cuadre</h4>
-            {['basecaja', 'fecha', 'turno', 'turnoCerrado', 'colaborador'].map((campo) => (
-              <input
-                key={campo}
-                value={(editando as any)[campo] || ''}
-                onChange={(e) => setEditando({ ...editando, [campo]: e.target.value } as Cuadre)}
-                placeholder={campo}
-                className="border p-1 mb-2 w-full"
-              />
-            ))}
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setEditando(null)}>Cancelar</button>
-              <button onClick={actualizarCuadre} className="bg-green-600 text-white px-3 py-1 rounded">Guardar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal crear */}
-      {creando && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded shadow w-[350px]">
-            <h4 className="text-lg font-semibold mb-2">Crear Cuadre</h4>
-            {['basecaja', 'fecha', 'turno', 'turnoCerrado', 'colaborador'].map((campo) => (
-              <input
-                key={campo}
-                value={(nuevoCuadre as any)[campo] || ''}
-                onChange={(e) => setNuevoCuadre({ ...nuevoCuadre, [campo]: e.target.value } as Cuadre)}
-                placeholder={campo}
-                className="border p-1 mb-2 w-full"
-              />
-            ))}
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setCreando(false)}>Cancelar</button>
-              <button onClick={crearCuadre} className="bg-blue-600 text-white px-3 py-1 rounded">Crear</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
