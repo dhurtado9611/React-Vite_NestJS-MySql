@@ -23,14 +23,12 @@ export class AuthService {
     const payload = {
       username: user.username,
       sub: user.id,
-      rol: user.rol, // incluir el rol en el token
+      role: user.rol, // ✅ Usamos 'rol' de la BD, pero lo mapeamos como 'role'
     };
-
+    
     return {
       access_token: this.jwtService.sign(payload),
-      rol: user.rol, // devolver también el rol explícitamente
-      username: user.username, // devuelve usuario loggeado
-      id: user.id,
-    };
+      user,
+    };    
   }  
 }
