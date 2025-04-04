@@ -8,7 +8,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://react-vite-nest-js-my-ds74mxdem-danielhurtados-projects.vercel.app',
-      'https://react-vite-nest-js-my-sql.vercel.app' // 👈 Agrega esta nueva URL también
+      'https://react-vite-nest-js-my-sql.vercel.app',// 👈 Agrega esta nueva URL también
+      'https://elesconditemotel.lat'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
