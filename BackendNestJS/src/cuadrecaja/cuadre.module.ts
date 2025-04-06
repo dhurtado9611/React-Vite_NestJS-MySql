@@ -6,7 +6,7 @@ import { CuadreController } from './cuadre.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Cuadre])],
-  providers: [CuadreService],
   controllers: [CuadreController],
+  providers: [CuadreService],
 })
 export class CuadreModule {}
