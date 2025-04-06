@@ -9,11 +9,10 @@ interface Props {
 const FormularioTurno = ({ onSubmit }: Props) => {
   const [colaborador, setColaborador] = useState('');
   const [turno, setTurno] = useState('');
-  const [turnoCerrado, setTurnoCerrado] = useState(0);
   const [baseCaja, setBaseCaja] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
   const [showAlert, setShowAlert] = useState(false);
-  const [turnoActivo, setTurnoActivo] = useState<string | null>(null);
+  const [turnoActivo, setTurnoActivo] = useState<{ colaborador: string; turno: string } | null>(null);
   const fechaActual = new Date().toISOString().split('T')[0];
   const navigate = useNavigate();
 
@@ -23,31 +22,11 @@ const FormularioTurno = ({ onSubmit }: Props) => {
     if (username) setColaborador(username);
     if (id) setUserId(Number(id));
 
-    const datosTurno = localStorage.getItem('datosTurno');
-    if (datosTurno) {
-      const { turno, fecha } = JSON.parse(datosTurno);
-      const ahora = new Date();
-      const turnoDate = new Date(`${fecha}T${turno}`);
-      const diferenciaHoras = (ahora.getTime() - turnoDate.getTime()) / (1000 * 60 * 60);
-
-      if (diferenciaHoras < 8) {
-        setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false);
-          navigate('/');
-        }, 3000);
-        return;
-      } else {
-        localStorage.removeItem('datosTurno');
-      }
-    }
-
-    // Verifica si ya hay un turno activo hoy
     const verificarTurno = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await api.get('/cuadre', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const turnoHoy = response.data.find(
@@ -55,9 +34,8 @@ const FormularioTurno = ({ onSubmit }: Props) => {
         );
 
         if (turnoHoy) {
-          setTurnoActivo(turnoHoy.colaborador);
+          setTurnoActivo({ colaborador: turnoHoy.colaborador, turno: turnoHoy.turno });
           setShowAlert(true);
-          setTimeout(() => navigate('/'), 3000);
         }
       } catch (error) {
         console.error('Error al verificar turno activo:', error);
@@ -77,112 +55,115 @@ const FormularioTurno = ({ onSubmit }: Props) => {
 
     try {
       const token = localStorage.getItem('token');
-      await api.post('/cuadre', {
-        colaborador,
-        fecha: fechaActual,
-        turno,
-        turnoCerrado,
-        basecaja: baseCajaNum,
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.post(
+        '/cuadre',
+        {
+          colaborador,
+          fecha: fechaActual,
+          turno,
+          turnoCerrado: null,
+          basecaja: baseCajaNum,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      localStorage.setItem('datosTurno', JSON.stringify({
-        colaborador,
-        fecha: fechaActual,
-        turno,
-        turnoCerrado
-      }));
+      localStorage.setItem(
+        'datosTurno',
+        JSON.stringify({ colaborador, fecha: fechaActual, turno, turnoCerrado: null })
+      );
 
       alert('Turno registrado correctamente');
       onSubmit({ colaborador, turno, fecha: fechaActual });
     } catch (error: any) {
       console.error('Error al registrar el turno:', error);
-      if (error.response?.status === 400 && error.response.data?.message) {
-        alert(error.response.data.message);
+      if (error.response?.data?.message) {
+        alert(`No se pudo registrar el turno: ${error.response.data.message}`);
       } else {
         alert('No se pudo registrar el turno');
       }
-    }    
+    }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 animate-fade-in">
-      <div className="bg-white/30 backdrop-blur-lg rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-slide-up">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-white/80">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative">
         {showAlert && turnoActivo && (
-          <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50 text-lg text-center">
-            Ya hay un turno abierto por <strong>{turnoActivo}</strong>. No puedes iniciar uno nuevo hasta que finalice el actual.
+          <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-800 px-4 py-2 rounded shadow-lg z-50 text-base text-center">
+            Ya hay un turno abierto por <strong>{turnoActivo.colaborador}</strong><br />
+            Iniciado a las <strong>{turnoActivo.turno}</strong>
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <h3 className="text-center text-2xl font-bold text-gray-800 mb-8">
+          <h3 className="text-center text-2xl font-bold text-gray-900 mb-8">
             Inicio de Turno - Invitado
           </h3>
 
-          <div className="relative z-0 w-full mb-6 group">
+          <div className="mb-6">
+            <label htmlFor="colaborador" className="block text-sm font-medium text-gray-700 mb-1">
+              Colaborador
+            </label>
             <input
               type="text"
               id="colaborador"
               disabled
               value={colaborador}
-              className="block py-3 px-0 w-full text-base text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
-              placeholder=" "
+              className="block w-full px-4 py-2 text-base text-gray-800 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none"
             />
-            <label htmlFor="colaborador" className="absolute text-base text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0]">
-              Colaborador
-            </label>
           </div>
 
-          <div className="relative z-0 w-full mb-6 group">
-            <input
-              type="time"
+          <div className="mb-6">
+            <label htmlFor="turno" className="block text-sm font-medium text-gray-700 mb-1">
+              Selecciona Turno
+            </label>
+            <select
               id="turno"
               value={turno}
               onChange={(e) => setTurno(e.target.value)}
               required
-              step="1"
-              className="block py-3 px-0 w-full text-base text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
-              placeholder=" "
-            />
-            <label htmlFor="turno" className="absolute text-base text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0]">
-              Turno (24 horas)
-            </label>
+              className="block w-full px-4 py-2 text-base text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none"
+            >
+              <option value="">-- Selecciona un turno --</option>
+              <option value="08:00">Mañana (8am - 2pm)</option>
+              <option value="14:00">Tarde (2pm - 8pm)</option>
+              <option value="20:00">Noche (8pm - 8am)</option>
+            </select>
           </div>
 
-          <div className="relative z-0 w-full mb-6 group">
+          <div className="mb-6">
+            <label htmlFor="baseCaja" className="block text-sm font-medium text-gray-700 mb-1">
+              Base de Caja
+            </label>
             <input
               type="number"
               id="baseCaja"
               value={baseCaja}
               onChange={(e) => setBaseCaja(e.target.value)}
               required
-              className="block py-3 px-3 w-full text-base text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder=" "
+              className="block w-full px-4 py-2 text-base text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none"
+              placeholder="Monto en efectivo"
             />
-            <label htmlFor="baseCaja" className="absolute left-3 top-2 text-base text-gray-600 duration-300 transform -translate-y-3 scale-75 origin-[0]">
-              Base de Caja
-            </label>
           </div>
 
-          <div className="relative z-0 w-full mb-8 group">
+          <div className="mb-8">
+            <label htmlFor="fecha" className="block text-sm font-medium text-gray-700 mb-1">
+              Fecha
+            </label>
             <input
               type="date"
               id="fecha"
               value={fechaActual}
               disabled
-              className="block py-3 px-0 w-full text-base text-gray-700 bg-transparent border-0 border-b border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
-              placeholder=" "
+              className="block w-full px-4 py-2 text-base text-gray-800 bg-gray-100 border border-gray-300 rounded-md shadow-sm"
             />
-            <label htmlFor="fecha" className="absolute text-base text-gray-600 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0]">
-              Fecha
-            </label>
           </div>
 
           <button
             type="submit"
             disabled={!!turnoActivo}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold py-3 px-4 rounded-lg shadow-md transition-colors"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 px-4 rounded-md shadow-md transition-colors"
           >
             Iniciar Turno
           </button>
