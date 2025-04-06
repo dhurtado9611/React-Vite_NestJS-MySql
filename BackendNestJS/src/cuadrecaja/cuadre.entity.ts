@@ -1,4 +1,3 @@
-// cuadre.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('cuadre') // el nombre entre comillas debe coincidir con el nombre de la tabla en la BD
@@ -15,7 +14,7 @@ export class Cuadre {
   @Column()
   turno: string;
 
-  @Column()
+  @Column({ nullable: true }) // ✅ Ahora puede ser null
   turnoCerrado: string;
 
   @Column('int')
