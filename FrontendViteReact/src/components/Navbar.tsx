@@ -1,3 +1,4 @@
+// Código actualizado para mantener el logo visible y mostrar el botón de login si no hay sesión
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -20,14 +21,12 @@ const Navbar = () => {
   const [active, setActive] = useState(location.pathname);
   const [rol, setRol] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (token) {
       setRol(localStorage.getItem('rol'));
       setUsername(localStorage.getItem('username'));
     }
-    setLoading(false);
   }, [token]);
 
   useEffect(() => {
@@ -68,53 +67,26 @@ const Navbar = () => {
         });
       }
 
-      const alertBox = document.createElement('div');
-      alertBox.textContent = 'Caja cerrada. Redirigiendo al inicio...';
-      Object.assign(alertBox.style, {
-        position: 'fixed',
-        top: '20px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        backgroundColor: '#38a169',
-        color: 'white',
-        padding: '12px 24px',
-        borderRadius: '8px',
-        zIndex: '9999',
-        fontSize: '16px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
-      });
-      document.body.appendChild(alertBox);
-
-      setTimeout(() => {
-        document.body.removeChild(alertBox);
-        logout();
-        localStorage.removeItem('rol');
-        localStorage.removeItem('username');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('datosTurno');
-        navigate('/');
-      }, 3000);
+      logout();
+      localStorage.clear();
+      navigate('/');
     } catch (error: any) {
       console.error('Error al cerrar caja:', error);
-      alert('Hubo un error al cerrar la caja.');
+      logout();
+      localStorage.clear();
+      navigate('/login');
     }
   };
 
   const handleLogout = () => {
-    const rol = localStorage.getItem('rol');
     if (rol === 'invitado') {
       cerrarCaja();
     } else {
       logout();
-      localStorage.removeItem('rol');
-      localStorage.removeItem('username');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('datosTurno');
+      localStorage.clear();
       navigate('/');
     }
   };
-
-  if (loading || !token) return null;
 
   const linkClass = (path: string) =>
     `hover:scale-110 transition-transform p-2 md:p-3 rounded-full bg-black/40 backdrop-blur-sm ${active === path ? 'text-red-500 scale-125' : 'text-white'}`;
@@ -126,7 +98,7 @@ const Navbar = () => {
         <div className="flex flex-col items-center gap-6 mt-4 text-white text-2xl w-full">
           <img src={Logo} alt="Logo" className="w-12 h-12 rounded-full border-4 border-white object-cover shadow-md" />
 
-          {rol === 'admin' && (
+          {token && rol === 'admin' && (
             <>
               <Link to="/" className={linkClass('/')} title="Inicio"><FaHome /></Link>
               <Link to="/reservas" className={linkClass('/reservas')} title="Reservas"><FaListAlt /></Link>
@@ -135,7 +107,7 @@ const Navbar = () => {
             </>
           )}
 
-          {rol === 'invitado' && (
+          {token && rol === 'invitado' && (
             <>
               <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva"><FaPlus /></Link>
               <Link to="/historial-invitado" className={linkClass('/historial-invitado')} title="Historial"><FaHistory /></Link>
@@ -148,9 +120,15 @@ const Navbar = () => {
         </div>
 
         <div className="text-white text-xl mb-4">
-          <button onClick={handleLogout} className="hover:scale-110 transition-transform bg-black/40 backdrop-blur-sm p-3 rounded-full" title="Cerrar sesión">
-            <FaSignOutAlt />
-          </button>
+          {token ? (
+            <button onClick={handleLogout} className="hover:scale-110 transition-transform bg-black/40 backdrop-blur-sm p-3 rounded-full" title="Cerrar sesión">
+              <FaSignOutAlt />
+            </button>
+          ) : (
+            <Link to="/login" className="p-2 rounded-full bg-black/40 backdrop-blur-sm hover:scale-110 transition-transform" title="Iniciar sesión">
+              <FaSignInAlt className="text-white" />
+            </Link>
+          )}
         </div>
       </aside>
 
@@ -163,7 +141,7 @@ const Navbar = () => {
           {username && <span className="text-xs text-white mt-1">{username}</span>}
         </div>
 
-        {rol === 'admin' && (
+        {token && rol === 'admin' && (
           <>
             <Link to="/" className={linkClass('/')} title="Inicio"><FaHome className="text-lg" /></Link>
             <Link to="/reservas" className={linkClass('/reservas')} title="Reservas"><FaListAlt className="text-lg" /></Link>
@@ -172,7 +150,7 @@ const Navbar = () => {
           </>
         )}
 
-        {rol === 'invitado' && (
+        {token && rol === 'invitado' && (
           <>
             <Link to="/crear-reservas" className={linkClass('/crear-reservas')} title="Crear Reserva"><FaPlus className="text-lg" /></Link>
             <Link to="/historial-invitado" className={linkClass('/historial-invitado')} title="Historial"><FaHistory className="text-lg" /></Link>
@@ -180,9 +158,15 @@ const Navbar = () => {
         )}
 
         <div className="text-white text-lg">
-          <button onClick={handleLogout} className="hover:scale-105 transition-transform bg-black/40 backdrop-blur-sm p-2 rounded-full" title="Cerrar sesión">
-            <FaSignOutAlt />
-          </button>
+          {token ? (
+            <button onClick={handleLogout} className="hover:scale-105 transition-transform bg-black/40 backdrop-blur-sm p-2 rounded-full" title="Cerrar sesión">
+              <FaSignOutAlt />
+            </button>
+          ) : (
+            <Link to="/login" className="p-2 rounded-full bg-black/40 backdrop-blur-sm hover:scale-110 transition-transform" title="Iniciar sesión">
+              <FaSignInAlt className="text-white text-lg" />
+            </Link>
+          )}
         </div>
       </nav>
     </>
