@@ -23,11 +23,17 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await api.post('/auth/login', { username, password });
-      const { access_token, rol, username: nombreUsuario, id } = response.data;
+
+      const {
+        access_token,
+        user: { rol, username: nombreUsuario, id },
+      } = response.data;
+
       localStorage.setItem('token', access_token);
       localStorage.setItem('rol', rol);
       localStorage.setItem('username', nombreUsuario);
       localStorage.setItem('userId', id.toString());
+
       setRol(rol);
 
       if (rol === 'invitado') {
