@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Put, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { CuadreService } from './cuadre.service';
 import { Cuadre } from './cuadre.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -24,7 +32,10 @@ export class CuadreController {
 
   @Put(':id')
   @Roles('admin', 'invitado')
-  update(@Param('id') id: number, @Body() data: Partial<Cuadre>): Promise<Cuadre> {
+  update(
+    @Param('id') id: number,
+    @Body() data: Partial<Cuadre>
+  ): Promise<Cuadre> {
     return this.cuadreService.update(id, data);
   }
 }
