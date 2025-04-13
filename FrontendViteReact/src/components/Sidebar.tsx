@@ -9,10 +9,12 @@ import {
 } from 'lucide-react'
 import logoSrc from '../assets/Logo-PNG.png'
 import { useEffect, useState } from 'react'
+import LoginModal from './LoginModal'
 
 const Sidebar = () => {
   const [username, setUsername] = useState<string | null>(null)
   const [rol, setRol] = useState<string | null>(null)
+  const [showLogin, setShowLogin] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -26,7 +28,7 @@ const Sidebar = () => {
     localStorage.clear()
     setUsername(null)
     setRol(null)
-    navigate('/login')
+    navigate('/')
   }
 
   const links =
@@ -46,64 +48,64 @@ const Sidebar = () => {
       : []
 
   return (
-    <div className="h-screen w-16 bg-black text-white flex flex-col justify-between items-center py-4 fixed left-0 top-0 z-50">
-      {/* Logo */}
-      <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
-        <img
-          src={logoSrc}
-          alt="Logo"
-          className="w-full h-full object-contain p-1"
-        />
-      </div>
-
-      {/* Navegación */}
-      <div className="flex flex-col gap-6 mt-6">
-        {username &&
-          links.map((link, index) => (
-            <NavLink
-              key={index}
-              to={link.to}
-              className={({ isActive }) =>
-                `w-6 h-6 cursor-pointer ${
-                  isActive ? 'text-blue-500' : 'text-white'
-                } hover:text-blue-400`
-              }
-              title={link.label}
-            >
-              {link.icon}
-            </NavLink>
-          ))}
-
-        {/* Si no ha iniciado sesión: mostrar botón de login */}
-        {!username && (
-          <button
-            onClick={() => navigate('/login')}
-            title="Iniciar Sesión"
-            className="w-6 h-6 hover:text-yellow-400"
-          >
-            <LogIn />
-          </button>
-        )}
-
-        {/* Si ha iniciado sesión: mostrar botón de logout */}
-        {username && (
-          <button
-            onClick={logout}
-            title="Cerrar Sesión"
-            className="w-6 h-6 hover:text-red-400"
-          >
-            <LogOut />
-          </button>
-        )}
-      </div>
-
-      {/* Avatar inferior */}
-      {username && (
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white text-black flex items-center justify-center font-bold text-sm">
-          {username.charAt(0).toUpperCase()}
+    <>
+      <div className="h-screen w-16 bg-black text-white flex flex-col justify-between items-center py-4 fixed left-0 top-0 z-50">
+        {/* Logo */}
+        <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+          <img
+            src={logoSrc}
+            alt="Logo"
+            className="w-full h-full object-contain p-1"
+          />
         </div>
-      )}
-    </div>
+
+        {/* Navegación */}
+        <div className="flex flex-col gap-6 mt-6">
+          {username &&
+            links.map((link, index) => (
+              <NavLink
+                key={index}
+                to={link.to}
+                className={({ isActive }) =>
+                  `w-6 h-6 cursor-pointer ${isActive ? 'text-blue-500' : 'text-white'} hover:text-blue-400`
+                }
+                title={link.label}
+              >
+                {link.icon}
+              </NavLink>
+            ))}
+
+          {!username && (
+            <button
+              onClick={() => setShowLogin(true)}
+              title="Iniciar Sesión"
+              className="w-6 h-6 hover:text-yellow-400"
+            >
+              <LogIn />
+            </button>
+          )}
+
+          {username && (
+            <button
+              onClick={logout}
+              title="Cerrar Sesión"
+              className="w-6 h-6 hover:text-red-400"
+            >
+              <LogOut />
+            </button>
+          )}
+        </div>
+
+        {/* Avatar inferior */}
+        {username && (
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white text-black flex items-center justify-center font-bold text-sm">
+            {username.charAt(0).toUpperCase()}
+          </div>
+        )}
+      </div>
+
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+    </>
   )
 }
 
