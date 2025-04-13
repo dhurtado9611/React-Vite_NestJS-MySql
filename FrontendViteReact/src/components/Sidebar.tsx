@@ -1,4 +1,3 @@
-// src/components/Sidebar.tsx
 import {
     Home,
     BarChart,
@@ -6,14 +5,12 @@ import {
     Megaphone,
     Mail,
     Download,
-    Bell,
-    User
+    Bell
   } from 'lucide-react'
   
   const Sidebar = () => {
     return (
       <div className="h-screen w-16 bg-black text-white flex flex-col justify-between items-center py-4 fixed left-0 top-0 z-50">
-        {/* Top Icons */}
         <div className="flex flex-col gap-6">
           <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-xl font-bold">
             S
@@ -30,11 +27,9 @@ import {
             </span>
           </div>
         </div>
-  
-        {/* User Avatar */}
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
           <img
-            src="https://i.pravatar.cc/40" // Puedes reemplazar con tu foto o una URL dinámica
+            src="https://i.pravatar.cc/40"
             alt="user"
             className="w-full h-full object-cover"
           />

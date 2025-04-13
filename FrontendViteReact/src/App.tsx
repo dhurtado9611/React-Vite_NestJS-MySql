@@ -9,7 +9,7 @@ import HistorialInvitado from './pages/HistorialInvitado'
 import RutaProtegidaInvitado from './components/RutaProtegidaInvitado'
 import AdminDashboard from './admin/AdminDashboard'
 import RutaProtegidaAdmin from './components/RutaProtegidaAdmin'
-import MainLayout from './layouts/MainLayout' // nuevo layout con Sidebar
+import MainLayout from './Layouts/MainLayout' // nuevo layout con Sidebar
 
 function App() {
   return (
