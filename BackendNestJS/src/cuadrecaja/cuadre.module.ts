@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Cuadre } from './cuadre.entity';
 import { CuadreService } from './cuadre.service';
 import { CuadreController } from './cuadre.controller';
+import { Cuadre } from './entities/cuadre.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Cuadre])],

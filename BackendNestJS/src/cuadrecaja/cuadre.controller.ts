@@ -1,39 +1,50 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Cuadre } from './cuadre.entity';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
+import { CuadreService } from './cuadre.service';
 import { CreateCuadreDto } from './dto/create-cuadre.dto';
+import { UpdateCuadreDto } from './dto/update-cuadre.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@Injectable()
-export class CuadreService {
-  constructor(
-    @InjectRepository(Cuadre)
-    private readonly cuadreRepository: Repository<Cuadre>,
-  ) {}
+@Controller('cuadre')
+@UseGuards(JwtAuthGuard)
+export class CuadreController {
+  constructor(private readonly cuadreService: CuadreService) {}
 
-  async create(createCuadreDto: CreateCuadreDto): Promise<Cuadre> {
-    const cuadre = this.cuadreRepository.create(createCuadreDto);
-    return this.cuadreRepository.save(cuadre);
+  @Post()
+  create(@Body() createCuadreDto: CreateCuadreDto) {
+    return this.cuadreService.create(createCuadreDto);
   }
 
-  async findAll(): Promise<Cuadre[]> {
-    return this.cuadreRepository.find();
+  @Get()
+  findAll() {
+    return this.cuadreService.findAll();
   }
 
-  async findOne(id: number): Promise<Cuadre> {
-    const cuadre = await this.cuadreRepository.findOne({ where: { id } });
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const cuadre = await this.cuadreService.findOne(+id);
     if (!cuadre) {
-      throw new NotFoundException(`No se encontró el cuadre con ID ${id}`);
+      throw new NotFoundException(`Cuadre con ID ${id} no encontrado`);
     }
     return cuadre;
   }
 
-  async update(id: number, updateData: Partial<Cuadre>): Promise<Cuadre> {
-    await this.cuadreRepository.update(id, updateData);
-    return this.findOne(id);
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateCuadreDto: UpdateCuadreDto) {
+    return this.cuadreService.update(+id, updateCuadreDto);
   }
 
-  async remove(id: number): Promise<void> {
-    await this.cuadreRepository.delete(id);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.cuadreService.remove(+id);
   }
 }

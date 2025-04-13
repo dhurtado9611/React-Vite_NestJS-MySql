@@ -1,62 +1,39 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
-import { Cuadre } from './cuadre.entity';
+import { Repository } from 'typeorm';
+import { Cuadre } from './entities/cuadre.entity';
+import { CreateCuadreDto } from './dto/create-cuadre.dto';
 
 @Injectable()
 export class CuadreService {
   constructor(
     @InjectRepository(Cuadre)
-    private cuadreRepository: Repository<Cuadre>,
+    private readonly cuadreRepository: Repository<Cuadre>,
   ) {}
 
-  async create(data: Partial<Cuadre>): Promise<Cuadre> {
-    const hoy = new Date().toISOString().split('T')[0];
-
-    // Paso 1: Cerrar turno anterior si está abierto
-    const turnoAbierto = await this.cuadreRepository.findOne({
-      where: {
-        fecha: hoy,
-        turnoCerrado: IsNull(),
-      },
-    });
-
-    if (turnoAbierto) {
-      const horaCierre = new Date().toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
-      await this.cuadreRepository.update(turnoAbierto.id, {
-        turnoCerrado: horaCierre,
-      });
-    }
-
-    // Paso 2: Validar que no se repita el mismo horario
-    const mismoTurno = await this.cuadreRepository.findOne({
-      where: {
-        fecha: hoy,
-        turno: data.turno,
-      },
-    });
-
-    if (mismoTurno) {
-      throw new BadRequestException('Ese turno ya fue registrado hoy.');
-    }
-
-    // Paso 3: Guardar nuevo turno
-    const nuevoCuadre = this.cuadreRepository.create(data);
-    return await this.cuadreRepository.save(nuevoCuadre);
+  async create(createCuadreDto: CreateCuadreDto): Promise<Cuadre> {
+    const cuadre = this.cuadreRepository.create(createCuadreDto);
+    return this.cuadreRepository.save(cuadre);
   }
 
   async findAll(): Promise<Cuadre[]> {
     return this.cuadreRepository.find();
   }
 
-  async update(id: number, data: Partial<Cuadre>): Promise<Cuadre> {
-    await this.cuadreRepository.update(id, data);
-    const updated = await this.cuadreRepository.findOneBy({ id });
-    if (!updated) throw new NotFoundException(`No se encontró el registro con id ${id}`);
-    return updated;
+  async findOne(id: number): Promise<Cuadre> {
+    const cuadre = await this.cuadreRepository.findOne({ where: { id } });
+    if (!cuadre) {
+      throw new NotFoundException(`No se encontró el cuadre con ID ${id}`);
+    }
+    return cuadre;
+  }
+
+  async update(id: number, updateData: Partial<Cuadre>): Promise<Cuadre> {
+    await this.cuadreRepository.update(id, updateData);
+    return this.findOne(id);
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.cuadreRepository.delete(id);
   }
 }

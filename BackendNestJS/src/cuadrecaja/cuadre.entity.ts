@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('cuadre') // el nombre entre comillas debe coincidir con el nombre de la tabla en la BD
+@Entity()
 export class Cuadre {
   @PrimaryGeneratedColumn()
   id: number;
@@ -14,9 +14,9 @@ export class Cuadre {
   @Column()
   turno: string;
 
+  @Column({ type: 'float' })
+  basecaja: number;
+
   @Column({ type: 'varchar', nullable: true })
   turnoCerrado: string | null;
-
-  @Column('int')
-  basecaja: number;
 }
