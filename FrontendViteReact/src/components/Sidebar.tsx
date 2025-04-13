@@ -4,7 +4,8 @@ import {
   CalendarPlus,
   ListChecks,
   BarChart3,
-  LogIn
+  LogIn,
+  LogOut
 } from 'lucide-react'
 import logoSrc from '../assets/Logo-PNG.png'
 import { useEffect, useState } from 'react'
@@ -20,6 +21,13 @@ const Sidebar = () => {
     setUsername(storedUser)
     setRol(storedRol)
   }, [])
+
+  const logout = () => {
+    localStorage.clear()
+    setUsername(null)
+    setRol(null)
+    navigate('/login')
+  }
 
   const links =
     rol === 'admin'
@@ -48,7 +56,7 @@ const Sidebar = () => {
         />
       </div>
 
-      {/* Navegación (solo si hay sesión) */}
+      {/* Navegación */}
       <div className="flex flex-col gap-6 mt-6">
         {username &&
           links.map((link, index) => (
@@ -66,7 +74,7 @@ const Sidebar = () => {
             </NavLink>
           ))}
 
-        {/* Botón de login si no hay sesión */}
+        {/* Si no ha iniciado sesión: mostrar botón de login */}
         {!username && (
           <button
             onClick={() => navigate('/login')}
@@ -76,9 +84,20 @@ const Sidebar = () => {
             <LogIn />
           </button>
         )}
+
+        {/* Si ha iniciado sesión: mostrar botón de logout */}
+        {username && (
+          <button
+            onClick={logout}
+            title="Cerrar Sesión"
+            className="w-6 h-6 hover:text-red-400"
+          >
+            <LogOut />
+          </button>
+        )}
       </div>
 
-      {/* Avatar inferior si hay sesión */}
+      {/* Avatar inferior */}
       {username && (
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white text-black flex items-center justify-center font-bold text-sm">
           {username.charAt(0).toUpperCase()}
