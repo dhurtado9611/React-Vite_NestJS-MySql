@@ -1,7 +1,10 @@
 @import "tailwindcss";
-body {
-  background-color: #cccccc;
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
+
 /* Botón para abrir el menú */
 .toggle-btn {
   position: fixed;
