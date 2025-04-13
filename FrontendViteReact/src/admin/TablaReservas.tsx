@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import TableReservas from './TableReservas';
+import TableReservas from '../components/TableReservas';
 
 interface Reserva {
   id: number;
