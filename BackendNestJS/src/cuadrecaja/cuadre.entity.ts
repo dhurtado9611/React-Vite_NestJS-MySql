@@ -14,8 +14,8 @@ export class Cuadre {
   @Column()
   turno: string;
 
-  @Column({ nullable: true }) // ✅ Ahora puede ser null
-  turnoCerrado: string;
+  @Column({ type: 'varchar', nullable: true })
+  turnoCerrado: string | null;
 
   @Column('int')
   basecaja: number;

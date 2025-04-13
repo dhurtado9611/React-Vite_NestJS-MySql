@@ -1,41 +1,39 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Body,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
-import { CuadreService } from './cuadre.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Cuadre } from './cuadre.entity';
-import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { CreateCuadreDto } from './dto/create-cuadre.dto';
 
-@Controller('cuadre')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
-export class CuadreController {
-  constructor(private readonly cuadreService: CuadreService) {}
+@Injectable()
+export class CuadreService {
+  constructor(
+    @InjectRepository(Cuadre)
+    private readonly cuadreRepository: Repository<Cuadre>,
+  ) {}
 
-  @Get()
-  @Roles('admin', 'invitado')
-  findAll(): Promise<Cuadre[]> {
-    return this.cuadreService.findAll();
+  async create(createCuadreDto: CreateCuadreDto): Promise<Cuadre> {
+    const cuadre = this.cuadreRepository.create(createCuadreDto);
+    return this.cuadreRepository.save(cuadre);
   }
 
-  @Post()
-  @Roles('admin', 'invitado')
-  create(@Body() data: Partial<Cuadre>): Promise<Cuadre> {
-    return this.cuadreService.create(data);
+  async findAll(): Promise<Cuadre[]> {
+    return this.cuadreRepository.find();
   }
 
-  @Put(':id')
-  @Roles('admin', 'invitado')
-  update(
-    @Param('id') id: number,
-    @Body() data: Partial<Cuadre>
-  ): Promise<Cuadre> {
-    return this.cuadreService.update(id, data);
+  async findOne(id: number): Promise<Cuadre> {
+    const cuadre = await this.cuadreRepository.findOne({ where: { id } });
+    if (!cuadre) {
+      throw new NotFoundException(`No se encontró el cuadre con ID ${id}`);
+    }
+    return cuadre;
+  }
+
+  async update(id: number, updateData: Partial<Cuadre>): Promise<Cuadre> {
+    await this.cuadreRepository.update(id, updateData);
+    return this.findOne(id);
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.cuadreRepository.delete(id);
   }
 }
