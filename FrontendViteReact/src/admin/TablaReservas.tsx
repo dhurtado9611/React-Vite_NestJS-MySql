@@ -30,6 +30,7 @@ interface Reserva {
 const TablaReservas = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [ingresosMesActual, setIngresosMesActual] = useState<number>(0);
 
   const cargarReservas = async () => {
     const token = localStorage.getItem('token');
@@ -42,6 +43,19 @@ const TablaReservas = () => {
   useEffect(() => {
     cargarReservas();
   }, []);
+
+  useEffect(() => {
+    const mesActual = new Date().getMonth() + 1;
+    const anioActual = new Date().getFullYear();
+    const totalMes = reservas.reduce((acc, r) => {
+      const fecha = new Date(r.fecha);
+      if (fecha.getMonth() + 1 === mesActual && fecha.getFullYear() === anioActual) {
+        return acc + r.valor;
+      }
+      return acc;
+    }, 0);
+    setIngresosMesActual(totalMes);
+  }, [reservas]);
 
   const habitacionesPorUso = Object.values(
     reservas.reduce((acc: any, r: Reserva) => {
@@ -62,7 +76,7 @@ const TablaReservas = () => {
 
   return (
     <div className="p-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white border rounded-xl shadow p-4">
           <h3 className="text-lg font-semibold mb-3 text-green-600">📊 Habitaciones más reservadas</h3>
           <ResponsiveContainer width="100%" height={250}>
@@ -88,6 +102,11 @@ const TablaReservas = () => {
             </LineChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow p-4 mb-6">
+        <h3 className="text-lg font-semibold text-blue-600">📦 Total ingresos del mes actual</h3>
+        <p className="text-2xl font-bold text-gray-800 mt-2">${ingresosMesActual.toLocaleString()}</p>
       </div>
 
       <div className="mt-8">
