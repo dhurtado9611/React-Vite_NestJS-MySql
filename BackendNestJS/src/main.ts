@@ -1,14 +1,14 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import * as dotenv from 'dotenv';
 
 async function bootstrap() {
+  dotenv.config(); // ✅ Cargar variables de entorno
   const app = await NestFactory.create(AppModule);
 
-  // ✅ Validación global de DTOs
   app.useGlobalPipes(new ValidationPipe());
 
-  // ✅ Configuración de CORS
   app.enableCors({
     origin: [
       'https://react-vite-nest-js-my-ds74mxdem-danielhurtados-projects.vercel.app',
