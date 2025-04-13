@@ -1,61 +1,70 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../services/api'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
   onSubmit: (data: { colaborador: string; turno: string; fecha: string }) => void;
 }
 
 const FormularioTurno = ({ onSubmit }: Props) => {
-  const [colaborador, setColaborador] = useState('')
-  const [turno, setTurno] = useState('')
-  const [baseCaja, setBaseCaja] = useState('')
-  const [userId, setUserId] = useState<number | null>(null)
-  const [showAlert, setShowAlert] = useState(false)
-  const [turnoActivo, setTurnoActivo] = useState<{ colaborador: string; turno: string } | null>(null)
-  const fechaActual = new Date().toISOString().split('T')[0]
-  const navigate = useNavigate()
+  const [colaborador, setColaborador] = useState('');
+  const [turno, setTurno] = useState('');
+  const [baseCaja, setBaseCaja] = useState('');
+  const [userId, setUserId] = useState<number | null>(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const [turnoActivo, setTurnoActivo] = useState<{
+    colaborador: string;
+    turno: string;
+    turnoCerrado?: string;
+  } | null>(null);
+  const fechaActual = new Date().toISOString().split('T')[0];
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const username = localStorage.getItem('username')
-    const id = localStorage.getItem('userId')
-    if (username) setColaborador(username)
-    if (id) setUserId(Number(id))
+    const username = localStorage.getItem('username');
+    const id = localStorage.getItem('userId');
+    if (username) setColaborador(username);
+    if (id) setUserId(Number(id));
 
     const verificarTurno = async () => {
       try {
-        const token = localStorage.getItem('token')
+        const token = localStorage.getItem('token');
         const response = await api.get('/cuadre', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         const turnoHoy = response.data.find(
           (item: any) => item.fecha === fechaActual && item.turnoCerrado === null
-        )
+        );
 
         if (turnoHoy) {
-          setTurnoActivo({ colaborador: turnoHoy.colaborador, turno: turnoHoy.turno })
-          setShowAlert(true)
+          setTurnoActivo({
+            colaborador: turnoHoy.colaborador,
+            turno: turnoHoy.turno,
+            turnoCerrado: turnoHoy.turnoCerrado,
+          });
+          setShowAlert(true);
+          setTimeout(() => navigate('/'), 3000); // ✅ Redirige a Home tras 3 segundos
         }
       } catch (error) {
-        console.error('Error al verificar turno activo:', error)
+        console.error('Error al verificar turno activo:', error);
       }
-    }
+    };
 
-    verificarTurno()
-  }, [navigate, fechaActual])
+    verificarTurno();
+  }, [navigate, fechaActual]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const baseCajaNum = Number(baseCaja)
+    e.preventDefault();
+    const baseCajaNum = Number(baseCaja);
     if (!colaborador || !turno || userId === null || isNaN(baseCajaNum)) {
-      alert('Por favor complete todos los campos')
-      return
+      alert('Por favor complete todos los campos');
+      return;
     }
 
     try {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('token');
       await api.post(
         '/cuadre',
         {
@@ -63,29 +72,29 @@ const FormularioTurno = ({ onSubmit }: Props) => {
           fecha: fechaActual,
           turno,
           turnoCerrado: null,
-          basecaja: baseCajaNum
+          basecaja: baseCajaNum,
         },
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
-      )
+      );
 
       localStorage.setItem(
         'datosTurno',
         JSON.stringify({ colaborador, fecha: fechaActual, turno, turnoCerrado: null })
-      )
+      );
 
-      alert('Turno registrado correctamente')
-      onSubmit({ colaborador, turno, fecha: fechaActual })
+      alert('Turno registrado correctamente');
+      onSubmit({ colaborador, turno, fecha: fechaActual });
     } catch (error: any) {
-      console.error('Error al registrar el turno:', error)
+      console.error('Error al registrar el turno:', error);
       if (error.response?.data?.message) {
-        alert(`No se pudo registrar el turno: ${error.response.data.message}`)
+        alert(`No se pudo registrar el turno: ${error.response.data.message}`);
       } else {
-        alert('No se pudo registrar el turno')
+        alert('No se pudo registrar el turno');
       }
     }
-  }
+  };
 
   return (
     <AnimatePresence>
@@ -104,8 +113,14 @@ const FormularioTurno = ({ onSubmit }: Props) => {
         >
           {showAlert && turnoActivo && (
             <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-800 px-4 py-2 rounded shadow-lg z-50 text-base text-center">
-              Ya hay un turno abierto por <strong>{turnoActivo.colaborador}</strong><br />
-              Iniciado a las <strong>{turnoActivo.turno}</strong>
+              Ya hay un turno abierto<br />
+              por <strong>{turnoActivo.colaborador}</strong><br />
+              Iniciado a las <strong>{turnoActivo.turno}</strong>{' '}
+              {turnoActivo.turnoCerrado && (
+                <>
+                  y termina a las <strong>{turnoActivo.turnoCerrado}</strong>
+                </>
+              )}
             </div>
           )}
 
@@ -184,7 +199,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
         </motion.div>
       </motion.div>
     </AnimatePresence>
-  )
-}
+  );
+};
 
-export default FormularioTurno
+export default FormularioTurno;
