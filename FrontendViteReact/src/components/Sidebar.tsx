@@ -104,7 +104,17 @@ const Sidebar = () => {
         )}
       </div>
 
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+      {showLogin && (
+        <LoginModal
+          onClose={() => {
+            setShowLogin(false)
+            const storedUser = localStorage.getItem('username')
+            const storedRol = localStorage.getItem('rol')
+            setUsername(storedUser)
+            setRol(storedRol)
+          }}
+        />
+      )}
     </>
   )
 }
