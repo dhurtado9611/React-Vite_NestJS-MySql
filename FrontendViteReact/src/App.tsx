@@ -1,7 +1,6 @@
 // App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
-import Login from './components/Login'
 import Reservas from './pages/Reservas'
 import Historial from './pages/Historial'
 import CrearReservas from './pages/CrearReservas'
@@ -9,9 +8,15 @@ import HistorialInvitado from './pages/HistorialInvitado'
 import RutaProtegidaInvitado from './components/RutaProtegidaInvitado'
 import AdminDashboard from './admin/AdminDashboard'
 import RutaProtegidaAdmin from './components/RutaProtegidaAdmin'
-import MainLayout from './Layouts/MainLayout' // nuevo layout con Sidebar
+import MainLayout from './Layouts/MainLayout' // Nuevo layout con Sidebar
+import LoginModal from './components/LoginModal'
 
 function App() {
+  // Función para manejar el cierre del modal
+  const handleCloseModal = () => {
+    console.log('Modal cerrado')
+  }
+
   return (
     <Router>
       <Routes>
@@ -39,8 +44,11 @@ function App() {
           />
         </Route>
 
-        {/* Login fuera del layout para que no muestre sidebar */}
-        <Route path="/login" element={<Login />} />
+        {/* Login fuera del layout para que no muestre Sidebar */}
+        <Route
+          path="/login-modal"
+          element={<LoginModal onClose={handleCloseModal} />}
+        />
       </Routes>
     </Router>
   )

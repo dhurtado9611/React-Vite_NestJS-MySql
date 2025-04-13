@@ -1,22 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
-import FormularioTurno from './FormularioTurno'
+import { useNavigate } from 'react-router-dom'
 import { FaTimes } from 'react-icons/fa'
-import { motion, AnimatePresence } from 'framer-motion'
+import FormularioTurno from './FormularioTurno'
 
-const Login = () => {
-  const [username, setUsername] = useState<string>('')
+const LoginModal = ({ onClose }: { onClose: () => void }) => {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [rol, setRol] = useState<string | null>(null)
-  const [turnoIniciado, setTurnoIniciado] = useState(false)
-  const [mostrarModalTurno, setMostrarModalTurno] = useState(false)
-  const [datosTurno, setDatosTurno] = useState<null | {
-    colaborador: string
-    turno: string
-    fecha: string
-  }>(null)
   const [error, setError] = useState('')
+  const [mostrarModalTurno, setMostrarModalTurno] = useState(false)
+  const [rol, setRol] = useState<string | null>(null)
   const navigate = useNavigate()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -38,35 +31,32 @@ const Login = () => {
       if (rol === 'invitado') {
         setMostrarModalTurno(true)
       } else {
+        onClose()
         navigate('/reservas')
       }
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
       setError('Usuario o contraseña incorrectos')
     }
   }
 
   const handleTurnoSubmit = (data: { colaborador: string; turno: string; fecha: string }) => {
-    setDatosTurno(data)
-    setTurnoIniciado(true)
+    localStorage.setItem('datosTurno', JSON.stringify(data))
     setMostrarModalTurno(false)
+    onClose()
     navigate('/crear-reservas')
   }
 
-  const handleCerrarModal = () => {
-    setMostrarModalTurno(false)
-  }
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.85 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="bg-white/10 backdrop-blur-md border border-red-600 text-white p-6 rounded-2xl w-[350px] shadow-xl relative"
-        >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      {!mostrarModalTurno ? (
+        <div className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl w-[350px] border border-red-600 shadow-xl relative text-white">
+          <button
+            onClick={onClose}
+            className="absolute top-2 right-2 text-white hover:text-red-400"
+          >
+            <FaTimes />
+          </button>
+
           <h2 className="text-xl font-semibold mb-4 text-center text-red-500">Inicio de Sesión</h2>
 
           {error && (
@@ -77,32 +67,26 @@ const Login = () => {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm mb-1">
-                Usuario
-              </label>
+              <label className="block text-sm mb-1">Usuario</label>
               <input
                 type="text"
-                id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                required
-                placeholder="Tu usuario"
                 className="w-full px-4 py-2 bg-black/70 border border-red-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+                placeholder="Tu usuario"
+                required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm mb-1">
-                Contraseña
-              </label>
+              <label className="block text-sm mb-1">Contraseña</label>
               <input
                 type="password"
-                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
                 className="w-full px-4 py-2 bg-black/70 border border-red-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+                placeholder="••••••••"
+                required
               />
             </div>
 
@@ -113,21 +97,12 @@ const Login = () => {
               Iniciar Sesión
             </button>
           </form>
-        </motion.div>
-      </AnimatePresence>
-
-      {mostrarModalTurno && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="absolute top-4 right-4">
-            <button onClick={handleCerrarModal} className="text-white text-2xl hover:text-red-500">
-              <FaTimes />
-            </button>
-          </div>
-          <FormularioTurno onSubmit={handleTurnoSubmit} />
         </div>
+      ) : (
+        <FormularioTurno onSubmit={handleTurnoSubmit} />
       )}
     </div>
   )
 }
 
-export default Login
+export default LoginModal
