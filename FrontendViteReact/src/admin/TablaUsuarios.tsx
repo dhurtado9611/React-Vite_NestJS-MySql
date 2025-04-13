@@ -77,7 +77,7 @@ const TablaUsuarios = () => {
         </div>
       )}
 
-      <div className="mb-4 p-4 bg-gray-100 rounded shadow-md">
+      <div className="mb-4 p-4 rounded shadow-md">
         <h4 className="font-semibold mb-2">Crear nuevo usuario</h4>
         <div className="flex gap-2 flex-wrap">
           <input

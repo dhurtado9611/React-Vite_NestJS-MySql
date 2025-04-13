@@ -8,6 +8,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  LineChart,
+  Line,
 } from 'recharts';
 import TableReservas from '../components/TableReservas';
 
@@ -27,8 +29,6 @@ interface Reserva {
 
 const TablaReservas = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [filtroFecha, setFiltroFecha] = useState('');
-  const [filtroTurno, setFiltroTurno] = useState('');
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const cargarReservas = async () => {
@@ -43,15 +43,8 @@ const TablaReservas = () => {
     cargarReservas();
   }, []);
 
-  const reservasFiltradas = reservas.filter((r) => {
-    return (
-      (!filtroFecha || r.fecha === filtroFecha) &&
-      (!filtroTurno || r.hentrada.startsWith(filtroTurno))
-    );
-  });
-
   const habitacionesPorUso = Object.values(
-    reservasFiltradas.reduce((acc: any, r: Reserva) => {
+    reservas.reduce((acc: any, r: Reserva) => {
       const clave = `Habitación ${r.habitacion}`;
       if (!acc[clave]) acc[clave] = { habitacion: clave, cantidad: 0 };
       acc[clave].cantidad++;
@@ -59,31 +52,16 @@ const TablaReservas = () => {
     }, {})
   );
 
-  const ingresosPorTurno = ['08:00', '14:00', '20:00'].map((turno) => {
-    const total = reservasFiltradas
-      .filter((r) => r.hentrada.startsWith(turno))
-      .reduce((sum, r) => sum + r.valor, 0);
-    return { turno, total };
-  });
+  const ingresosPorDia = Object.values(
+    reservas.reduce((acc: any, r: Reserva) => {
+      if (!acc[r.fecha]) acc[r.fecha] = { fecha: r.fecha, total: 0 };
+      acc[r.fecha].total += r.valor;
+      return acc;
+    }, {})
+  );
 
   return (
     <div className="p-4">
-      <div className="mb-4 flex gap-4">
-        <div>
-          <label className="block mb-1">Filtrar por fecha:</label>
-          <input type="date" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} className="border px-2 py-1 rounded" />
-        </div>
-        <div>
-          <label className="block mb-1">Filtrar por turno:</label>
-          <select value={filtroTurno} onChange={(e) => setFiltroTurno(e.target.value)} className="border px-2 py-1 rounded">
-            <option value="">Todos</option>
-            <option value="08:00">Mañana</option>
-            <option value="14:00">Tarde</option>
-            <option value="20:00">Noche</option>
-          </select>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white border rounded-xl shadow p-4">
           <h3 className="text-lg font-semibold mb-3 text-green-600">📊 Habitaciones más reservadas</h3>
@@ -99,22 +77,22 @@ const TablaReservas = () => {
         </div>
 
         <div className="bg-white border rounded-xl shadow p-4">
-          <h3 className="text-lg font-semibold mb-3 text-indigo-600">💰 Ingresos por turno</h3>
+          <h3 className="text-lg font-semibold mb-3 text-indigo-600">📈 Ingresos por día</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={ingresosPorTurno}>
+            <LineChart data={ingresosPorDia}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="turno" />
+              <XAxis dataKey="fecha" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="total" fill="#4f46e5" />
-            </BarChart>
+              <Line type="monotone" dataKey="total" stroke="#4f46e5" strokeWidth={2} dot={{ r: 4 }} />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       <div className="mt-8">
         <TableReservas
-          reservas={reservasFiltradas}
+          reservas={reservas}
           fetchReservas={cargarReservas}
           selectedId={selectedId}
           setSelectedId={setSelectedId}
