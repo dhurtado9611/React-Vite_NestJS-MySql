@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Cuadre } from './entities/cuadre.entity';
+import { Cuadre } from './cuadre.entity';
 import { CreateCuadreDto } from './dto/create-cuadre.dto';
 
 @Injectable()
