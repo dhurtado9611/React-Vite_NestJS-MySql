@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
+import TableReservas from './TableReservas';
 
 interface Reserva {
   id: number;
@@ -28,6 +29,7 @@ const TablaReservas = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [filtroFecha, setFiltroFecha] = useState('');
   const [filtroTurno, setFiltroTurno] = useState('');
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const cargarReservas = async () => {
     const token = localStorage.getItem('token');
@@ -110,7 +112,14 @@ const TablaReservas = () => {
         </div>
       </div>
 
-      {/* tabla de reservas aquí ... */}
+      <div className="mt-8">
+        <TableReservas
+          reservas={reservasFiltradas}
+          fetchReservas={cargarReservas}
+          selectedId={selectedId}
+          setSelectedId={setSelectedId}
+        />
+      </div>
     </div>
   );
 };
