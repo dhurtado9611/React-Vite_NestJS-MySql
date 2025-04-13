@@ -22,7 +22,7 @@ export class CuadreController {
   constructor(private readonly cuadreService: CuadreService) {}
 
   @Post()
-  @Roles('admin', 'invitado')
+  @Roles('admin', 'invitado') // ✅ Permitir ambos roles
   create(@Body() createCuadreDto: CreateCuadreDto) {
     return this.cuadreService.create(createCuadreDto);
   }
