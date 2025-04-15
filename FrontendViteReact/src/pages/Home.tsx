@@ -89,7 +89,7 @@ const Logo = () => {
         <motion.img
           src={logoSrc}
           alt="Logo"
-          className="w-16 h-16 md:w-12 md:h-12 fixed top-4 right-4 z-[50]"
+          className="w-14 h-14 md:w-12 md:h-12 fixed top-4 right-4 z-[50]"
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -114,7 +114,7 @@ const Home = () => {
   return (
     <>
       <div
-        className="relative flex flex-col md:flex-row min-h-screen text-white pt-16 overflow-hidden bg-cover bg-center pb-20"
+        className="relative flex flex-col lg:flex-row min-h-screen text-white pt-16 overflow-hidden bg-cover bg-center pb-20"
         style={{ backgroundImage: `url(${background})` }}
       >
         <div className="absolute inset-0 bg-black/60 z-0"></div>
@@ -122,13 +122,13 @@ const Home = () => {
         <Logo />
 
         {mensaje && (
-          <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-green-600 px-6 py-3 rounded-lg shadow-lg text-white text-center z-50">
+          <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-green-600 px-6 py-3 rounded-lg shadow-lg text-white text-center z-50 text-sm md:text-base">
             {mensaje}
           </div>
         )}
 
-        <div className="w-full md:w-1/2 flex items-center justify-center p-8 z-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-center md:text-left pt-4">
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-0 z-10">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center lg:text-left pt-4 px-2">
             ¡Bienvenido a nuestra plataforma de reservas!
           </h1>
         </div>
