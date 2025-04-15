@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { FaTimes } from 'react-icons/fa';
@@ -9,7 +9,6 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [mostrarModalTurno, setMostrarModalTurno] = useState(false);
-  const [rol, setRol] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -26,36 +25,40 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
       localStorage.setItem('username', nombreUsuario);
       localStorage.setItem('userId', id.toString());
 
-      setRol(rol);
-
       if (rol === 'invitado') {
-        const datosTurno = localStorage.getItem('datosTurno');
         const token = access_token;
+        const fechaHoy = new Date().toISOString().split('T')[0];
 
-        if (datosTurno) {
-          const { colaborador, turno, fecha, basecaja } = JSON.parse(datosTurno);
-          try {
-            const cuadreResponse = await api.get('/cuadre', {
-              headers: { Authorization: `Bearer ${token}` }
-            });
+        try {
+          const cuadreResponse = await api.get('/cuadre', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-            const turnoActivo = cuadreResponse.data.find(
-              (item: any) =>
-                item.colaborador === colaborador &&
-                item.turno === turno &&
-                item.fecha === fecha &&
-                item.basecaja === basecaja &&
-                item.turnoCerrado === null
+          const turnoAbierto = cuadreResponse.data.find(
+            (item: any) =>
+              item.colaborador === nombreUsuario &&
+              item.turnoCerrado === null &&
+              item.fecha === fechaHoy
+          );
+
+          if (turnoAbierto) {
+            localStorage.setItem(
+              'datosTurno',
+              JSON.stringify({
+                colaborador: turnoAbierto.colaborador,
+                turno: turnoAbierto.turno,
+                fecha: turnoAbierto.fecha,
+                basecaja: turnoAbierto.basecaja,
+                idCuadre: turnoAbierto.id
+              })
             );
 
-            if (turnoActivo) {
-              onClose();
-              navigate('/crear-reservas');
-              return;
-            }
-          } catch (error) {
-            console.error('Error validando sesión previa de invitado:', error);
+            onClose();
+            navigate('/crear-reservas');
+            return;
           }
+        } catch (error) {
+          console.error('Error validando sesión de turno:', error);
         }
 
         setMostrarModalTurno(true);
