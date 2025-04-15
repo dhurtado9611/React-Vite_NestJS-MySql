@@ -1,50 +1,79 @@
-import { useState } from 'react'
-import api from '../services/api'
-import { useNavigate } from 'react-router-dom'
-import { FaTimes } from 'react-icons/fa'
-import FormularioTurno from './FormularioTurno'
+import { useState, useEffect } from 'react';
+import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { FaTimes } from 'react-icons/fa';
+import FormularioTurno from './FormularioTurno';
 
 const LoginModal = ({ onClose }: { onClose: () => void }) => {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [mostrarModalTurno, setMostrarModalTurno] = useState(false)
-  const [rol, setRol] = useState<string | null>(null)
-  const navigate = useNavigate()
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [mostrarModalTurno, setMostrarModalTurno] = useState(false);
+  const [rol, setRol] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const response = await api.post('/auth/login', { username, password })
+      const response = await api.post('/auth/login', { username, password });
       const {
         access_token,
         user: { rol, username: nombreUsuario, id }
-      } = response.data
+      } = response.data;
 
-      localStorage.setItem('token', access_token)
-      localStorage.setItem('rol', rol)
-      localStorage.setItem('username', nombreUsuario)
-      localStorage.setItem('userId', id.toString())
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('rol', rol);
+      localStorage.setItem('username', nombreUsuario);
+      localStorage.setItem('userId', id.toString());
 
-      setRol(rol)
+      setRol(rol);
 
       if (rol === 'invitado') {
-        setMostrarModalTurno(true)
+        const datosTurno = localStorage.getItem('datosTurno');
+        const token = access_token;
+
+        if (datosTurno) {
+          const { colaborador, turno, fecha, basecaja } = JSON.parse(datosTurno);
+          try {
+            const cuadreResponse = await api.get('/cuadre', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const turnoActivo = cuadreResponse.data.find(
+              (item: any) =>
+                item.colaborador === colaborador &&
+                item.turno === turno &&
+                item.fecha === fecha &&
+                item.basecaja === basecaja &&
+                item.turnoCerrado === null
+            );
+
+            if (turnoActivo) {
+              onClose();
+              navigate('/crear-reservas');
+              return;
+            }
+          } catch (error) {
+            console.error('Error validando sesión previa de invitado:', error);
+          }
+        }
+
+        setMostrarModalTurno(true);
       } else {
-        onClose()
-        navigate('/reservas')
+        onClose();
+        navigate('/reservas');
       }
     } catch (err) {
-      setError('Usuario o contraseña incorrectos')
+      setError('Usuario o contraseña incorrectos');
     }
-  }
+  };
 
   const handleTurnoSubmit = (data: { colaborador: string; turno: string; fecha: string }) => {
-    localStorage.setItem('datosTurno', JSON.stringify(data))
-    setMostrarModalTurno(false)
-    onClose()
-    navigate('/crear-reservas')
-  }
+    localStorage.setItem('datosTurno', JSON.stringify(data));
+    setMostrarModalTurno(false);
+    onClose();
+    navigate('/crear-reservas');
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -102,7 +131,7 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
         <FormularioTurno onSubmit={handleTurnoSubmit} />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default LoginModal
+export default LoginModal;
