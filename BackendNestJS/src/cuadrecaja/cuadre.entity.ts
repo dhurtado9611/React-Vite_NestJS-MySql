@@ -11,12 +11,15 @@ export class Cuadre {
   @Column()
   fecha: string;
 
-  @Column()
-  turno: string;
-
   @Column({ type: 'float' })
   basecaja: number;
 
+  @Column({ type: 'int', nullable: true })
+  totalEntregado: number;
+
+  @Column()
+  turno: string;
+  
   @Column({ type: 'varchar', nullable: true })
   turnoCerrado: string | null;
 }

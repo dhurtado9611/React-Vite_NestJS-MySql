@@ -92,7 +92,7 @@ const Caja = () => {
     const horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
     try {
       const token = localStorage.getItem('token');
-      await api.patch(`/cuadre/${cuadreId}`, { turnoCerrado: horaActual }, {
+      await api.patch(`/cuadre/${cuadreId}`, { turnoCerrado: horaActual, totalEntregado: totalReservas, }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       localStorage.removeItem('datosTurno');
