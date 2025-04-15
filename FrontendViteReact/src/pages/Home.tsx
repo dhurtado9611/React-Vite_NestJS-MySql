@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import logoSrc from "../assets/Logo-PNG.png"; // Asegúrate de tener un logo en esta ruta
+import { useLocation } from "react-router-dom";
+import logoSrc from "../assets/Logo-PNG.png";
 import { motion, AnimatePresence } from "framer-motion";
 import Carousel from "../components/Carousel";
 import fondo1 from "../assets/fondo1.jpg";
@@ -13,19 +14,19 @@ const Logo = () => {
   useEffect(() => {
     const fetchReservas = async () => {
       try {
-        setProgress(30); // Inicio
-        await new Promise((res) => setTimeout(res, 500)); // Simulación: inicio carga
+        setProgress(30);
+        await new Promise((res) => setTimeout(res, 500));
         setProgress(60);
 
-        const response = await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/cuadre"); // Ajusta URL si es necesario
+        const response = await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/cuadre");
         if (response.status === 200) {
           setProgress(100);
-          setTimeout(() => setIsAnimating(false), 500); // Espera breve antes de desaparecer
+          setTimeout(() => setIsAnimating(false), 500);
         }
       } catch (error) {
         console.error("Error al cargar reservas:", error);
         setProgress(100);
-        setTimeout(() => setIsAnimating(false), 500); // Aun con error, continúa
+        setTimeout(() => setIsAnimating(false), 500);
       }
     };
 
@@ -54,12 +55,12 @@ const Logo = () => {
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
             >
-                <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 160 160">
+              <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 160 160">
                 <circle
                   cx="80"
                   cy="80"
                   r={radius}
-                  stroke="#ef4444" // Red color
+                  stroke="#ef4444"
                   strokeWidth="6"
                   fill="transparent"
                   className="opacity-20"
@@ -68,7 +69,7 @@ const Logo = () => {
                   cx="80"
                   cy="80"
                   r={radius}
-                  stroke="#ef4444" // Red color
+                  stroke="#ef4444"
                   strokeWidth="6"
                   fill="transparent"
                   strokeDasharray={circumference}
@@ -77,12 +78,8 @@ const Logo = () => {
                   animate={{ strokeDashoffset: offset }}
                   transition={{ duration: 0.1 }}
                 />
-                </svg>
-              <img
-                src={logoSrc}
-                alt="Logo"
-                className="w-24 h-24 object-contain z-10"
-              />
+              </svg>
+              <img src={logoSrc} alt="Logo" className="w-24 h-24 object-contain z-10" />
             </motion.div>
           </motion.div>
         )}
@@ -103,32 +100,44 @@ const Logo = () => {
 };
 
 const Home = () => {
+  const location = useLocation();
+  const [background, setBackground] = useState(fondo1);
+  const [mensaje, setMensaje] = useState("");
+
+  useEffect(() => {
+    if (location.state?.turnoCerrado) {
+      setMensaje("✅ Turno cerrado correctamente");
+      setTimeout(() => setMensaje(""), 5000);
+    }
+  }, [location]);
+
   return (
     <>
       <div
         className="relative flex flex-col md:flex-row min-h-screen text-white pt-16 overflow-hidden bg-cover bg-center pb-20"
-        style={{ backgroundImage: `url(${fondo1})` }}
+        style={{ backgroundImage: `url(${background})` }}
       >
-        {/* Overlay oscuro */}
         <div className="absolute inset-0 bg-black/60 z-0"></div>
 
-        {/* Logo animado */}
         <Logo />
 
-        {/* Saludo */}
+        {mensaje && (
+          <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-green-600 px-6 py-3 rounded-lg shadow-lg text-white text-center z-50">
+            {mensaje}
+          </div>
+        )}
+
         <div className="w-full md:w-1/2 flex items-center justify-center p-8 z-10">
           <h1 className="text-3xl md:text-4xl font-bold text-center md:text-left pt-4">
             ¡Bienvenido a nuestra plataforma de reservas!
           </h1>
         </div>
 
-        {/* Carrusel */}
         <div className="overflow-hidden w-full flex justify-center items-center z-10">
-          <Carousel />
+          <Carousel setBackground={setBackground} />
         </div>
       </div>
 
-      {/* Footer FUERA del flex-row */}
       <Footer />
     </>
   );

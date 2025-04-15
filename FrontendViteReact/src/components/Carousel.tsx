@@ -8,8 +8,12 @@ const images = [
   new URL("/src/assets/habSen3.jpg", import.meta.url).href
 ];
 
-const Carousel = () => {
+const Carousel = ({ setBackground }: { setBackground: (src: string) => void }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    setBackground(images[currentIndex]);
+  }, [currentIndex, setBackground]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -21,11 +25,11 @@ const Carousel = () => {
   const getPositionClass = (index: number) => {
     const diff = (index - currentIndex + images.length) % images.length;
 
-    if (diff === 0) return "translate-x-0 scale-105 z-30 opacity-100"; // Imagen central
-    if (diff === 1) return "-translate-x-[160px] scale-95 z-20 opacity-80"; // Izquierda inmediata
-    if (diff === 2) return "-translate-x-[320px] scale-90 z-10 opacity-60"; // Extremo izquierdo
-    if (diff === images.length - 1) return "translate-x-[160px] scale-95 z-20 opacity-80"; // Derecha inmediata
-    if (diff === images.length - 2) return "translate-x-[320px] scale-90 z-10 opacity-60"; // Extremo derecho
+    if (diff === 0) return "translate-x-0 scale-105 z-30 opacity-100";
+    if (diff === 1) return "-translate-x-[160px] scale-95 z-20 opacity-80";
+    if (diff === 2) return "-translate-x-[320px] scale-90 z-10 opacity-60";
+    if (diff === images.length - 1) return "translate-x-[160px] scale-95 z-20 opacity-80";
+    if (diff === images.length - 2) return "translate-x-[320px] scale-90 z-10 opacity-60";
     return "opacity-0 hidden";
   };
 
