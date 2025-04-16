@@ -91,7 +91,7 @@ const Historial = () => {
   }, []);
 
   return (
-    <div className="relative w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white lg:ml-24">
+    <div className="relative w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white lg:pl-24">
       <div className="row">
         <div className="col-md-6">
           <h2 className="mb-4 text-center">Estado de las Habitaciones</h2>

@@ -7,7 +7,7 @@ const AdminDashboard = () => {
   const [selectedTable, setSelectedTable] = useState<'users' | 'reservas' | 'cuadre'>('users');
 
   return (
-    <div className="p-4">
+    <div className="relative w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white lg:pl-24">
       <h2 className="text-2xl font-bold mb-6">Panel de Administración</h2>
 
       <div className="flex gap-4 mb-6">
