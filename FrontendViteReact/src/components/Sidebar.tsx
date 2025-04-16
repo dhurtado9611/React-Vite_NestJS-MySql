@@ -1,4 +1,4 @@
-// Sidebar unificado moderno con roles, animación, y barra inferior tipo app en móvil
+// Sidebar unificado moderno con fondo traslúcido oscuro y bordes redondeados
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -51,7 +51,7 @@ const SidebarResponsive = () => {
   return (
     <div className="relative">
       {/* Sidebar escritorio */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-20 bg-gradient-to-b from-red-900 to-black text-white py-6 fixed left-0 top-0 z-50 items-center justify-between h-screen rounded-tr-3xl rounded-br-3xl">
+      <aside className="hidden lg:flex lg:flex-col lg:w-20 bg-black/60 backdrop-blur-md text-white py-6 fixed left-4 top-4 z-50 items-center justify-between h-[90vh] rounded-3xl">
         <div className="flex flex-col items-center gap-6">
           <img src={logoSrc} alt="Logo" className="w-10 h-10 rounded-full bg-white p-1" />
           <nav className="flex flex-col gap-4 items-center">
@@ -62,7 +62,7 @@ const SidebarResponsive = () => {
                   to={link.to}
                   className={({ isActive }) =>
                     `w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${
-                      isActive ? "bg-white text-red-700" : "hover:bg-red-800"
+                      isActive ? "bg-white text-black" : "hover:bg-gray-700"
                     }`
                   }
                   title={link.label}
@@ -98,7 +98,7 @@ const SidebarResponsive = () => {
       </aside>
 
       {/* Móvil: barra inferior tipo app */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-red-900 to-black text-white flex justify-around items-center z-50 rounded-t-2xl">
+      <div className="lg:hidden fixed bottom-4 left-4 right-4 h-20 bg-black/60 backdrop-blur-md text-white flex justify-around items-center z-50 rounded-3xl shadow-lg">
         {username &&
           links.map((link, index) => (
             <NavLink
