@@ -68,69 +68,79 @@ const TablaUsuarios = () => {
   }, []);
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold mb-4">Tabla de Usuarios</h2>
+    <div className="text-black">
+      <h2 className="text-xl font-bold mb-6 text-white">Tabla de Usuarios</h2>
 
       {error && (
-        <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
-          Error: {error}
+        <div className="bg-red-100 text-red-700 p-3 rounded mb-4 border border-red-300">
+          ⚠️ Error: {error}
         </div>
       )}
 
-      <div className="mb-4 p-4 rounded shadow-md">
-        <h4 className="font-semibold mb-2">Crear nuevo usuario</h4>
-        <div className="flex gap-2 flex-wrap">
+      <div className="mb-6 bg-white/30 backdrop-blur p-4 rounded-xl shadow-lg">
+        <h4 className="font-semibold mb-3 text-white">➕ Crear nuevo usuario</h4>
+        <div className="flex flex-wrap gap-3">
           <input
-            placeholder="Username"
+            placeholder="Usuario"
             value={nuevoUsuario.username}
             onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, username: e.target.value })}
-            className="border p-1 rounded"
+            className="px-3 py-2 rounded-md w-full sm:w-auto border focus:outline-none"
           />
           <input
             type="password"
             placeholder="Contraseña"
             value={nuevoUsuario.password}
             onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, password: e.target.value })}
-            className="border p-1 rounded"
+            className="px-3 py-2 rounded-md w-full sm:w-auto border focus:outline-none"
           />
           <select
             value={nuevoUsuario.rol}
             onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, rol: e.target.value })}
-            className="border p-1 rounded"
+            className="px-3 py-2 rounded-md w-full sm:w-auto border focus:outline-none"
           >
             <option value="admin">Admin</option>
             <option value="invitado">Invitado</option>
           </select>
-          <button onClick={crearUsuario} className="bg-blue-600 text-white px-3 py-1 rounded">
-            ➕ Crear
+          <button
+            onClick={crearUsuario}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-md transition"
+          >
+            Crear
           </button>
         </div>
       </div>
 
-      <table className="table-auto w-full border text-sm">
-        <thead>
-          <tr>
-            <th className="border p-1">ID</th>
-            <th className="border p-1">Usuario</th>
-            <th className="border p-1">Contraseña</th>
-            <th className="border p-1">Rol</th>
-            <th className="border p-1">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {usuarios.map((user) => (
-            <tr key={user.id}>
-              <td className="border p-1">{user.id}</td>
-              <td className="border p-1">{user.username}</td>
-              <td className="border p-1">••••••••</td>
-              <td className="border p-1">{user.rol}</td>
-              <td className="border p-1 text-center">
-                <button onClick={() => eliminarUsuario(user.id)} className="text-red-600">🗑️</button>
-              </td>
+      <div className="overflow-x-auto rounded-xl">
+        <table className="min-w-full bg-white text-sm rounded-xl shadow-xl overflow-hidden">
+          <thead className="bg-blue-600 text-white">
+            <tr>
+              <th className="px-4 py-2 text-left">ID</th>
+              <th className="px-4 py-2 text-left">Usuario</th>
+              <th className="px-4 py-2 text-left">Contraseña</th>
+              <th className="px-4 py-2 text-left">Rol</th>
+              <th className="px-4 py-2 text-center">Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {usuarios.map((user) => (
+              <tr key={user.id} className="border-b hover:bg-gray-100">
+                <td className="px-4 py-2">{user.id}</td>
+                <td className="px-4 py-2">{user.username}</td>
+                <td className="px-4 py-2">••••••••</td>
+                <td className="px-4 py-2 capitalize">{user.rol}</td>
+                <td className="px-4 py-2 text-center">
+                  <button
+                    onClick={() => eliminarUsuario(user.id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
