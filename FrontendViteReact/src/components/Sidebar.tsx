@@ -52,7 +52,7 @@ const SidebarResponsive = () => {
       {/* Sidebar escritorio con estilo glassmorphism */}
       <aside className="hidden lg:flex fixed top-4 left-4 bottom-4 w-20 bg-black/40 backdrop-blur-md shadow-xl text-white z-50 rounded-3xl flex-col justify-between items-center py-6">
         <div className="flex flex-col items-center gap-6">
-          <img src={logoSrc} alt="Logo" className="w-14 h-14 rounded-full bg-white p-1" />
+          <img src={logoSrc} alt="Logo" className="w-14 h-14 rounded-full bg-white p-[2px] transition duration-300 hover:shadow-[0_0_12px_rgba(255,255,255,0.5)]" />
           <nav className="flex flex-col gap-6 items-center">
             {username &&
               links.map((link, index) => (
@@ -61,7 +61,7 @@ const SidebarResponsive = () => {
                   to={link.to}
                   className={({ isActive }) =>
                     `w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${
-                      isActive ? "bg-white text-black" : "hover:bg-gray-700"
+                      isActive ? "bg-white text-black" : "hover:bg-gray-700 hover:shadow-md hover:shadow-white/20"
                     }`
                   }
                   title={link.label}
@@ -89,12 +89,18 @@ const SidebarResponsive = () => {
             )}
           </nav>
         </div>
-        <img src={logoSrc} alt="Logo" className="w-14 h-14 rounded-full bg-white p-1" />
+        {username && (
+          <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold text-sm">
+            {username.charAt(0).toUpperCase()}
+          </div>
+        )}
       </aside>
 
       {/* Móvil: barra inferior tipo app */}
-      <div className="lg:hidden fixed bottom-4 left-4 right-4 h-20 bg-black/40 backdrop-blur-md text-white flex justify-around items-center z-50 rounded-3xl shadow-lg">
-        <img src={logoSrc} alt="Logo" className="w-10 h-10 rounded-full bg-white p-1 absolute left-2 top-1/2 -translate-y-1/2" />
+      <div className="lg:hidden fixed bottom-4 left-4 right-4 h-20 bg-black/40 backdrop-blur-md text-white flex justify-around items-center z-50 rounded-3xl shadow-lg px-4">
+        {username && (
+          <img src={logoSrc} alt="Logo" className="w-10 h-10 rounded-full bg-white p-[2px]" />
+        )}
         {username &&
           links.map((link, index) => (
             <NavLink
