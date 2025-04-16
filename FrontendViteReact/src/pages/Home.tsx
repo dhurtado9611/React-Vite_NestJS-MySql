@@ -17,7 +17,7 @@ const Home = () => {
   }, [location]);
 
   return (
-    <div className="ml-0 flex-1 p-0">
+    <>
       <div
         className="ml-0 p-0 w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white bg-cover bg-center flex flex-col items-center justify-center text-center gap-6 relative"
         style={{ backgroundImage: `url(${background})` }}
@@ -41,7 +41,7 @@ const Home = () => {
         </div>
       </div>
       <Footer />
-    </div>
+    </>
   );
 };
 
