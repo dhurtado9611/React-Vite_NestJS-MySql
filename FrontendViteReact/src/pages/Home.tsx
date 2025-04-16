@@ -19,7 +19,7 @@ const Home = () => {
   return (
     <>
       <div
-        className="w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white bg-cover bg-center flex flex-col items-center justify-center text-center gap-6 relative"
+        className="ml-0 p-0 w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white bg-cover bg-center flex flex-col items-center justify-center text-center gap-6 relative"
         style={{ backgroundImage: `url(${background})` }}
       >
         <div className="absolute inset-0 bg-black/60 z-0"></div>
