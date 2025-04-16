@@ -43,7 +43,7 @@ const Reservas = () => {
   }, []);
 
   return (
-    <div className="pb-20 container mt-5">
+    <div className="w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white bg-transparent">
       <h2 className="text-2xl font-bold mb-4">
         Bienvenido, {username || 'Invitado'}, ¡aquí puedes hacer tus registros, modificarlos o eliminarlos!
       </h2>
