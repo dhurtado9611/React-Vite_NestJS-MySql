@@ -114,7 +114,7 @@ const Home = () => {
   return (
     <>
       <div
-        className="relative flex flex-col lg:flex-row min-h-screen text-white pt-16 overflow-hidden bg-cover bg-center pb-20"
+        className="relative flex flex-col min-h-screen text-white pt-16 overflow-hidden bg-cover bg-center pb-20 px-4 sm:px-6"
         style={{ backgroundImage: `url(${background})` }}
       >
         <div className="absolute inset-0 bg-black/60 z-0"></div>
@@ -127,14 +127,13 @@ const Home = () => {
           </div>
         )}
 
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-0 z-10">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center lg:text-left pt-4 px-2">
+        <div className="w-full flex flex-col items-center justify-center text-center z-10 gap-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold pt-4 px-2">
             ¡Bienvenido a nuestra plataforma de reservas!
           </h1>
-        </div>
-
-        <div className="overflow-hidden w-full flex justify-center items-center z-10">
-          <Carousel setBackground={setBackground} />
+          <div className="w-full max-w-4xl">
+            <Carousel setBackground={setBackground} />
+          </div>
         </div>
       </div>
 
