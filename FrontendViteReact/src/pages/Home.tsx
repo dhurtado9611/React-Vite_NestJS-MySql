@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import Carousel from "../components/Carousel";
+import Carousel from "../components/Home/Carousel";
 import fondo1 from "../assets/fondo1.jpg";
-import Footer from "../components/Footer";
+import Footer from "../components/Home/Footer";
 
 const Home = () => {
   const location = useLocation();

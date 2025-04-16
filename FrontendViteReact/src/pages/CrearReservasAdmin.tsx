@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
-import ReservasForm from '../components/ReservasForm';
-import TableReservas from '../components/TableReservas';
+import ReservasForm from '../components/CrearReservas/ReservasForm';
+import TableReservas from '../components/CrearReservas/TableCrearReservasAdmin';
 
 interface Reserva {
   id: number;

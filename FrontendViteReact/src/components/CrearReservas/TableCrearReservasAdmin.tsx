@@ -1,7 +1,7 @@
 // Código actualizado de TableReservas.tsx con filtros por rango de fechas y colaborador
 import { useState } from 'react';
 import * as XLSX from 'xlsx';
-import api from '../services/api';
+import api from '../../services/api';
 
 interface Reserva {
   id: number;

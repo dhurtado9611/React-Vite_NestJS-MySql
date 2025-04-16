@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import GraficaReservas from '../components/GraficaReservas';
+import GraficaReservas from '../components/CrearReservas/GraficaReservas';
 import { Reserva } from '../components/types';
 import api from '../services/api';
 import { Modal, Button } from 'react-bootstrap';

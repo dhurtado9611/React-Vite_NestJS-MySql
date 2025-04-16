@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
-import ReservasForm from '../components/ReservasForm';
-import TableCrearReservas from '../components/TableCrearReservas';
+import ReservasForm from '../components/CrearReservas/ReservasForm';
+import TableCrearReservas from '../components/CrearReservas/TableCrearReservasInvitado';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Caja from '../components/Caja';

@@ -11,7 +11,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
-import TableReservas from '../components/TableReservas';
+import TableReservas from '../components/CrearReservas/TableCrearReservasAdmin';
 
 interface Reserva {
   id: number;
