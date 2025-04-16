@@ -19,10 +19,9 @@ const Home = () => {
   return (
     <>
       <div
-      className="relative flex flex-col min-h-screen text-white pt-16 overflow-hidden bg-cover bg-center pb-20 px-4 sm:px-6"
-      style={{ backgroundImage: `url(${background})` }}
+        className="w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white bg-cover bg-center flex flex-col items-center justify-center text-center gap-6 relative"
+        style={{ backgroundImage: `url(${background})` }}
       >
-
         <div className="absolute inset-0 bg-black/60 z-0"></div>
 
         {mensaje && (
@@ -31,13 +30,14 @@ const Home = () => {
           </div>
         )}
 
-        <div className="w-full flex flex-col items-center justify-center text-center z-10 gap-4">
+        <div className="w-full z-10">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold pt-4 px-2">
             ¡Bienvenido a nuestra plataforma de reservas!
           </h1>
-          <div className="w-full max-w-4xl">
-            <Carousel setBackground={setBackground} />
-          </div>
+        </div>
+
+        <div className="w-full max-w-4xl z-10">
+          <Carousel setBackground={setBackground} />
         </div>
       </div>
 
