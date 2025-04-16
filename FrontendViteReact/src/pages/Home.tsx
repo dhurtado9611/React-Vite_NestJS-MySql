@@ -19,9 +19,10 @@ const Home = () => {
   return (
     <>
       <div
-        className="relative flex flex-col min-h-screen text-white pt-16 overflow-hidden bg-cover bg-center pb-20 px-4 sm:px-6"
-        style={{ backgroundImage: `url(${background})` }}
+      className="relative flex flex-col min-h-screen text-white pt-16 overflow-hidden bg-cover bg-center pb-20 px-4 sm:px-6"
+      style={{ backgroundImage: `url(${background})` }}
       >
+
         <div className="absolute inset-0 bg-black/60 z-0"></div>
 
         {mensaje && (
