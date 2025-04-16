@@ -1,4 +1,3 @@
-// Sidebar unificado moderno con fondo traslúcido oscuro y bordes redondeados
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -50,11 +49,11 @@ const SidebarResponsive = () => {
 
   return (
     <div className="relative">
-      {/* Sidebar escritorio */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-20 bg-black/60 backdrop-blur-md text-white py-6 fixed left-4 top-4 z-50 items-center justify-between h-[90vh] rounded-3xl">
+      {/* Sidebar escritorio con estilo glassmorphism */}
+      <aside className="hidden lg:flex fixed top-4 left-4 bottom-4 w-20 bg-black/40 backdrop-blur-md shadow-xl text-white z-50 rounded-3xl flex-col justify-between items-center py-6">
         <div className="flex flex-col items-center gap-6">
-          <img src={logoSrc} alt="Logo" className="w-10 h-10 rounded-full bg-white p-1" />
-          <nav className="flex flex-col gap-4 items-center">
+          <img src={logoSrc} alt="Logo" className="w-14 h-14 rounded-full bg-white p-1" />
+          <nav className="flex flex-col gap-6 items-center">
             {username &&
               links.map((link, index) => (
                 <NavLink
@@ -90,15 +89,12 @@ const SidebarResponsive = () => {
             )}
           </nav>
         </div>
-        {username && (
-          <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold text-sm">
-            {username.charAt(0).toUpperCase()}
-          </div>
-        )}
+        <img src={logoSrc} alt="Logo" className="w-14 h-14 rounded-full bg-white p-1" />
       </aside>
 
       {/* Móvil: barra inferior tipo app */}
-      <div className="lg:hidden fixed bottom-4 left-4 right-4 h-20 bg-black/60 backdrop-blur-md text-white flex justify-around items-center z-50 rounded-3xl shadow-lg">
+      <div className="lg:hidden fixed bottom-4 left-4 right-4 h-20 bg-black/40 backdrop-blur-md text-white flex justify-around items-center z-50 rounded-3xl shadow-lg">
+        <img src={logoSrc} alt="Logo" className="w-10 h-10 rounded-full bg-white p-1 absolute left-2 top-1/2 -translate-y-1/2" />
         {username &&
           links.map((link, index) => (
             <NavLink
