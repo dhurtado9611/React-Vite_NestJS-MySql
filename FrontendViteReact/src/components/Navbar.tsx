@@ -14,7 +14,7 @@ const NavbarTop = () => {
         <div className="flex items-center gap-4">
           <img src={Logo} alt="Logo" className="w-10 h-10 rounded-full border-2 border-white" />
           <Link to="/" className={activeClass('/')}>Inicio</Link>
-          <Link to="/reservar" className={activeClass('/reservar')}>Reservar</Link>
+          <Link to="/ReservarCliente" className={activeClass('/ReservarCliente')}>Reservar</Link>
         </div>
       </div>
     </header>
