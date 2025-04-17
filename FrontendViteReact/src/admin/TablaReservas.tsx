@@ -72,13 +72,13 @@ const TablaReservas = () => {
   );
 
   return (
-    <div className="container-fluid px-3 py-4">
-      <div className="row g-4 mb-4">
-        <div className="col-md-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <h6 className="card-title text-success mb-3">Habitaciones más reservadas</h6>
-              <ResponsiveContainer width="100%" height={180}>
+    <div className="container-fluid px-2 py-3">
+      <div className="row g-3 mb-3">
+        <div className="col-12">
+          <div className="card shadow-sm rounded-3">
+            <div className="card-body p-2">
+              <h6 className="text-success text-sm mb-2">Habitaciones más reservadas</h6>
+              <ResponsiveContainer width="100%" height={130}>
                 <LineChart data={habitacionesPorUso}>
                   <XAxis dataKey="habitacion" hide />
                   <YAxis hide />
@@ -90,11 +90,11 @@ const TablaReservas = () => {
           </div>
         </div>
 
-        <div className="col-md-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <h6 className="card-title text-primary mb-3">Ingresos por día</h6>
-              <ResponsiveContainer width="100%" height={180}>
+        <div className="col-12">
+          <div className="card shadow-sm rounded-3">
+            <div className="card-body p-2">
+              <h6 className="text-primary text-sm mb-2">Ingresos por día</h6>
+              <ResponsiveContainer width="100%" height={130}>
                 <LineChart data={ingresosPorDia}>
                   <XAxis dataKey="fecha" hide />
                   <YAxis hide />
@@ -107,14 +107,14 @@ const TablaReservas = () => {
         </div>
       </div>
 
-      <div className="card shadow-sm mb-5">
-        <div className="card-body">
-          <h6 className="card-title text-info">Total ingresos del mes actual</h6>
-          <p className="fs-4 fw-bold text-dark mt-2">${ingresosMesActual.toLocaleString()}</p>
+      <div className="card shadow-sm mb-3 rounded-3">
+        <div className="card-body p-2">
+          <h6 className="text-info text-sm">Total ingresos del mes actual</h6>
+          <p className="fs-5 fw-bold text-dark mt-1 mb-0">${ingresosMesActual.toLocaleString()}</p>
         </div>
       </div>
 
-      <div>
+      <div className="mb-5">
         <TableReservas
           reservas={reservas}
           fetchReservas={cargarReservas}
