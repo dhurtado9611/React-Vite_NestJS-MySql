@@ -1,72 +1,160 @@
-import { useEffect, useState } from 'react';
-import api from '../services/api';
-import ReservasForm from '../components/CrearReservas/ReservasForm';
-import TableReservas from '../components/CrearReservas/TableCrearReservasAdmin';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
-interface Reserva {
+interface Cuadre {
   id: number;
-  vehiculo: string;
-  placa: string;
-  habitacion: number;
-  valor: number;
-  hentrada: string;
-  hsalidamax: string;
-  hsalida: string;
-  observaciones: string;
-  fecha: string;
   colaborador: string;
+  fecha: string;
+  turno: string;
+  turnoCerrado: string;
+  basecaja: number;
+  totalEntregado: number;
 }
 
-const Reservas = () => {
-  const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [formData, setFormData] = useState<Partial<Reserva>>({});
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+const TablaCuadre = () => {
+  const [cuadres, setCuadres] = useState<Cuadre[]>([]);
+  const [mes, setMes] = useState<number>(new Date().getMonth() + 1);
+  const [anio, setAnio] = useState<number>(new Date().getFullYear());
 
-  useEffect(() => {
-      const storedUsername = localStorage.getItem('username');
-      setUsername(storedUsername);
-  }, []);
-
-  const fetchReservas = async () => {
+  const cargarCuadres = async () => {
     try {
-      const response = await api.get('/reservas');
-      setReservas(response.data);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const res = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/cuadre', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCuadres(res.data);
+    } catch (err) {
+      console.error('Error al cargar cuadre:', err);
+    }
+  };
+
+  const eliminarCuadre = async (id: number) => {
+    if (!confirm('¿Seguro que deseas eliminar este registro?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      cargarCuadres();
     } catch (error) {
-      console.error('Error fetching reservas:', error);
+      console.error('Error al eliminar el cuadre:', error);
+      alert('No se pudo eliminar el registro.');
     }
   };
 
   useEffect(() => {
-    fetchReservas();
+    cargarCuadres();
   }, []);
 
-  return (
-    <div className="relative w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white lg:pl-24">
-      <h2 className="text-2xl font-bold mb-4">
-        Bienvenido, {username || 'Invitado'}, ¡aquí puedes hacer tus registros, modificarlos o eliminarlos!
-      </h2>
-      <h2 className="mb-4">{editingId ? 'Editar Reserva' : 'Agregar Reserva'}</h2>
-      <ReservasForm
-        fetchReservas={fetchReservas}
-        formData={formData}
-        setFormData={setFormData}
-        editingId={editingId}
-        setEditingId={setEditingId}
-        selectedId={selectedId}
-        setSelectedId={setSelectedId}
-        reservas={reservas}
-      />
+  const datosFiltrados = cuadres
+    .filter((c) => {
+      const fecha = new Date(c.fecha);
+      return fecha.getMonth() + 1 === mes && fecha.getFullYear() === anio;
+    })
+    .map((c) => {
+      const dia = new Date(c.fecha).getDate();
+      return { dia, totalEntregado: c.totalEntregado };
+    });
 
-      <TableReservas
-        reservas={reservas}
-        fetchReservas={fetchReservas}
-        selectedId={selectedId}
-        setSelectedId={setSelectedId}
-      />
+  return (
+    <div className="container-fluid px-3 py-3">
+      {/* Filtros */}
+      <div className="row g-3 mb-3">
+        <div className="col">
+          <label className="form-label">Mes</label>
+          <select className="form-select" value={mes} onChange={(e) => setMes(Number(e.target.value))}>
+            {[...Array(12)].map((_, i) => (
+              <option key={i + 1} value={i + 1}>{i + 1}</option>
+            ))}
+          </select>
+        </div>
+        <div className="col">
+          <label className="form-label">Año</label>
+          <input
+            type="number"
+            className="form-control"
+            value={anio}
+            onChange={(e) => setAnio(Number(e.target.value))}
+          />
+        </div>
+      </div>
+
+      {/* Gráfica totalEntregado por día */}
+      <div className="card shadow-sm mb-4">
+        <div className="card-body p-2">
+          <h6 className="text-primary text-sm mb-2">Total entregado por día</h6>
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={datosFiltrados}>
+              <XAxis dataKey="dia" type="number" domain={[1, 31]} tickCount={31} />
+              <YAxis />
+              <Tooltip />
+              <Line
+                type="monotone"
+                dataKey="totalEntregado"
+                stroke="#0d6efd"
+                strokeWidth={2}
+                dot={{ r: 3 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Tabla con scroll horizontal */}
+      <div className="card shadow-sm">
+        <div className="card-body p-2">
+          <h6 className="text-dark text-sm mb-2">Registros de Cuadre</h6>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="table table-striped table-bordered text-center" style={{ minWidth: '800px' }}>
+              <thead className="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Colaborador</th>
+                  <th>Fecha</th>
+                  <th>Turno</th>
+                  <th>Hora Cierre</th>
+                  <th>Base Caja</th>
+                  <th>Total Entregado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cuadres.map((cuadre) => (
+                  <tr key={cuadre.id}>
+                    <td>{cuadre.id}</td>
+                    <td>{cuadre.colaborador}</td>
+                    <td>{cuadre.fecha}</td>
+                    <td>{cuadre.turno}</td>
+                    <td>{cuadre.turnoCerrado || 'Pendiente'}</td>
+                    <td>${cuadre.basecaja}</td>
+                    <td>${cuadre.totalEntregado}</td>
+                    <td>
+                      <button
+                        onClick={() => eliminarCuadre(cuadre.id)}
+                        className="btn btn-sm btn-outline-danger"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default Reservas;
+export default TablaCuadre;
