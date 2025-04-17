@@ -154,9 +154,9 @@ const FormularioTurno = ({ onSubmit }: Props) => {
                 className="block w-full px-4 py-2 text-base text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none"
               >
                 <option value="">-- Selecciona un turno --</option>
-                <option value="08:00">Mañana (8am - 2pm)</option>
-                <option value="14:00">Tarde (2pm - 8pm)</option>
-                <option value="20:00">Noche (8pm - 8am)</option>
+                <option value="07:00">Mañana (7am - 2pm)</option>
+                <option value="14:00">Tarde (2pm - 9pm)</option>
+                <option value="21:00">Noche (9pm - 7am)</option>
               </select>
             </div>
 
