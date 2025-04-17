@@ -35,4 +35,9 @@ export class ReservasClienteService {
       order: { hora_entrada: 'ASC' },
     });
   }
+
+  async findHabitacionesOcupadas(fecha: string): Promise<number[]> {
+    const reservas = await this.reservasRepo.find({ where: { fecha } });
+    return reservas.map((r) => parseInt(r.habitacion));
+  }
 }

@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
 
 const ReservarCliente = () => {
   const [fecha, setFecha] = useState<Date | null>(new Date());
+  const [habitacionesDisponibles, setHabitacionesDisponibles] = useState<number[]>([]);
   const [horaEntrada, setHoraEntrada] = useState('14:00');
   const [horaSalida, setHoraSalida] = useState('16:00');
-  const [habitacion, setHabitacion] = useState('101');
+  const [habitacion, setHabitacion] = useState('');
   const [tipoHabitacion, setTipoHabitacion] = useState('Sencilla');
   const [precio, setPrecio] = useState(80000);
   const [telefono, setTelefono] = useState('');
@@ -15,6 +16,26 @@ const ReservarCliente = () => {
   const [correoCliente, setCorreoCliente] = useState('');
   const [nombreCliente, setNombreCliente] = useState('');
   const [clienteId, setClienteId] = useState('cliente-uid-ejemplo');
+
+  useEffect(() => {
+    const fetchDisponibles = async () => {
+      if (!fecha) return;
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas-cliente/disponibles`, {
+          params: { fecha: fecha.toISOString().split('T')[0] },
+        });
+        setHabitacionesDisponibles(res.data.disponibles);
+        if (res.data.disponibles.length > 0) {
+          setHabitacion(String(res.data.disponibles[0]));
+        } else {
+          setHabitacion('');
+        }
+      } catch (err) {
+        console.error('Error obteniendo habitaciones disponibles', err);
+      }
+    };
+    fetchDisponibles();
+  }, [fecha]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,10 +123,18 @@ const ReservarCliente = () => {
             value={habitacion}
             onChange={(e) => setHabitacion(e.target.value)}
             className="input"
+            required
           >
-            <option value="101">101</option>
-            <option value="102">102</option>
-            <option value="103">103</option>
+            <option value="" disabled>
+              {habitacionesDisponibles.length === 0
+                ? 'No hay habitaciones disponibles'
+                : 'Selecciona habitación'}
+            </option>
+            {habitacionesDisponibles.map((h) => (
+              <option key={h} value={h}>
+                {h}
+              </option>
+            ))}
           </select>
 
           <select
