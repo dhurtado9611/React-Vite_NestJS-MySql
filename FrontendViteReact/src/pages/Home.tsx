@@ -29,7 +29,7 @@ const Home = () => {
   return (
     <>
       <div
-        className="ml-0 p-0 w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white bg-cover bg-center flex flex-col items-center justify-center text-center gap-6 relative"
+        className="relative w-screen h-screen text-white bg-cover bg-center flex flex-col items-center justify-center text-center gap-6"
         style={{ backgroundImage: `url(${background})` }}
       >
         <div className="absolute inset-0 bg-black/60 z-0"></div>
@@ -54,18 +54,22 @@ const Home = () => {
           </h1>
         </div>
 
-        <div className="w-full max-w-4xl z-10">
-          <Carousel setBackground={setBackground} />
+        <div className="col">
+          <div className="w-screen max-w-4xl z-10">
+            <Carousel setBackground={setBackground} />
+          </div>
         </div>
 
+        <div className="col">
         <button
           onClick={handleScrollToReserva}
-          className="z-10 mt-6 px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-semibold rounded-lg shadow-md transition flex items-center gap-2"
+          className="z-10 mt-6 px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-semibold rounded-lg shadow-md transition flex items-center gap-2 animate-bounce"
         >
           <FaCalendarAlt className="text-lg" /> Reservar ahora
         </button>
+        </div>
       </div>
-
+      
       {/* Target para reservar */}
       <div id="reserva-cliente-section" className="w-full py-5 px-3 bg-white text-black">
         <ReservarCliente />

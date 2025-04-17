@@ -34,13 +34,13 @@ const Carousel = ({ setBackground }: { setBackground: (src: string) => void }) =
   };
 
   return (
-    <div className="relative flex items-center justify-center h-[400px] w-full z-10">
+    <div className="relative flex items-center justify-center h-[150px] w-full z-10">
       {images.map((src, index) => (
         <img
           key={index}
           src={src}
           alt={`Slide ${index}`}
-          className={`absolute w-[240px] h-[320px] object-cover rounded-xl shadow-lg transition-transform duration-700 ease-in-out ${getPositionClass(index)}`}
+          className={`absolute w-[200px] h-[150px] object-cover rounded-xl shadow-lg transition-transform duration-700 ease-in-out ${getPositionClass(index)}`}
         />
       ))}
     </div>
