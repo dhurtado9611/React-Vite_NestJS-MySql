@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   CalendarPlus,
+  Home,
+  ListChecks,
+  BarChart3,
   LogIn,
   LogOut
 } from "lucide-react";
@@ -28,6 +31,29 @@ const SidebarResponsive = () => {
     navigate("/");
   };
 
+  const getLinks = () => {
+    if (rol === "admin") {
+      return [
+        { to: "/", icon: Home, label: "Inicio" },
+        { to: "/reservas", icon: CalendarPlus, label: "Reservas" },
+        { to: "/historial", icon: ListChecks, label: "Historial" },
+        { to: "/admin", icon: BarChart3, label: "Admin" }
+      ];
+    } else if (rol === "invitado") {
+      return [
+        { to: "/", icon: Home, label: "Inicio" },
+        { to: "/crear-reservas", icon: CalendarPlus, label: "Crear" },
+        { to: "/historial-invitado", icon: ListChecks, label: "Historial" }
+      ];
+    }
+    return [];
+  };
+
+  const commonLinkStyle = (isActive: boolean) =>
+    `flex flex-col items-center gap-1 w-14 h-14 justify-center rounded-full transform transition-all duration-300 text-xs ${
+      isActive ? "bg-black text-white scale-110" : "hover:scale-105 hover:bg-gray-200 text-black"
+    }`;
+
   return (
     <div className="relative">
       {/* Sidebar escritorio */}
@@ -39,14 +65,27 @@ const SidebarResponsive = () => {
             className="w-16 h-16 rounded-full bg-white p-[2px] shadow"
           />
           <nav className="flex flex-col gap-2 items-center text-xs">
+            {username &&
+              getLinks().map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) => commonLinkStyle(isActive)}
+                  title={link.label}
+                >
+                  {({ isActive }) => (
+                    <>
+                      <link.icon className={isActive ? "text-white" : "text-black"} />
+                      <span className="text-[10px]">{link.label}</span>
+                    </>
+                  )}
+                </NavLink>
+              ))}
+
             {!username && (
               <NavLink
                 to="/ReservarCliente"
-                className={({ isActive }) =>
-                  `flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition-all duration-300 ${
-                    isActive ? "bg-black text-white scale-110" : "hover:scale-105 hover:bg-gray-200 text-black"
-                  }`
-                }
+                className={({ isActive }) => commonLinkStyle(isActive)}
                 title="Reservar"
               >
                 {({ isActive }) => (
@@ -57,11 +96,12 @@ const SidebarResponsive = () => {
                 )}
               </NavLink>
             )}
+
             {!username && (
               <button
                 onClick={() => setShowLogin(true)}
                 title="Iniciar Sesión"
-                className="flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition-all hover:scale-105 hover:bg-yellow-300 text-black"
+                className="flex flex-col items-center gap-1 w-14 h-14 justify-center rounded-full transform transition-all hover:scale-105 hover:bg-yellow-300 text-black"
               >
                 <LogIn className="text-black" />
                 <span className="text-[10px]">Login</span>
@@ -71,7 +111,7 @@ const SidebarResponsive = () => {
               <button
                 onClick={logout}
                 title="Cerrar Sesión"
-                className="flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition-all hover:scale-105 hover:bg-red-100 text-black"
+                className="flex flex-col items-center gap-1 w-14 h-14 justify-center rounded-full transform transition-all hover:scale-105 hover:bg-red-100 text-black"
               >
                 <LogOut className="text-black" />
                 <span className="text-[10px]">Salir</span>
@@ -88,37 +128,55 @@ const SidebarResponsive = () => {
 
       {/* Sidebar móvil inferior */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-black flex items-center justify-around z-50 shadow-inner text-xs">
-        <div className="flex flex-col items-center gap-1">
-          <img
-            src={logoSrc}
-            alt="Logo"
-            className="w-10 h-10 rounded-full bg-white p-[2px] shadow"
-          />
-        </div>
-        <NavLink
-          to="/ReservarCliente"
-          className={({ isActive }) =>
-            `flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition duration-200 ${
-              isActive ? "bg-black text-white scale-110" : "hover:scale-105 hover:bg-gray-200 text-black"
-            }`
-          }
-          title="Reservar"
-        >
-          {({ isActive }) => (
-            <>
-              <CalendarPlus className={isActive ? "text-white" : "text-black"} />
-              <span className="text-[10px]">Reservar</span>
-            </>
-          )}
-        </NavLink>
-        <button
-          onClick={() => setShowLogin(true)}
-          title="Iniciar Sesión"
-          className="flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition-all hover:scale-105 hover:bg-yellow-300 text-black"
-        >
-          <LogIn className="text-black" />
-          <span className="text-[10px]">Login</span>
-        </button>
+        <img
+          src={logoSrc}
+          alt="Logo"
+          className="w-10 h-10 rounded-full bg-white p-[2px] shadow"
+        />
+
+        {username &&
+          getLinks().map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) => commonLinkStyle(isActive)}
+              title={link.label}
+            >
+              {({ isActive }) => (
+                <>
+                  <link.icon className={isActive ? "text-white" : "text-black"} />
+                  <span className="text-[10px]">{link.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+
+        {!username && (
+          <NavLink
+            to="/ReservarCliente"
+            className={({ isActive }) => commonLinkStyle(isActive)}
+            title="Reservar"
+          >
+            {({ isActive }) => (
+              <>
+                <CalendarPlus className={isActive ? "text-white" : "text-black"} />
+                <span className="text-[10px]">Reservar</span>
+              </>
+            )}
+          </NavLink>
+        )}
+
+        {!username && (
+          <button
+            onClick={() => setShowLogin(true)}
+            title="Iniciar Sesión"
+            className="flex flex-col items-center gap-1 w-14 h-14 justify-center rounded-full transform transition-all hover:scale-105 hover:bg-yellow-300 text-black"
+          >
+            <LogIn className="text-black" />
+            <span className="text-[10px]">Login</span>
+          </button>
+        )}
+
         {username && (
           <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm">
             {username.charAt(0).toUpperCase()}
