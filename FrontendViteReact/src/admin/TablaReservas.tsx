@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  CartesianGrid,
-  LineChart,
-  Line,
 } from 'recharts';
 import TableReservas from '../components/CrearReservas/TableCrearReservasAdmin';
 
@@ -59,7 +56,7 @@ const TablaReservas = () => {
 
   const habitacionesPorUso = Object.values(
     reservas.reduce((acc: any, r: Reserva) => {
-      const clave = `Habitación ${r.habitacion}`;
+      const clave = `Hab. ${r.habitacion}`;
       if (!acc[clave]) acc[clave] = { habitacion: clave, cantidad: 0 };
       acc[clave].cantidad++;
       return acc;
@@ -80,15 +77,14 @@ const TablaReservas = () => {
         <div className="col-md-6">
           <div className="card shadow-sm h-100">
             <div className="card-body">
-              <h5 className="card-title text-success mb-3">📊 Habitaciones más reservadas</h5>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={habitacionesPorUso}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="habitacion" />
-                  <YAxis />
+              <h6 className="card-title text-success mb-3">Habitaciones más reservadas</h6>
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={habitacionesPorUso}>
+                  <XAxis dataKey="habitacion" hide />
+                  <YAxis hide />
                   <Tooltip />
-                  <Bar dataKey="cantidad" fill="#198754" />
-                </BarChart>
+                  <Line type="monotone" dataKey="cantidad" stroke="#198754" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -97,14 +93,13 @@ const TablaReservas = () => {
         <div className="col-md-6">
           <div className="card shadow-sm h-100">
             <div className="card-body">
-              <h5 className="card-title text-primary mb-3">📈 Ingresos por día</h5>
-              <ResponsiveContainer width="100%" height={250}>
+              <h6 className="card-title text-primary mb-3">Ingresos por día</h6>
+              <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={ingresosPorDia}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="fecha" />
-                  <YAxis />
+                  <XAxis dataKey="fecha" hide />
+                  <YAxis hide />
                   <Tooltip />
-                  <Line type="monotone" dataKey="total" stroke="#0d6efd" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="total" stroke="#0d6efd" strokeWidth={2} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -114,7 +109,7 @@ const TablaReservas = () => {
 
       <div className="card shadow-sm mb-5">
         <div className="card-body">
-          <h5 className="card-title text-info">📦 Total ingresos del mes actual</h5>
+          <h6 className="card-title text-info">Total ingresos del mes actual</h6>
           <p className="fs-4 fw-bold text-dark mt-2">${ingresosMesActual.toLocaleString()}</p>
         </div>
       </div>
