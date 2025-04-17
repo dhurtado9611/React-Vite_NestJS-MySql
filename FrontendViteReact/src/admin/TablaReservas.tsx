@@ -64,13 +64,13 @@ const TablaReservas = () => {
   const habPorUso = reservas.reduce((acc: any, r) => {
     const fecha = new Date(r.fecha);
     if (fecha.getMonth() + 1 === mes && fecha.getFullYear() === anio) {
-      const key = `Hab. ${r.habitacion}`;
+      const key = r.habitacion;
       if (!acc[key]) acc[key] = { habitacion: key, cantidad: 0 };
       acc[key].cantidad++;
     }
     return acc;
   }, {});
-  const datosHabUso = Object.values(habPorUso);
+  const datosHabUso = Object.values(habPorUso).sort((a: any, b: any) => a.habitacion - b.habitacion);
 
   const totalMesActual = reservas.reduce((acc, r) => {
     const fecha = new Date(r.fecha);
@@ -147,7 +147,7 @@ const TablaReservas = () => {
           <h6 className="text-info text-sm mb-2">Habitaciones más usadas</h6>
           <ResponsiveContainer width="100%" height={130}>
             <LineChart data={datosHabUso as any[]}>
-              <XAxis dataKey="habitacion" />
+              <XAxis dataKey="habitacion" type="number" domain={[1, 16]} tickCount={16} />
               <YAxis hide />
               <Tooltip />
               <Line type="monotone" dataKey="cantidad" stroke="#0dcaf0" strokeWidth={2} dot={{ r: 3 }} />
