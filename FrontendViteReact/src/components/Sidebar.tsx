@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  Home,
   CalendarPlus,
-  ListChecks,
-  BarChart3,
   LogIn,
   LogOut
 } from "lucide-react";
@@ -31,110 +28,83 @@ const SidebarResponsive = () => {
     navigate("/");
   };
 
-  const links =
-    rol === "admin"
-      ? [
-          { to: "/", icon: <Home />, label: "Inicio" },
-          { to: "/reservas", icon: <CalendarPlus />, label: "Reservas" },
-          { to: "/historial", icon: <ListChecks />, label: "Historial" },
-          { to: "/admin", icon: <BarChart3 />, label: "Admin" }
-        ]
-      : rol === "invitado"
-      ? [
-          { to: "/", icon: <Home />, label: "Inicio" },
-          { to: "/crear-reservas", icon: <CalendarPlus />, label: "Crear Reserva" },
-          { to: "/historial-invitado", icon: <ListChecks />, label: "Historial" }
-        ]
-      : [];
-
   return (
     <div className="relative">
-      {/* Sidebar escritorio con estilo glassmorphism */}
-      <aside className="hidden lg:flex fixed top-0 bottom-0 rounded-r-lg w-20 bg-white/40 backdrop-blur-md shadow-xl text-white z-50 flex-col justify-between items-center py-6">
+      {/* Sidebar escritorio */}
+      <aside className="hidden md:flex fixed top-0 bottom-0 w-20 bg-white text-black z-50 flex-col justify-between items-center py-6 border-r border-black shadow-xl">
         <div className="flex flex-col items-center gap-6">
-          <img src={logoSrc} alt="Logo" className="w-16 h-16 rounded-full bg-white p-[2px] transition duration-300 hover:shadow-[0_0_12px_rgba(255,255,255,0.5)]" />
+          <img
+            src={logoSrc}
+            alt="Logo"
+            className="w-16 h-16 rounded-full bg-white p-[2px] shadow"
+          />
           <nav className="flex flex-col gap-6 items-center">
-            {username &&
-              links.map((link, index) => (
-                <NavLink
-                  key={index}
-                  to={link.to}
-                  className={({ isActive }) =>
-                    `w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${
-                      isActive ? "bg-white text-black" : "hover:bg-gray-700 hover:shadow-md hover:shadow-white/20"
-                    }`
-                  }
-                  title={link.label}
-                >
-                  {link.icon}
-                </NavLink>
-              ))}
+            {!username && (
+              <NavLink
+                to="/ReservarCliente"
+                className={({ isActive }) =>
+                  `w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${
+                    isActive ? "bg-black" : "hover:bg-gray-200"
+                  }`
+                }
+                title="Reservar"
+              >
+                <CalendarPlus className="text-black" />
+              </NavLink>
+            )}
             {!username && (
               <button
                 onClick={() => setShowLogin(true)}
                 title="Iniciar Sesión"
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-yellow-400 text-white"
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-yellow-300"
               >
-                <LogIn />
+                <LogIn className="text-black" />
               </button>
             )}
             {username && (
               <button
                 onClick={logout}
                 title="Cerrar Sesión"
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-500 text-white"
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-100"
               >
-                <LogOut />
+                <LogOut className="text-black" />
               </button>
             )}
           </nav>
         </div>
         {username && (
-          <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold text-sm">
+          <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm">
             {username.charAt(0).toUpperCase()}
           </div>
         )}
       </aside>
 
-      {/* Móvil: barra inferior tipo app */}
-      <div className="lg:hidden fixed bottom-4 left-4 right-4 h-20 bg-black/40 backdrop-blur-md text-white flex justify-around items-center z-50 rounded-3xl shadow-lg px-4">
-        {username && (
-          <img src={logoSrc} alt="Logo" className="w-10 h-10 rounded-full bg-white p-[2px]" />
-        )}
-        {username &&
-          links.map((link, index) => (
-            <NavLink
-              key={index}
-              to={link.to}
-              className={({ isActive }) =>
-                `text-2xl transition-colors duration-300 ${
-                  isActive ? "text-yellow-300" : "hover:text-red-400"
-                }`
-              }
-              title={link.label}
-            >
-              {link.icon}
-            </NavLink>
-          ))}
-        {!username && (
-          <button
-            onClick={() => setShowLogin(true)}
-            title="Iniciar Sesión"
-            className="text-white text-2xl hover:text-yellow-400"
-          >
-            <LogIn />
-          </button>
-        )}
-        {username && (
-          <button
-            onClick={logout}
-            title="Cerrar Sesión"
-            className="text-white text-2xl hover:text-red-400"
-          >
-            <LogOut />
-          </button>
-        )}
-      </div>
+      {/* Sidebar móvil inferior */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-black flex items-center justify-around z-50 shadow-inner">
+        <img
+          src={logoSrc}
+          alt="Logo"
+          className="w-10 h-10 rounded-full bg-white p-[2px] shadow"
+        />
+        <NavLink
+          to="/ReservarCliente"
+          className={({ isActive }) =>
+            `w-10 h-10 flex items-center justify-center rounded-full transition duration-200 ${
+              isActive ? "bg-black text-white" : "hover:bg-gray-200 text-black"
+            }`
+          }
+          title="Reservar"
+        >
+          <CalendarPlus className="text-black" />
+        </NavLink>
+        <button
+          onClick={() => setShowLogin(true)}
+          title="Iniciar Sesión"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-yellow-300 text-black"
+        >
+          <LogIn />
+        </button>
+      </nav>
 
       {showLogin && (
         <LoginModal
