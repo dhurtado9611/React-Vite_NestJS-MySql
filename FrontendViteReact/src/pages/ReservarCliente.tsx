@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const ReservarCliente = () => {
   const [fecha, setFecha] = useState<Date | null>(new Date());
@@ -61,113 +62,137 @@ const ReservarCliente = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white text-black rounded-xl shadow mt-10">
-      <h2 className="text-2xl font-bold text-center mb-4">Reservar habitación</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="Nombre"
-            value={nombreCliente}
-            onChange={(e) => setNombreCliente(e.target.value)}
-            className="input text-black"
-            required
-          />
-          <input
-            type="email"
-            placeholder="Correo"
-            value={correoCliente}
-            onChange={(e) => setCorreoCliente(e.target.value)}
-            className="input text-black"
-            required
-          />
+    <div className="container mt-5">
+      <div className="card shadow">
+        <div className="card-body">
+          <h3 className="card-title text-center mb-4">Reservar Habitación</h3>
+          <form onSubmit={handleSubmit} className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Nombre</label>
+              <input
+                type="text"
+                className="form-control"
+                value={nombreCliente}
+                onChange={(e) => setNombreCliente(e.target.value)}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Correo</label>
+              <input
+                type="email"
+                className="form-control"
+                value={correoCliente}
+                onChange={(e) => setCorreoCliente(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Teléfono</label>
+              <input
+                type="tel"
+                className="form-control"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Fecha de Reserva</label>
+              <div className="border rounded">
+                <DatePicker
+                  selected={fecha}
+                  onChange={(date) => setFecha(date)}
+                  inline
+                />
+              </div>
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Hora de Entrada</label>
+              <input
+                type="time"
+                className="form-control"
+                value={horaEntrada}
+                onChange={(e) => setHoraEntrada(e.target.value)}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Hora de Salida</label>
+              <input
+                type="time"
+                className="form-control"
+                value={horaSalida}
+                onChange={(e) => setHoraSalida(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Habitación</label>
+              <select
+                className="form-select"
+                value={habitacion}
+                onChange={(e) => setHabitacion(e.target.value)}
+                required
+              >
+                <option value="" disabled>
+                  {habitacionesDisponibles.length === 0
+                    ? 'No hay habitaciones disponibles'
+                    : 'Selecciona habitación'}
+                </option>
+                {habitacionesDisponibles.map((h) => (
+                  <option key={h} value={h}>
+                    {h}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Tipo de Habitación</label>
+              <select
+                className="form-select"
+                value={tipoHabitacion}
+                onChange={(e) => setTipoHabitacion(e.target.value)}
+              >
+                <option value="Sencilla">Sencilla</option>
+                <option value="Doble">Doble</option>
+                <option value="Jacuzzi">Jacuzzi</option>
+              </select>
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Precio</label>
+              <input
+                type="number"
+                className="form-control"
+                value={precio}
+                onChange={(e) => setPrecio(Number(e.target.value))}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <label className="form-label">Notas u Observaciones</label>
+              <textarea
+                className="form-control"
+                value={notas}
+                onChange={(e) => setNotas(e.target.value)}
+              />
+            </div>
+
+            <div className="col-12 text-center">
+              <button type="submit" className="btn btn-primary px-4">
+                Confirmar Reserva
+              </button>
+            </div>
+          </form>
         </div>
-
-        <input
-          type="tel"
-          placeholder="Teléfono"
-          value={telefono}
-          onChange={(e) => setTelefono(e.target.value)}
-          className="input w-full text-black"
-          required
-        />
-
-        <DatePicker
-          selected={fecha}
-          onChange={(date) => setFecha(date)}
-          className="input w-full text-black"
-          placeholderText="Selecciona una fecha"
-          dateFormat="yyyy-MM-dd"
-          required
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="time"
-            value={horaEntrada}
-            onChange={(e) => setHoraEntrada(e.target.value)}
-            className="input text-black"
-            required
-          />
-          <input
-            type="time"
-            value={horaSalida}
-            onChange={(e) => setHoraSalida(e.target.value)}
-            className="input text-black"
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <select
-            value={habitacion}
-            onChange={(e) => setHabitacion(e.target.value)}
-            className="input text-black"
-            required
-          >
-            <option value="" disabled>
-              {habitacionesDisponibles.length === 0
-                ? 'No hay habitaciones disponibles'
-                : 'Selecciona habitación'}
-            </option>
-            {habitacionesDisponibles.map((h) => (
-              <option key={h} value={h}>
-                {h}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={tipoHabitacion}
-            onChange={(e) => setTipoHabitacion(e.target.value)}
-            className="input text-black"
-          >
-            <option value="Sencilla">Sencilla</option>
-            <option value="Doble">Doble</option>
-            <option value="Jacuzzi">Jacuzzi</option>
-          </select>
-        </div>
-
-        <input
-          type="number"
-          value={precio}
-          onChange={(e) => setPrecio(Number(e.target.value))}
-          className="input w-full text-black"
-          placeholder="Precio"
-          required
-        />
-
-        <textarea
-          value={notas}
-          onChange={(e) => setNotas(e.target.value)}
-          placeholder="Notas u observaciones"
-          className="input w-full h-24 text-black"
-        />
-
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          Confirmar reserva
-        </button>
-      </form>
+      </div>
     </div>
   );
 };
