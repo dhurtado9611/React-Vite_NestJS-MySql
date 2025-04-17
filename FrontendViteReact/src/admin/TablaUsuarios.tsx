@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 interface Usuario {
   id: number;
@@ -16,17 +17,11 @@ const TablaUsuarios = () => {
   const cargarUsuarios = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        setError('No hay token disponible.');
-        return;
-      }
+      if (!token) return setError('No hay token disponible.');
 
       const response = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/users', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       setUsuarios(response.data);
       setError(null);
     } catch (error: any) {
@@ -69,71 +64,78 @@ const TablaUsuarios = () => {
 
   return (
     <div className="text-black">
-      <h2 className="text-xl font-bold mb-6 text-white">Tabla de Usuarios</h2>
+      <h2 className="text-xl font-bold mb-4 text-white">Tabla de Usuarios</h2>
 
       {error && (
-        <div className="bg-red-100 text-red-700 p-3 rounded mb-4 border border-red-300">
+        <div className="bg-danger text-white p-3 rounded mb-4">
           ⚠️ Error: {error}
         </div>
       )}
 
-      <div className="mb-6 bg-white/30 backdrop-blur p-4 rounded-xl shadow-lg">
-        <h4 className="font-semibold mb-3 text-white">➕ Crear nuevo usuario</h4>
-        <div className="flex flex-wrap gap-3">
-          <input
-            placeholder="Usuario"
-            value={nuevoUsuario.username}
-            onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, username: e.target.value })}
-            className="px-3 py-2 rounded-md w-full sm:w-auto border focus:outline-none"
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={nuevoUsuario.password}
-            onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, password: e.target.value })}
-            className="px-3 py-2 rounded-md w-full sm:w-auto border focus:outline-none"
-          />
-          <select
-            value={nuevoUsuario.rol}
-            onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, rol: e.target.value })}
-            className="px-3 py-2 rounded-md w-full sm:w-auto border focus:outline-none"
-          >
-            <option value="admin">Admin</option>
-            <option value="invitado">Invitado</option>
-          </select>
-          <button
-            onClick={crearUsuario}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-md transition"
-          >
-            Crear
-          </button>
+      <div className="mb-5 bg-white p-4 rounded shadow">
+        <h4 className="font-semibold mb-3">➕ Crear nuevo usuario</h4>
+        <div className="row g-2">
+          <div className="col-md-3">
+            <input
+              type="text"
+              placeholder="Usuario"
+              value={nuevoUsuario.username}
+              onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, username: e.target.value })}
+              className="form-control"
+            />
+          </div>
+          <div className="col-md-3">
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={nuevoUsuario.password}
+              onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, password: e.target.value })}
+              className="form-control"
+            />
+          </div>
+          <div className="col-md-3">
+            <select
+              value={nuevoUsuario.rol}
+              onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, rol: e.target.value })}
+              className="form-select"
+            >
+              <option value="admin">Admin</option>
+              <option value="invitado">Invitado</option>
+            </select>
+          </div>
+          <div className="col-md-3">
+            <button onClick={crearUsuario} className="btn btn-primary w-100">
+              Crear
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl">
-        <table className="min-w-full bg-white text-sm rounded-xl shadow-xl overflow-hidden">
-          <thead className="bg-blue-600 text-white">
+      <div className="table-responsive">
+        <table className="table table-striped table-bordered table-hover">
+          <thead className="table-dark">
             <tr>
-              <th className="px-4 py-2 text-left">ID</th>
-              <th className="px-4 py-2 text-left">Usuario</th>
-              <th className="px-4 py-2 text-left">Contraseña</th>
-              <th className="px-4 py-2 text-left">Rol</th>
-              <th className="px-4 py-2 text-center">Acciones</th>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Contraseña</th>
+              <th>Rol</th>
+              <th className="text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {usuarios.map((user) => (
-              <tr key={user.id} className="border-b hover:bg-gray-100">
-                <td className="px-4 py-2">{user.id}</td>
-                <td className="px-4 py-2">{user.username}</td>
-                <td className="px-4 py-2">••••••••</td>
-                <td className="px-4 py-2 capitalize">{user.rol}</td>
-                <td className="px-4 py-2 text-center">
+              <tr key={user.id}>
+                <td>{user.id}</td>
+                <td>{user.username}</td>
+                <td>••••••••</td>
+                <td className="text-capitalize">{user.rol}</td>
+                <td className="text-center">
                   <button
                     onClick={() => eliminarUsuario(user.id)}
-                    className="text-red-600 hover:text-red-800"
+                    className="btn btn-sm btn-outline-danger me-2"
+                    title="Eliminar"
                   >
-                    🗑️
+                    <i className="bi bi-trash-fill"></i>
                   </button>
                 </td>
               </tr>
