@@ -38,36 +38,43 @@ const SidebarResponsive = () => {
             alt="Logo"
             className="w-16 h-16 rounded-full bg-white p-[2px] shadow"
           />
-          <nav className="flex flex-col gap-6 items-center">
+          <nav className="flex flex-col gap-2 items-center text-xs">
             {!username && (
               <NavLink
                 to="/ReservarCliente"
                 className={({ isActive }) =>
-                  `w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${
-                    isActive ? "bg-black" : "hover:bg-gray-200"
+                  `flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition-all duration-300 ${
+                    isActive ? "bg-black text-white scale-110" : "hover:scale-105 hover:bg-gray-200 text-black"
                   }`
                 }
                 title="Reservar"
               >
-                <CalendarPlus className="text-black" />
+                {({ isActive }) => (
+                  <>
+                    <CalendarPlus className={isActive ? "text-white" : "text-black"} />
+                    <span className="text-[10px]">Reservar</span>
+                  </>
+                )}
               </NavLink>
             )}
             {!username && (
               <button
                 onClick={() => setShowLogin(true)}
                 title="Iniciar Sesión"
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-yellow-300"
+                className="flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition-all hover:scale-105 hover:bg-yellow-300 text-black"
               >
                 <LogIn className="text-black" />
+                <span className="text-[10px]">Login</span>
               </button>
             )}
             {username && (
               <button
                 onClick={logout}
                 title="Cerrar Sesión"
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-100"
+                className="flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition-all hover:scale-105 hover:bg-red-100 text-black"
               >
                 <LogOut className="text-black" />
+                <span className="text-[10px]">Salir</span>
               </button>
             )}
           </nav>
@@ -80,30 +87,43 @@ const SidebarResponsive = () => {
       </aside>
 
       {/* Sidebar móvil inferior */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-black flex items-center justify-around z-50 shadow-inner">
-        <img
-          src={logoSrc}
-          alt="Logo"
-          className="w-10 h-10 rounded-full bg-white p-[2px] shadow"
-        />
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-black flex items-center justify-around z-50 shadow-inner text-xs">
+        <div className="flex flex-col items-center gap-1">
+          <img
+            src={logoSrc}
+            alt="Logo"
+            className="w-10 h-10 rounded-full bg-white p-[2px] shadow"
+          />
+        </div>
         <NavLink
           to="/ReservarCliente"
           className={({ isActive }) =>
-            `w-10 h-10 flex items-center justify-center rounded-full transition duration-200 ${
-              isActive ? "bg-black text-white" : "hover:bg-gray-200 text-black"
+            `flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition duration-200 ${
+              isActive ? "bg-black text-white scale-110" : "hover:scale-105 hover:bg-gray-200 text-black"
             }`
           }
           title="Reservar"
         >
-          <CalendarPlus className="text-black" />
+          {({ isActive }) => (
+            <>
+              <CalendarPlus className={isActive ? "text-white" : "text-black"} />
+              <span className="text-[10px]">Reservar</span>
+            </>
+          )}
         </NavLink>
         <button
           onClick={() => setShowLogin(true)}
           title="Iniciar Sesión"
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-yellow-300 text-black"
+          className="flex flex-col items-center gap-1 w-10 h-10 justify-center rounded-full transform transition-all hover:scale-105 hover:bg-yellow-300 text-black"
         >
-          <LogIn />
+          <LogIn className="text-black" />
+          <span className="text-[10px]">Login</span>
         </button>
+        {username && (
+          <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm">
+            {username.charAt(0).toUpperCase()}
+          </div>
+        )}
       </nav>
 
       {showLogin && (
