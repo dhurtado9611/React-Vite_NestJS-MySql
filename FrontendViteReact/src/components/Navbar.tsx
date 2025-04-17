@@ -9,8 +9,8 @@ const NavbarTop = () => {
     }`;
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-md border-b border-red-800 z-50 shadow-md">
-      <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+    <header className="fixed top-0 left-0 w-full bg-black/40 backdrop-blur-md z-40 shadow-md">
+      <div className="max-w-7xl mx-auto px-20 py-2 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <img src={Logo} alt="Logo" className="w-10 h-10 rounded-full border-2 border-white" />
           <Link to="/" className={activeClass('/')}>Inicio</Link>

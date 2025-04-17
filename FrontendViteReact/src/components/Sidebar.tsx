@@ -50,9 +50,9 @@ const SidebarResponsive = () => {
   return (
     <div className="relative">
       {/* Sidebar escritorio con estilo glassmorphism */}
-      <aside className="hidden lg:flex fixed top-4 left-4 bottom-4 w-20 bg-black/40 backdrop-blur-md shadow-xl text-white z-50 rounded-3xl flex-col justify-between items-center py-6">
+      <aside className="hidden lg:flex fixed top-0 bottom-0 rounded-r-lg w-20 bg-white/40 backdrop-blur-md shadow-xl text-white z-50 flex-col justify-between items-center py-6">
         <div className="flex flex-col items-center gap-6">
-          <img src={logoSrc} alt="Logo" className="w-14 h-14 rounded-full bg-white p-[2px] transition duration-300 hover:shadow-[0_0_12px_rgba(255,255,255,0.5)]" />
+          <img src={logoSrc} alt="Logo" className="w-16 h-16 rounded-full bg-white p-[2px] transition duration-300 hover:shadow-[0_0_12px_rgba(255,255,255,0.5)]" />
           <nav className="flex flex-col gap-6 items-center">
             {username &&
               links.map((link, index) => (

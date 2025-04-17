@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { FaCalendarAlt } from "react-icons/fa";
 import Carousel from "../components/Home/Carousel";
 import fondo1 from "../assets/fondo1.jpg";
 import Footer from "../components/Home/Footer";
+import ReservarCliente from "../pages/ReservarCliente";
+import Logo from "../assets/Logo-PNG.png";
 
 const Home = () => {
   const location = useLocation();
@@ -15,6 +18,13 @@ const Home = () => {
       setTimeout(() => setMensaje(""), 5000);
     }
   }, [location]);
+
+  const handleScrollToReserva = () => {
+    const target = document.getElementById("reserva-cliente-section");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <>
@@ -30,8 +40,16 @@ const Home = () => {
           </div>
         )}
 
+        <div className="z-10">
+          <img
+            src={Logo}
+            alt="Logo principal"
+            className="w-40 sm:w-56 md:w-64 lg:w-72 xl:w-80 mb-4 drop-shadow-xl"
+          />
+        </div>
+
         <div className="w-full z-10">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold pt-4 px-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold pt-2 px-2">
             ¡Bienvenido a nuestra plataforma de reservas!
           </h1>
         </div>
@@ -39,7 +57,20 @@ const Home = () => {
         <div className="w-full max-w-4xl z-10">
           <Carousel setBackground={setBackground} />
         </div>
+
+        <button
+          onClick={handleScrollToReserva}
+          className="z-10 mt-6 px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-semibold rounded-lg shadow-md transition flex items-center gap-2"
+        >
+          <FaCalendarAlt className="text-lg" /> Reservar ahora
+        </button>
       </div>
+
+      {/* Target para reservar */}
+      <div id="reserva-cliente-section" className="w-full py-5 px-3 bg-white text-black">
+        <ReservarCliente />
+      </div>
+
       <Footer />
     </>
   );
