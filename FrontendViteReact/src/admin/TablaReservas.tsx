@@ -8,7 +8,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import TableReservas from '../components/CrearReservas/TableCrearReservasAdmin';
 
 interface Reserva {
   id: number;
@@ -26,7 +25,6 @@ interface Reserva {
 
 const TablaReservas = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [ingresosMesActual, setIngresosMesActual] = useState<number>(0);
 
   const cargarReservas = async () => {
@@ -112,15 +110,6 @@ const TablaReservas = () => {
           <h6 className="text-info text-sm">Total ingresos del mes actual</h6>
           <p className="fs-5 fw-bold text-dark mt-1 mb-0">${ingresosMesActual.toLocaleString()}</p>
         </div>
-      </div>
-
-      <div className="mb-5">
-        <TableReservas
-          reservas={reservas}
-          fetchReservas={cargarReservas}
-          selectedId={selectedId}
-          setSelectedId={setSelectedId}
-        />
       </div>
     </div>
   );
