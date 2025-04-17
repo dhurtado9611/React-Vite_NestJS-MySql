@@ -8,7 +8,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 
 interface Cuadre {
   id: number;
@@ -21,36 +20,20 @@ interface Cuadre {
 
 const TablaCuadre = () => {
   const [cuadres, setCuadres] = useState<Cuadre[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [filtroTurno, setFiltroTurno] = useState<string>('');
+  const [mes, setMes] = useState<number>(new Date().getMonth() + 1);
+  const [anio, setAnio] = useState<number>(new Date().getFullYear());
 
   const cargarCuadres = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) return setError('No hay token disponible.');
+      if (!token) return;
 
       const res = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/cuadre', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCuadres(res.data);
-      setError(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error al cargar cuadre:', err);
-      setError(err.response?.data?.message || 'Error desconocido');
-    }
-  };
-
-  const eliminarCuadre = async (id: number) => {
-    if (!confirm('¿Deseas eliminar este registro de cuadre?')) return;
-    try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      cargarCuadres();
-    } catch (error) {
-      alert('Error al eliminar el registro');
-      console.error(error);
     }
   };
 
@@ -58,49 +41,51 @@ const TablaCuadre = () => {
     cargarCuadres();
   }, []);
 
-  const cuadresFiltrados = filtroTurno
-    ? cuadres.filter((c) => c.turno === filtroTurno)
-    : cuadres;
-
-  const datosGrafica = Object.values(
-    cuadresFiltrados.reduce((acc: any, c: Cuadre) => {
-      if (!acc[c.fecha]) acc[c.fecha] = { fecha: c.fecha, total: 0 };
-      acc[c.fecha].total += c.basecaja;
-      return acc;
-    }, {})
-  );
+  const datosFiltrados = cuadres
+    .filter((c) => {
+      const fecha = new Date(c.fecha);
+      return fecha.getMonth() + 1 === mes && fecha.getFullYear() === anio;
+    })
+    .map((c) => {
+      const dia = new Date(c.fecha).getDate();
+      return { dia, basecaja: c.basecaja };
+    });
 
   return (
-    <div className="container-fluid px-3 py-4">
-      <h2 className="text-xl fw-bold mb-4 text-white">📋 Registro de Cuadres</h2>
-
-      {error && <div className="alert alert-danger">Error: {error}</div>}
-
-      <div className="mb-4">
-        <label className="form-label me-2">Filtrar por turno:</label>
-        <select
-          value={filtroTurno}
-          onChange={(e) => setFiltroTurno(e.target.value)}
-          className="form-select w-auto d-inline-block"
-        >
-          <option value="">Todos</option>
-          <option value="08:00">Mañana</option>
-          <option value="14:00">Tarde</option>
-          <option value="20:00">Noche</option>
-        </select>
+    <div className="container-fluid px-3 py-3">
+      {/* Filtros de mes y año */}
+      <div className="row g-3 mb-3">
+        <div className="col">
+          <label className="form-label">Mes</label>
+          <select className="form-select" value={mes} onChange={(e) => setMes(Number(e.target.value))}>
+            {[...Array(12)].map((_, i) => (
+              <option key={i + 1} value={i + 1}>{i + 1}</option>
+            ))}
+          </select>
+        </div>
+        <div className="col">
+          <label className="form-label">Año</label>
+          <input
+            type="number"
+            className="form-control"
+            value={anio}
+            onChange={(e) => setAnio(Number(e.target.value))}
+          />
+        </div>
       </div>
 
-      <div className="card mb-5 shadow-sm">
-        <div className="card-body">
-          <h6 className="card-title text-primary mb-3">📈 Base de caja por día</h6>
+      {/* Gráfica basecaja por día */}
+      <div className="card shadow-sm mb-4">
+        <div className="card-body p-2">
+          <h6 className="text-primary text-sm mb-2">Base caja por día</h6>
           <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={datosGrafica}>
-              <XAxis dataKey="fecha" hide />
-              <YAxis hide />
+            <LineChart data={datosFiltrados} layout="vertical">
+              <XAxis type="number" dataKey="basecaja" />
+              <YAxis type="category" dataKey="dia" interval={0} />
               <Tooltip />
               <Line
                 type="monotone"
-                dataKey="total"
+                dataKey="basecaja"
                 stroke="#0d6efd"
                 strokeWidth={2}
                 dot={{ r: 3 }}
@@ -110,41 +95,37 @@ const TablaCuadre = () => {
         </div>
       </div>
 
-      <div className="table-responsive">
-        <table className="table table-striped table-bordered table-hover text-center">
-          <thead className="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Colaborador</th>
-              <th>Fecha</th>
-              <th>Turno</th>
-              <th>Hora Cierre</th>
-              <th>Base Caja</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cuadresFiltrados.map((cuadre) => (
-              <tr key={cuadre.id}>
-                <td>{cuadre.id}</td>
-                <td>{cuadre.colaborador}</td>
-                <td>{cuadre.fecha}</td>
-                <td>{cuadre.turno}</td>
-                <td>{cuadre.turnoCerrado || 'Pendiente'}</td>
-                <td>${cuadre.basecaja}</td>
-                <td>
-                  <button
-                    onClick={() => eliminarCuadre(cuadre.id)}
-                    className="btn btn-sm btn-outline-danger"
-                    title="Eliminar"
-                  >
-                    <i className="bi bi-trash-fill"></i>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Tabla con scroll responsive */}
+      <div className="card shadow-sm">
+        <div className="card-body p-2">
+          <h6 className="text-dark text-sm mb-2">Registros de Cuadre</h6>
+          <div style={{ maxHeight: '300px', overflowX: 'auto', overflowY: 'auto' }}>
+            <table className="table table-striped table-bordered text-center">
+              <thead className="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Colaborador</th>
+                  <th>Fecha</th>
+                  <th>Turno</th>
+                  <th>Hora Cierre</th>
+                  <th>Base Caja</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cuadres.map((cuadre) => (
+                  <tr key={cuadre.id}>
+                    <td>{cuadre.id}</td>
+                    <td>{cuadre.colaborador}</td>
+                    <td>{cuadre.fecha}</td>
+                    <td>{cuadre.turno}</td>
+                    <td>{cuadre.turnoCerrado || 'Pendiente'}</td>
+                    <td>${cuadre.basecaja}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
