@@ -9,10 +9,12 @@ import { AuthModule } from './auth/auth.module';
 import { CuadreModule } from './cuadrecaja/cuadre.module';
 import { Cuadre } from './cuadrecaja/cuadre.entity';
 import { AdminModule } from './admin/admin.module';
+import { ReservasClienteModule } from './cliente/reservas_cliente.module';
 
 @Module({
   imports: [
     AdminModule,
+    ReservasClienteModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
