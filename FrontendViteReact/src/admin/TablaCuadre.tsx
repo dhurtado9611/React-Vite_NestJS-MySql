@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 type Cuadre = {
   id: number;
@@ -75,21 +76,21 @@ const TablaCuadre = () => {
   );
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold mb-4">Tabla Cuadre</h2>
+    <div className="container-fluid px-3 py-4">
+      <h2 className="text-xl fw-bold mb-4 text-white">📋 Registro de Cuadres</h2>
 
       {error && (
-        <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
+        <div className="alert alert-danger" role="alert">
           Error: {error}
         </div>
       )}
 
       <div className="mb-4">
-        <label className="mr-2">Filtrar por turno:</label>
+        <label className="form-label me-2">Filtrar por turno:</label>
         <select
           value={filtroTurno}
           onChange={(e) => setFiltroTurno(e.target.value)}
-          className="border rounded px-2 py-1"
+          className="form-select w-auto d-inline-block"
         >
           <option value="">Todos</option>
           <option value="08:00">Mañana</option>
@@ -98,47 +99,57 @@ const TablaCuadre = () => {
         </select>
       </div>
 
-      <div className="mb-6">
-        <h3 className="text-md font-semibold mb-2">📊 Ingresos por Día (Base Caja)</h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={datosGrafica} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="fecha" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="total" fill="#4f46e5" />
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="card mb-5 shadow-sm">
+        <div className="card-body">
+          <h5 className="card-title mb-3 text-primary">📊 Ingresos por Día (Base Caja)</h5>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={datosGrafica} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="fecha" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="total" fill="#0d6efd" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      <table className="table-auto w-full border text-sm">
-        <thead>
-          <tr>
-            <th className="border p-1">ID</th>
-            <th className="border p-1">Colaborador</th>
-            <th className="border p-1">Fecha</th>
-            <th className="border p-1">Turno</th>
-            <th className="border p-1">Hora Cierre</th>
-            <th className="border p-1">Base Caja</th>
-            <th className="border p-1">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cuadresFiltrados.map((cuadre) => (
-            <tr key={cuadre.id}>
-              <td className="border p-1">{cuadre.id}</td>
-              <td className="border p-1">{cuadre.colaborador}</td>
-              <td className="border p-1">{cuadre.fecha}</td>
-              <td className="border p-1">{cuadre.turno}</td>
-              <td className="border p-1">{cuadre.turnoCerrado || 'Pendiente'}</td>
-              <td className="border p-1">{cuadre.basecaja}</td>
-              <td className="border p-1 text-center">
-                <button onClick={() => eliminarCuadre(cuadre.id)} className="text-red-600">🗑️</button>
-              </td>
+      <div className="table-responsive">
+        <table className="table table-striped table-bordered table-hover text-center">
+          <thead className="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Colaborador</th>
+              <th>Fecha</th>
+              <th>Turno</th>
+              <th>Hora Cierre</th>
+              <th>Base Caja</th>
+              <th>Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {cuadresFiltrados.map((cuadre) => (
+              <tr key={cuadre.id}>
+                <td>{cuadre.id}</td>
+                <td>{cuadre.colaborador}</td>
+                <td>{cuadre.fecha}</td>
+                <td>{cuadre.turno}</td>
+                <td>{cuadre.turnoCerrado || 'Pendiente'}</td>
+                <td>${cuadre.basecaja}</td>
+                <td>
+                  <button
+                    onClick={() => eliminarCuadre(cuadre.id)}
+                    className="btn btn-sm btn-outline-danger"
+                    title="Eliminar"
+                  >
+                    <i className="bi bi-trash-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
