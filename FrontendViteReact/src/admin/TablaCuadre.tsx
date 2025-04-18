@@ -16,6 +16,7 @@ interface Cuadre {
   turno: string;
   turnoCerrado: string;
   basecaja: number;
+  totalEntregado: number;
 }
 
 const TablaCuadre = () => {
@@ -95,35 +96,39 @@ const TablaCuadre = () => {
         </div>
       </div>
 
-      {/* Tabla con scroll responsive */}
+      {/* Tabla con scroll en todas direcciones y tamaño reducido en móvil */}
       <div className="card shadow-sm">
         <div className="card-body p-2">
           <h6 className="text-dark text-sm mb-2">Registros de Cuadre</h6>
-          <div style={{ maxHeight: '300px', overflowX: 'auto', overflowY: 'auto' }}>
-            <table className="table table-striped table-bordered text-center">
-              <thead className="table-dark">
-                <tr>
-                  <th>ID</th>
-                  <th>Colaborador</th>
-                  <th>Fecha</th>
-                  <th>Turno</th>
-                  <th>Hora Cierre</th>
-                  <th>Base Caja</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cuadres.map((cuadre) => (
-                  <tr key={cuadre.id}>
-                    <td>{cuadre.id}</td>
-                    <td>{cuadre.colaborador}</td>
-                    <td>{cuadre.fecha}</td>
-                    <td>{cuadre.turno}</td>
-                    <td>{cuadre.turnoCerrado || 'Pendiente'}</td>
-                    <td>${cuadre.basecaja}</td>
+          <div className="overflow-auto w-100" style={{ maxHeight: '300px' }}>
+            <div className="table-responsive">
+              <table className="table table-sm table-striped table-bordered text-center">
+                <thead className="table-dark">
+                  <tr>
+                    <th>ID</th>
+                    <th>Colaborador</th>
+                    <th>Fecha</th>
+                    <th>Turno</th>
+                    <th>Hora Cierre</th>
+                    <th>Base Caja</th>
+                    <th>Total Entregado</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {cuadres.map((cuadre) => (
+                    <tr key={cuadre.id}>
+                      <td>{cuadre.id}</td>
+                      <td>{cuadre.colaborador}</td>
+                      <td>{cuadre.fecha}</td>
+                      <td>{cuadre.turno}</td>
+                      <td>{cuadre.turnoCerrado || 'Pendiente'}</td>
+                      <td>${cuadre.basecaja}</td>
+                      <td>${cuadre.totalEntregado}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
