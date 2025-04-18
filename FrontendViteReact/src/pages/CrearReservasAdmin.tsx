@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 import ReservasForm from '../components/CrearReservas/ReservasForm';
-import TableCrearReservas from '../components/CrearReservas/TableCrearReservasInvitado';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import Caja from '../components/Caja';
+import TableReservas from '../components/CrearReservas/TableCrearReservasAdmin';
 
 interface Reserva {
   id: number;
@@ -20,15 +17,16 @@ interface Reserva {
   colaborador: string;
 }
 
-const CrearReservas = () => {
+const Reservas = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [formData, setFormData] = useState<Partial<Reserva>>({});
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem('username');
-    setUsername(storedUsername);
+      const storedUsername = localStorage.getItem('username');
+      setUsername(storedUsername);
   }, []);
 
   const fetchReservas = async () => {
@@ -44,58 +42,31 @@ const CrearReservas = () => {
     fetchReservas();
   }, []);
 
-  const exportarExcel = () => {
-    const datosTurno = localStorage.getItem('datosTurno');
-    if (!datosTurno) return alert('No hay turno activo');
-
-    const { colaborador, fecha } = JSON.parse(datosTurno);
-
-    const reservasFiltradas = reservas.filter(
-      (reserva) => reserva.fecha === fecha && reserva.colaborador === colaborador
-    );
-
-    const worksheet = XLSX.utils.json_to_sheet(reservasFiltradas);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservas');
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(data, `reservas_${colaborador}_${fecha}.xlsx`);
-  };
-
   return (
     <div className="relative w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-white lg:pl-24">
       <h2 className="text-2xl font-bold mb-4">
-        Bienvenido {username || 'Invitado'} ¡aquí puedes hacer tus registros!
+        Bienvenido, {username || 'Invitado'}, ¡aquí puedes hacer tus registros, modificarlos o eliminarlos!
       </h2>
-
+      <h2 className="mb-4">{editingId ? 'Editar Reserva' : 'Agregar Reserva'}</h2>
       <ReservasForm
         fetchReservas={fetchReservas}
         formData={formData}
         setFormData={setFormData}
-        editingId={null}
-        setEditingId={() => {}}
+        editingId={editingId}
+        setEditingId={setEditingId}
         selectedId={selectedId}
         setSelectedId={setSelectedId}
         reservas={reservas}
-        disableEditButton={true}
-        disableDeleteButton={true}
       />
 
-      <TableCrearReservas
+      <TableReservas
         reservas={reservas}
         fetchReservas={fetchReservas}
+        selectedId={selectedId}
+        setSelectedId={setSelectedId}
       />
-
-      <Caja/>
-
-      <div className="text-center mt-4">
-        <button onClick={exportarExcel} className="btn btn-success">
-          Exportar reservas del turno a Excel
-        </button>
-      </div>
-
     </div>
   );
 };
 
-export default CrearReservas;
+export default Reservas;
