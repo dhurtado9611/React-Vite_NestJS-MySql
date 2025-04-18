@@ -8,6 +8,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { Trash2 } from 'lucide-react';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 interface Cuadre {
   id: number;
@@ -23,6 +26,8 @@ const TablaCuadre = () => {
   const [cuadres, setCuadres] = useState<Cuadre[]>([]);
   const [mes, setMes] = useState<number>(new Date().getMonth() + 1);
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
+  const [cuadreEliminar, setCuadreEliminar] = useState<Cuadre | null>(null);
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   const cargarCuadres = async () => {
     try {
@@ -38,6 +43,26 @@ const TablaCuadre = () => {
     }
   };
 
+  const confirmarEliminacion = (cuadre: Cuadre) => {
+    setCuadreEliminar(cuadre);
+    setMostrarModal(true);
+  };
+
+  const eliminarCuadreConfirmado = async () => {
+    if (!cuadreEliminar) return;
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      await axios.delete(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${cuadreEliminar.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCuadres(cuadres.filter((c) => c.id !== cuadreEliminar.id));
+      setMostrarModal(false);
+    } catch (err) {
+      console.error('Error al eliminar cuadre:', err);
+    }
+  };
+
   useEffect(() => {
     cargarCuadres();
   }, []);
@@ -47,8 +72,8 @@ const TablaCuadre = () => {
       const fecha = new Date(c.fecha);
       return fecha.getMonth() + 1 === mes && fecha.getFullYear() === anio;
     })
-    .reduce((acc: { dia: number; total: number }[], c) => {
-      const dia = new Date(c.fecha).getDate();
+    .reduce((acc: { dia: string; total: number }[], c) => {
+      const dia = new Date(c.fecha).toISOString().split('T')[0];
       const existente = acc.find((d) => d.dia === dia);
       if (existente) {
         existente.total += c.totalEntregado;
@@ -81,10 +106,10 @@ const TablaCuadre = () => {
         </div>
       </div>
 
-      {/* Gráfica totalEntregado por día */}
+      {/* Gráfica totalEntregado por fecha */}
       <div className="card shadow-sm mb-4">
         <div className="card-body p-2">
-          <h6 className="text-primary text-sm mb-2">Total entregado por día</h6>
+          <h6 className="text-primary text-sm mb-2">Total entregado por fecha</h6>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={datosFiltrados}>
               <XAxis dataKey="dia" tick={{ fontSize: 12 }} />
@@ -106,8 +131,8 @@ const TablaCuadre = () => {
       <div className="card shadow-sm">
         <div className="card-body p-2">
           <h6 className="text-dark text-sm mb-2">Registros de Cuadre</h6>
-          <div className="table-responsive overflow-auto" style={{ maxHeight: '400px', maxWidth: '100%' }}>
-            <table className="table table-sm table-striped table-bordered text-center">
+          <div style={{ overflow: 'auto', maxHeight: '400px' }}>
+            <table className="table table-sm table-striped table-bordered text-center" style={{ minWidth: '900px' }}>
               <thead className="table-dark">
                 <tr>
                   <th>ID</th>
@@ -117,6 +142,7 @@ const TablaCuadre = () => {
                   <th>Hora Cierre</th>
                   <th>Base Caja</th>
                   <th>Total Entregado</th>
+                  <th>Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -129,6 +155,15 @@ const TablaCuadre = () => {
                     <td>{cuadre.turnoCerrado || 'Pendiente'}</td>
                     <td>${cuadre.basecaja}</td>
                     <td>${cuadre.totalEntregado}</td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => confirmarEliminacion(cuadre)}
+                        title="Eliminar"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -136,6 +171,23 @@ const TablaCuadre = () => {
           </div>
         </div>
       </div>
+
+      <Modal show={mostrarModal} onHide={() => setMostrarModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirmar eliminación</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          ¿Estás seguro de que deseas eliminar el cuadre del día <strong>{cuadreEliminar?.fecha}</strong>?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setMostrarModal(false)}>
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={eliminarCuadreConfirmado}>
+            Eliminar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
