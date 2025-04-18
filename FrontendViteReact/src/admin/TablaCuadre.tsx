@@ -47,10 +47,16 @@ const TablaCuadre = () => {
       const fecha = new Date(c.fecha);
       return fecha.getMonth() + 1 === mes && fecha.getFullYear() === anio;
     })
-    .map((c) => {
+    .reduce((acc: { dia: number; total: number }[], c) => {
       const dia = new Date(c.fecha).getDate();
-      return { dia, basecaja: c.basecaja };
-    });
+      const existente = acc.find((d) => d.dia === dia);
+      if (existente) {
+        existente.total += c.totalEntregado;
+      } else {
+        acc.push({ dia, total: c.totalEntregado });
+      }
+      return acc;
+    }, []);
 
   return (
     <div className="container-fluid px-3 py-3">
@@ -75,19 +81,19 @@ const TablaCuadre = () => {
         </div>
       </div>
 
-      {/* Gráfica basecaja por día */}
+      {/* Gráfica totalEntregado por día */}
       <div className="card shadow-sm mb-4">
         <div className="card-body p-2">
-          <h6 className="text-primary text-sm mb-2">Base caja por día</h6>
+          <h6 className="text-primary text-sm mb-2">Total entregado por día</h6>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={datosFiltrados} layout="vertical">
-              <XAxis type="number" dataKey="basecaja" />
+              <XAxis type="number" dataKey="total" />
               <YAxis type="category" dataKey="dia" interval={0} />
               <Tooltip />
               <Line
                 type="monotone"
-                dataKey="basecaja"
-                stroke="#0d6efd"
+                dataKey="total"
+                stroke="#dc3545"
                 strokeWidth={2}
                 dot={{ r: 3 }}
               />
@@ -96,39 +102,37 @@ const TablaCuadre = () => {
         </div>
       </div>
 
-      {/* Tabla con scroll en todas direcciones y tamaño reducido en móvil */}
+      {/* Tabla con scroll completo */}
       <div className="card shadow-sm">
         <div className="card-body p-2">
           <h6 className="text-dark text-sm mb-2">Registros de Cuadre</h6>
-          <div className="overflow-auto w-100" style={{ maxHeight: '300px' }}>
-            <div className="table-responsive">
-              <table className="table table-sm table-striped table-bordered text-center">
-                <thead className="table-dark">
-                  <tr>
-                    <th>ID</th>
-                    <th>Colaborador</th>
-                    <th>Fecha</th>
-                    <th>Turno</th>
-                    <th>Hora Cierre</th>
-                    <th>Base Caja</th>
-                    <th>Total Entregado</th>
+          <div className="table-responsive overflow-auto" style={{ maxHeight: '400px', maxWidth: '100%' }}>
+            <table className="table table-sm table-striped table-bordered text-center">
+              <thead className="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Colaborador</th>
+                  <th>Fecha</th>
+                  <th>Turno</th>
+                  <th>Hora Cierre</th>
+                  <th>Base Caja</th>
+                  <th>Total Entregado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cuadres.map((cuadre) => (
+                  <tr key={cuadre.id}>
+                    <td>{cuadre.id}</td>
+                    <td>{cuadre.colaborador}</td>
+                    <td>{cuadre.fecha}</td>
+                    <td>{cuadre.turno}</td>
+                    <td>{cuadre.turnoCerrado || 'Pendiente'}</td>
+                    <td>${cuadre.basecaja}</td>
+                    <td>${cuadre.totalEntregado}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {cuadres.map((cuadre) => (
-                    <tr key={cuadre.id}>
-                      <td>{cuadre.id}</td>
-                      <td>{cuadre.colaborador}</td>
-                      <td>{cuadre.fecha}</td>
-                      <td>{cuadre.turno}</td>
-                      <td>{cuadre.turnoCerrado || 'Pendiente'}</td>
-                      <td>${cuadre.basecaja}</td>
-                      <td>${cuadre.totalEntregado}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
