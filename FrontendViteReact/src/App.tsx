@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import Reservas from './pages/CrearReservasAdmin'
-import Historial from './pages/ActividadAdmin'
+import Actividad from './pages/ActividadAdmin'
 import ReservarCliente from './pages/ReservarCliente'
 import CrearReservas from './pages/CrearReservasInvitado'
 import HistorialInvitado from './pages/ActividadInvitado'
@@ -26,7 +26,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/reservas" element={<Reservas />} />
-            <Route path="/historial" element={<Historial />} />
+            <Route path="/Actividad" element={<Actividad />} />
             <Route path="/ReservarCliente" element={<ReservarCliente />} />
             <Route
               path="/crear-reservas"
