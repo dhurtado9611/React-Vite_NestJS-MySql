@@ -85,10 +85,10 @@ const TablaCuadre = () => {
       <div className="card shadow-sm mb-4">
         <div className="card-body p-2">
           <h6 className="text-primary text-sm mb-2">Total entregado por día</h6>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={datosFiltrados} layout="vertical">
-              <XAxis type="number" dataKey="total" />
-              <YAxis type="category" dataKey="dia" interval={0} />
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={datosFiltrados}>
+              <XAxis dataKey="dia" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
               <Line
                 type="monotone"
