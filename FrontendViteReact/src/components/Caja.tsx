@@ -80,12 +80,17 @@ const Caja = () => {
         .filter(r => r.colaborador === colaborador && r.fecha === fecha)
         .reduce((sum, r) => sum + r.valor, 0);
       setTotalReservas(total);
+  
+      // Guarda en localStorage
+      localStorage.setItem('totalReservasTurno', total.toString());
+  
     } catch (error) {
       console.error('Error al calcular total de reservas:', error);
     } finally {
       setCargando(false);
     }
   };
+  
 
   const cerrarTurno = async () => {
     if (!cuadreId) return;

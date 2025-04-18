@@ -54,7 +54,7 @@ const TablaReservas = () => {
     (d: any) => parseInt(d.mes.split('-')[0]) === anio
   );
 
-  const datosTurno = ['08:00', '14:00', '20:00'].map((turno) => {
+  const datosTurno = ['07:00', '14:00', '21:00'].map((turno) => {
     const total = reservas.reduce((acc, r) => {
       return r.fecha === fechaTurno && r.hentrada.startsWith(turno) ? acc + r.valor : acc;
     }, 0);
@@ -77,11 +77,7 @@ const TablaReservas = () => {
     return fecha.getMonth() + 1 === new Date().getMonth() + 1 ? acc + r.valor : acc;
   }, 0);
 
-  const ultimoCuadre = cuadres.find(c => !c.turnoCerrado);
-  const reservasTurno = reservas.reduce((acc, r) => {
-    return r.fecha === ultimoCuadre?.fecha ? acc + r.valor : acc;
-  }, 0);
-  const totalTurnoActivo = (ultimoCuadre?.basecaja || 0) + reservasTurno;
+  const totalTurnoActivo = Number(localStorage.getItem('totalReservasTurno')) || 0;
 
   return (
     <div className="container-fluid px-2 py-3">
