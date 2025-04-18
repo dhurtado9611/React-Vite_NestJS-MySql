@@ -76,7 +76,7 @@ const SidebarResponsive = () => {
                   {({ isActive }) => (
                     <>
                       <link.icon className={isActive ? "text-red-600" : "text-black"} />
-                      <span className="text-[10px]">{link.label}</span>
+                      <span className="text-[10px] text-red-600 ">{link.label}</span>
                     </>
                   )}
                 </NavLink>

@@ -64,10 +64,10 @@ const TablaUsuarios = () => {
 
   return (
     <div className="text-black">
-      <h2 className="text-xl font-bold mb-4 text-white">Tabla de Usuarios</h2>
+      <h2 className="text-xl font-bold mb-4 text-auto">Tabla de Usuarios</h2>
 
       {error && (
-        <div className="bg-danger text-white p-3 rounded mb-4">
+        <div className="bg-danger text-auto p-3 rounded mb-4">
           ⚠️ Error: {error}
         </div>
       )}

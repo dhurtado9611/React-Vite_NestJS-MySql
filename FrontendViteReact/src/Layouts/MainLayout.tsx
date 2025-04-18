@@ -4,7 +4,7 @@ import NavbarTop from '../components/Navbar';
 
 const MainLayout = () => {
   return (
-    <div className="flex min-h-screen w-full bg-grey overflow-hidden">
+    <div className="flex min-h-screen w-full bg-white overflow-hidden">
       <Sidebar />
       <div className="flex-1 px-0 sm:px-6 lg:px-8">
         <Outlet />
