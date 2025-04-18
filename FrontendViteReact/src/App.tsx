@@ -1,16 +1,19 @@
 // App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import MainLayout from './Layouts/MainLayout'
 import Home from './pages/Home'
+import ReservarCliente from './pages/ReservarCliente'
+import LoginModal from './components/LoginModal'
+
+import AdminDashboard from './admin/AdminDashboard'
 import CrearReservasAdmin from './pages/CrearReservasAdmin'
 import ActividadAdmin from './pages/ActividadAdmin'
-import ReservarCliente from './pages/ReservarCliente'
 import CrearReservasInvitado from './pages/CrearReservasInvitado'
 import ActividadInvitado from './pages/ActividadInvitado'
+
 import RutaProtegidaInvitado from './components/RutaProtegidaInvitado'
-import AdminDashboard from './admin/AdminDashboard'
 import RutaProtegidaAdmin from './components/RutaProtegidaAdmin'
-import MainLayout from './Layouts/MainLayout'
-import LoginModal from './components/LoginModal'
+
 import LogoLoader from './components/LogoLoader'
 
 function App() {
