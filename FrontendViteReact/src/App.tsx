@@ -1,11 +1,11 @@
 // App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
-import Reservas from './pages/CrearReservasAdmin'
-import Actividad from './pages/ActividadAdmin'
+import CrearReservasAdmin from './pages/CrearReservasAdmin'
+import ActividadAdmin from './pages/ActividadAdmin'
 import ReservarCliente from './pages/ReservarCliente'
-import CrearReservas from './pages/CrearReservasInvitado'
-import HistorialInvitado from './pages/ActividadInvitado'
+import CrearReservasInvitado from './pages/CrearReservasInvitado'
+import ActividadInvitado from './pages/ActividadInvitado'
 import RutaProtegidaInvitado from './components/RutaProtegidaInvitado'
 import AdminDashboard from './admin/AdminDashboard'
 import RutaProtegidaAdmin from './components/RutaProtegidaAdmin'
@@ -25,32 +25,61 @@ function App() {
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/reservas" element={<Reservas />} />
-            <Route path="/Actividad" element={<Actividad />} />
             <Route path="/ReservarCliente" element={<ReservarCliente />} />
+
             <Route
-              path="/crear-reservas"
+              path="/LoginModal"
               element={
-                <RutaProtegidaInvitado>
-                  <CrearReservas />
-                </RutaProtegidaInvitado>
+              <LoginModal onClose={handleCloseModal} />
               }
             />
-            <Route path="/historial-invitado" element={<HistorialInvitado />} />
+
             <Route
-              path="/admin"
+              path="/AdminDashboard"
               element={
                 <RutaProtegidaAdmin>
                   <AdminDashboard />
                 </RutaProtegidaAdmin>
               }
             />
-          </Route>
 
-          <Route
-            path="/login-modal"
-            element={<LoginModal onClose={handleCloseModal} />}
-          />
+            <Route 
+              path="/CrearReservasAdmin"
+              element={
+                <RutaProtegidaAdmin>
+                  <CrearReservasAdmin />
+                </RutaProtegidaAdmin>
+              }
+            />
+
+            <Route 
+              path="/ActividadAdmin" 
+              element={
+                <RutaProtegidaAdmin>
+                  <ActividadAdmin />
+                </RutaProtegidaAdmin>
+              }
+            />
+
+            <Route
+              path="/CrearReservasInvitado"
+              element={
+                <RutaProtegidaInvitado>
+                  <CrearReservasInvitado />
+                </RutaProtegidaInvitado>
+              }
+            />
+
+            <Route 
+              path="/ActividadInvitado"
+              element={
+                <RutaProtegidaInvitado>
+                  <ActividadInvitado />
+                </RutaProtegidaInvitado>
+              }
+            />
+
+          </Route>
         </Routes>
       </Router>
     </>

@@ -7,7 +7,7 @@ const RutaProtegidaAdmin = ({ children }: { children: ReactNode }) => {
 
   // Si no hay token o el rol no es admin, redirige a login
   if (!token || rol !== 'admin') {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

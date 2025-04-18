@@ -6,7 +6,7 @@ const RutaProtegidaInvitado = ({ children }: { children: ReactNode }) => {
 
   if (!datosTurno) {
     alert('Debes iniciar un turno antes de acceder.');
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

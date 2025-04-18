@@ -52,15 +52,15 @@ const SidebarActividadContador = () => {
     if (rol === "admin") {
       return [
         { to: "/", icon: Home, label: "Inicio" },
-        { to: "/reservas", icon: CalendarPlus, label: "Reservas" },
-        { to: "/actividad", icon: Clock, label: "Actividad" },
-        { to: "/admin", icon: BarChart3, label: "Admin" }
+        { to: "/CrearReservasAdmin", icon: CalendarPlus, label: "Reservas" },
+        { to: "/ActividadAdmin", icon: Clock, label: "Actividad" },
+        { to: "/AdminDashboard", icon: BarChart3, label: "Admin" }
       ];
     } else if (rol === "invitado") {
       return [
         { to: "/", icon: Home, label: "Inicio" },
-        { to: "/crear-reservas", icon: CalendarPlus, label: "Crear" },
-        { to: "/actividad", icon: Clock, label: "Actividad" }
+        { to: "/CrearReservasInvitado", icon: CalendarPlus, label: "Reservas" },
+        { to: "/ActividadInvitado", icon: Clock, label: "Actividad" }
       ];
     }
     return [];
