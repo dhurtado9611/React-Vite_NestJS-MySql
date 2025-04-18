@@ -110,7 +110,7 @@ const Caja = () => {
   const totalCaja = baseCaja + totalReservas;
 
   return (
-    <div className="mt-5 p-4 text-white">
+    <div className="mt-5 text-auto">
       <h3 className="text-2xl font-semibold mb-4">Cuadre de Caja</h3>
       <div className="overflow-x-auto">
         <table className="table table-bordered table-striped w-full max-w-4xl text-center text-sm md:text-base">
@@ -132,7 +132,7 @@ const Caja = () => {
               <td>${baseCaja.toLocaleString()}</td>
               <td>
                 {cargando ? (
-                  <span className="italic text-gray-300">actualizando...</span>
+                  <span className="italic text-gray-300">...</span>
                 ) : (
                   `$${totalReservas.toLocaleString()}`
                 )}
@@ -141,8 +141,9 @@ const Caja = () => {
             </tr>
           </tbody>
         </table>
+
         {rol === 'invitado' && (
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex justify-Center">
             <button
               onClick={cerrarTurno}
               className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded shadow"
@@ -151,6 +152,7 @@ const Caja = () => {
             </button>
           </div>
         )}
+
       </div>
     </div>
   );
