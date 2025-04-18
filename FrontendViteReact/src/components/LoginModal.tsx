@@ -54,7 +54,7 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
             );
 
             onClose();
-            navigate('/crear-reservas');
+            navigate('/CrearReservasInvitado');
             return;
           }
         } catch (error) {
@@ -75,7 +75,7 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
     localStorage.setItem('datosTurno', JSON.stringify(data));
     setMostrarModalTurno(false);
     onClose();
-    navigate('/crear-reservas');
+    navigate('/CrearReservasInvitado');
   };
 
   return (
