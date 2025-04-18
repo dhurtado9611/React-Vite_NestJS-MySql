@@ -6,4 +6,8 @@ export class UpdateCuadreDto extends PartialType(CreateCuadreDto) {
   @IsOptional()
   @IsNumber()
   totalEntregado?: number;
+
+  @IsOptional()
+  @IsNumber()
+  totalActual?: number;
 }

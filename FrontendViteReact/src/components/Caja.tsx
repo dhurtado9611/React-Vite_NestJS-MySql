@@ -80,24 +80,31 @@ const Caja = () => {
         .filter(r => r.colaborador === colaborador && r.fecha === fecha)
         .reduce((sum, r) => sum + r.valor, 0);
       setTotalReservas(total);
-  
-      // Guarda en localStorage
-      localStorage.setItem('totalReservasTurno', total.toString());
-  
+
+      const cuadreResponse = await api.get('/cuadre');
+      const cuadreActivo = cuadreResponse.data.find((c: Cuadre) => c.colaborador === colaborador && c.fecha === fecha && !c.turnoCerrado);
+
+      if (cuadreActivo) {
+        await api.patch(`/cuadre/${cuadreActivo.id}`, {
+          totalActual: total + (cuadreActivo.basecaja || 0)
+        });
+      }
     } catch (error) {
       console.error('Error al calcular total de reservas:', error);
     } finally {
       setCargando(false);
     }
   };
-  
 
   const cerrarTurno = async () => {
     if (!cuadreId) return;
     const horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
     try {
       const token = localStorage.getItem('token');
-      await api.patch(`/cuadre/${cuadreId}`, { turnoCerrado: horaActual, totalEntregado: totalReservas, }, {
+      await api.patch(`/cuadre/${cuadreId}`, {
+        turnoCerrado: horaActual,
+        totalEntregado: totalReservas,
+      }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       localStorage.removeItem('datosTurno');

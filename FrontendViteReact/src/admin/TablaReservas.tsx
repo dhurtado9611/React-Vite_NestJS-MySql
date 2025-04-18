@@ -21,6 +21,7 @@ interface Cuadre {
   turno: string;
   turnoCerrado: string;
   basecaja: number;
+  totalActual?: number;
   fecha: string;
 }
 
@@ -77,7 +78,8 @@ const TablaReservas = () => {
     return fecha.getMonth() + 1 === new Date().getMonth() + 1 ? acc + r.valor : acc;
   }, 0);
 
-  const totalTurnoActivo = Number(localStorage.getItem('totalReservasTurno')) || 0;
+  const ultimoCuadre = cuadres.find(c => !c.turnoCerrado);
+  const totalTurnoActivo = ultimoCuadre?.totalActual || 0;
 
   return (
     <div className="container-fluid px-2 py-3">

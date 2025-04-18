@@ -36,4 +36,5 @@ export class CuadreService {
   async remove(id: number): Promise<void> {
     await this.cuadreRepository.delete(id);
   }
+  
 }

@@ -19,7 +19,10 @@ export class Cuadre {
 
   @Column()
   turno: string;
-  
+
+  @Column({ type: 'int', nullable: true })
+  totalActual?: number;
+
   @Column({ type: 'varchar', nullable: true })
   turnoCerrado: string | null;
 }
