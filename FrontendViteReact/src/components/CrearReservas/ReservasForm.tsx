@@ -197,6 +197,7 @@ const ReservasForm = ({
           value={formData.hsalidamax || ''}
           readOnly
           className="form-control"
+          disabled
         />
       </div>
 
@@ -208,6 +209,7 @@ const ReservasForm = ({
           value={formData.hsalida || ''}
           onChange={handleInputChange}
           className="form-control"
+          disabled
         />
       </div>
 

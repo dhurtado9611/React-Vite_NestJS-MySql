@@ -143,7 +143,7 @@ const Caja = () => {
         </table>
 
         {rol === 'invitado' && (
-          <div className="mt-6 flex justify-Center">
+          <div className="mt-6 flex justify-center">
             <button
               onClick={cerrarTurno}
               className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded shadow"

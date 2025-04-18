@@ -2,10 +2,10 @@ import { FaFacebookF, FaInstagram, FaWhatsapp, FaMapMarkerAlt } from 'react-icon
 
 const Footer = () => {
   return (
-    <footer className="pb-20 w-full bg-gradient-to-r from-black via-gray-900 to-black text-white py-6 shadow-inner border-t border-red-700">
+    <footer className="py-20 w-full bg-gradient-to-r from-black via-gray-900 to-black text-white py-6 shadow-inner border-t border-red-700">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="text-sm text-gray-300 text-center md:text-left">
-          © {new Date().getFullYear()} <span className="text-red-500 font-semibold">Reservas App</span>. Todos los derechos reservados.
+          © {new Date().getFullYear()} <span className="text-red-500 font-semibold">El escondite motel</span>. Todos los derechos reservados. 
         </p>
         <div className="flex space-x-6 text-2xl">
           <a
