@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   CalendarPlus,
   Home,
+  Clock,
   ListChecks,
   BarChart3,
   LogIn,
@@ -10,11 +11,13 @@ import {
 } from "lucide-react";
 import logoSrc from "../assets/Logo-PNG.png";
 import LoginModal from "./LoginModal";
+import axios from "axios";
 
-const SidebarResponsive = () => {
+const SidebarActividadContador = () => {
   const [username, setUsername] = useState<string | null>(null);
   const [rol, setRol] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
+  const [vencidas, setVencidas] = useState<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +25,15 @@ const SidebarResponsive = () => {
     const storedRol = localStorage.getItem("rol");
     setUsername(storedUser);
     setRol(storedRol);
+
+    axios.get("https://react-vitenestjs-mysql-production.up.railway.app/reservas").then((res) => {
+      const vencidas = res.data.filter((r: any) => {
+        const h1 = new Date(`2000-01-01T${r.hentrada}`);
+        const h2 = new Date(`2000-01-01T${r.hsalida}`);
+        return h2.getTime() - h1.getTime() > 4 * 60 * 60 * 1000;
+      });
+      setVencidas(vencidas.length);
+    });
   }, []);
 
   const logout = () => {
@@ -31,56 +43,55 @@ const SidebarResponsive = () => {
     navigate("/");
   };
 
+  const commonLinkStyle = (isActive: boolean) =>
+    `flex flex-col items-center gap-1 w-16 h-16 justify-center transform transition-all duration-300 text-xs ${
+      isActive ? "text-red-600 scale-110" : "hover:scale-105 text-black"
+    }`;
+
   const getLinks = () => {
     if (rol === "admin") {
       return [
         { to: "/", icon: Home, label: "Inicio" },
         { to: "/reservas", icon: CalendarPlus, label: "Reservas" },
-        { to: "/historial", icon: ListChecks, label: "Historial" },
+        { to: "/actividad", icon: Clock, label: "Actividad" },
         { to: "/admin", icon: BarChart3, label: "Admin" }
       ];
     } else if (rol === "invitado") {
       return [
         { to: "/", icon: Home, label: "Inicio" },
         { to: "/crear-reservas", icon: CalendarPlus, label: "Crear" },
-        { to: "/historial-invitado", icon: ListChecks, label: "Historial" }
+        { to: "/actividad", icon: Clock, label: "Actividad" }
       ];
     }
     return [];
   };
 
-  const commonLinkStyle = (isActive: boolean) =>
-    `flex flex-col items-center gap-1 w-16 h-16 justify-center transform transition-all duration-300 text-xs ${
-      isActive ? "text-red-600 scale-110" : "hover:scale-105 text-black"
-    }`;
-
   return (
-    <div className="relative">
-      {/* Sidebar escritorio */}
+    <>
       <aside className="hidden md:flex fixed top-0 bottom-0 w-20 bg-white text-black z-50 flex-col justify-between items-center py-10 gap-8 border-r border-black shadow-xl">
         <div className="flex flex-col items-center gap-10">
-          <img
-            src={logoSrc}
-            alt="Logo"
-            className="w-16 h-16 object-contain"
-          />
+          <img src={logoSrc} alt="Logo" className="w-16 h-16 object-contain" />
           <nav className="flex flex-col gap-4 items-center text-xs">
-            {username &&
-              getLinks().map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={({ isActive }) => commonLinkStyle(isActive)}
-                  title={link.label}
-                >
-                  {({ isActive }) => (
-                    <>
-                      <link.icon className={isActive ? "text-red-600" : "text-black"} />
-                      <span className="text-[10px] text-red-600 ">{link.label}</span>
-                    </>
-                  )}
-                </NavLink>
-              ))}
+            {username && getLinks().map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) => commonLinkStyle(isActive)}
+                title={link.label}
+              >
+                {({ isActive }) => (
+                  <div className="relative flex flex-col items-center">
+                    {link.label === "Actividad" && vencidas > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full text-[10px] px-2 py-[1px]">
+                        {vencidas}
+                      </span>
+                    )}
+                    <link.icon className={isActive ? "text-red-600" : "text-black"} />
+                    <span className="text-[10px]">{link.label}</span>
+                  </div>
+                )}
+              </NavLink>
+            ))}
 
             {!username && (
               <NavLink
@@ -126,31 +137,29 @@ const SidebarResponsive = () => {
         )}
       </aside>
 
-      {/* Sidebar móvil inferior */}
+      {/* Versión móvil */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-black flex items-center justify-around z-50 shadow-inner text-xs">
-        <img
-          src={logoSrc}
-          alt="Logo"
-          className="w-10 h-10 object-contain"
-        />
-
-        {username &&
-          getLinks().map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              className={({ isActive }) => commonLinkStyle(isActive)}
-              title={link.label}
-            >
-              {({ isActive }) => (
-                <>
-                  <link.icon className={isActive ? "text-red-600" : "text-black"} />
-                  <span className="text-[10px]">{link.label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-
+        <img src={logoSrc} alt="Logo" className="w-10 h-10 object-contain" />
+        {username && getLinks().map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) => commonLinkStyle(isActive)}
+            title={link.label}
+          >
+            {({ isActive }) => (
+              <div className="relative flex flex-col items-center">
+                {link.label === "Actividad" && vencidas > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full text-[10px] px-2 py-[1px]">
+                    {vencidas}
+                  </span>
+                )}
+                <link.icon className={isActive ? "text-red-600" : "text-black"} />
+                <span className="text-[10px]">{link.label}</span>
+              </div>
+            )}
+          </NavLink>
+        ))}
         {!username && (
           <NavLink
             to="/ReservarCliente"
@@ -165,7 +174,6 @@ const SidebarResponsive = () => {
             )}
           </NavLink>
         )}
-
         {!username && (
           <button
             onClick={() => setShowLogin(true)}
@@ -176,7 +184,6 @@ const SidebarResponsive = () => {
             <span className="text-[10px]">Login</span>
           </button>
         )}
-
         {username && (
           <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm">
             {username.charAt(0).toUpperCase()}
@@ -195,8 +202,8 @@ const SidebarResponsive = () => {
           }}
         />
       )}
-    </div>
+    </>
   );
 };
 
-export default SidebarResponsive;
+export default SidebarActividadContador;
