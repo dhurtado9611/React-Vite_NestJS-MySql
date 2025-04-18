@@ -68,7 +68,7 @@ const SidebarActividadContador = () => {
 
   return (
     <>
-      <aside className="hidden md:flex fixed top-0 bottom-0 w-20 bg-white text-black z-50 flex-col justify-between items-center py-10 gap-8 border-r border-black shadow-xl">
+      <aside className="hidden md:flex fixed top-0 bottom-0 w-20 bg-white text-black z-50 flex-col justify-between items-center py-10 gap-8 border-r border-black shadow-xl overflow-y-auto">
         <div className="flex flex-col items-center gap-10">
           <img src={logoSrc} alt="Logo" className="w-16 h-16 object-contain" />
           <nav className="flex flex-col gap-4 items-center text-xs">
@@ -87,7 +87,7 @@ const SidebarActividadContador = () => {
                       </span>
                     )}
                     <link.icon className={isActive ? "text-red-600" : "text-black"} />
-                    <span className="text-[10px]">{link.label}</span>
+                    <span className="text-[10px] text-black no-underline">{link.label}</span>
                   </div>
                 )}
               </NavLink>
@@ -102,7 +102,7 @@ const SidebarActividadContador = () => {
                 {({ isActive }) => (
                   <>
                     <CalendarPlus className={isActive ? "text-red-600" : "text-black"} />
-                    <span className="text-[10px]">Reservar</span>
+                    <span className="text-[10px] text-black no-underline">Reservar</span>
                   </>
                 )}
               </NavLink>
@@ -115,7 +115,7 @@ const SidebarActividadContador = () => {
                 className="flex flex-col items-center gap-1 w-16 h-16 justify-center transform transition-all hover:scale-105 text-black"
               >
                 <LogIn className="text-black" />
-                <span className="text-[10px]">Login</span>
+                <span className="text-[10px] text-black no-underline">Login</span>
               </button>
             )}
             {username && (
@@ -125,7 +125,7 @@ const SidebarActividadContador = () => {
                 className="flex flex-col items-center gap-1 w-16 h-16 justify-center transform transition-all hover:scale-105 text-black"
               >
                 <LogOut className="text-black" />
-                <span className="text-[10px]">Salir</span>
+                <span className="text-[10px] text-black no-underline">Salir</span>
               </button>
             )}
           </nav>
@@ -138,7 +138,7 @@ const SidebarActividadContador = () => {
       </aside>
 
       {/* Versión móvil */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-black flex items-center justify-around z-50 shadow-inner text-xs">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-black flex items-center justify-around z-50 shadow-inner text-xs overflow-x-auto">
         <img src={logoSrc} alt="Logo" className="w-10 h-10 object-contain" />
         {username && getLinks().map((link) => (
           <NavLink
@@ -155,7 +155,7 @@ const SidebarActividadContador = () => {
                   </span>
                 )}
                 <link.icon className={isActive ? "text-red-600" : "text-black"} />
-                <span className="text-[10px]">{link.label}</span>
+                <span className="text-[10px] text-black no-underline">{link.label}</span>
               </div>
             )}
           </NavLink>
@@ -169,7 +169,7 @@ const SidebarActividadContador = () => {
             {({ isActive }) => (
               <>
                 <CalendarPlus className={isActive ? "text-red-600" : "text-black"} />
-                <span className="text-[10px]">Reservar</span>
+                <span className="text-[10px] text-black no-underline">Reservar</span>
               </>
             )}
           </NavLink>
@@ -181,13 +181,18 @@ const SidebarActividadContador = () => {
             className="flex flex-col items-center gap-1 w-16 h-16 justify-center transform transition-all hover:scale-105 text-black"
           >
             <LogIn className="text-black" />
-            <span className="text-[10px]">Login</span>
+            <span className="text-[10px] text-black no-underline">Login</span>
           </button>
         )}
         {username && (
-          <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm">
-            {username.charAt(0).toUpperCase()}
-          </div>
+          <button
+            onClick={logout}
+            title="Cerrar Sesión"
+            className="flex flex-col items-center gap-1 w-16 h-16 justify-center transform transition-all hover:scale-105 text-black"
+          >
+            <LogOut className="text-black" />
+            <span className="text-[10px] text-black no-underline">Salir</span>
+          </button>
         )}
       </nav>
 
