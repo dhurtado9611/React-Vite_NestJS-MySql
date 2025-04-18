@@ -64,7 +64,7 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
         setMostrarModalTurno(true);
       } else {
         onClose();
-        navigate('/reservas');
+        navigate('/CrearReservasAdmin');
       }
     } catch (err) {
       setError('Usuario o contraseña incorrectos');
