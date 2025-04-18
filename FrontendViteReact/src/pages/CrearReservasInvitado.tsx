@@ -63,7 +63,7 @@ const CrearReservas = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen px-4 sm:px-6 lg:px-8 pt-16 pb-20 lg:pl-24">
+    <div className="relative w-full min-h-screen px-10 sm:px-6 lg:px-8 pt-16 pb-20 lg:pl-24">
       <h2 className="text-2xl font-bold mb-4">
         Bienvenido {username || 'Invitado'} ¡aquí puedes hacer tus registros!
       </h2>
