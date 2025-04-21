@@ -1,3 +1,4 @@
+// ActividadModificada.tsx
 import { useEffect, useState } from 'react';
 import { Reserva } from '../components/types';
 import api from '../services/api';
@@ -15,7 +16,6 @@ const Historial = () => {
   const [reservaSeleccionada, setReservaSeleccionada] = useState<ReservaExtendida | null>(null);
   const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<number | null>(null);
 
-  // ✅ Obtener datos desde la API
   const fetchDatosReservas = async () => {
     try {
       const response = await api.get('/reservas');
@@ -41,22 +41,18 @@ const Historial = () => {
     const reservaActiva = reservas.find(
       (reserva) => reserva.habitacion === habitacion && !reserva.hsalida
     );
-  
+
     if (reservaActiva) {
       const { hentradaNum } = reservaActiva;
-      // Obtenemos la hora actual en formato "HH:mm"
       const now = new Date();
       const currentHour = now.getHours().toString().padStart(2, '0');
       const currentMinute = now.getMinutes().toString().padStart(2, '0');
       const currentTimeString = `${currentHour}:${currentMinute}`;
       const currentTimeNum = Math.abs(convertirHoraANumero(currentTimeString));
-  
-      // Si la diferencia entre la hora actual y la hora de entrada es >= 400, la habitación se marca como 'critica'
       const diferencia = currentTimeNum - hentradaNum;
-      //console.log(`Diferencia entre la hora actual y la hora de entrada: ${currentTimeNum}-${hentradaNum}=${diferencia}`);
       return diferencia >= 400 ? 'critica' : 'ocupada';
     }
-  
+
     return 'libre';
   };
 
@@ -89,6 +85,20 @@ const Historial = () => {
     const updateInterval = setInterval(fetchDatosReservas, 10000);
     return () => clearInterval(updateInterval);
   }, []);
+
+  useEffect(() => {
+    const calcularCriticas = () => {
+      const habitacionesCriticas = [...Array(16)].filter((_, i) => {
+        return getEstadoHabitacion(i + 1) === 'critica';
+      });
+      localStorage.setItem('alertasHabitaciones', habitacionesCriticas.length.toString());
+    };
+
+    calcularCriticas();
+    const interval = setInterval(calcularCriticas, 10000);
+
+    return () => clearInterval(interval);
+  }, [reservas]);
 
   return (
     <div className="relative w-full min-h-screen px-10 sm:px-6 lg:px-8 pt-16 pb-20 lg:pl-24">
@@ -163,7 +173,6 @@ const Historial = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
     </div>
   );
 };

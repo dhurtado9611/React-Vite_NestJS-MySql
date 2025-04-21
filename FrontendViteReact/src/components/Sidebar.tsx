@@ -1,3 +1,4 @@
+// SidebarModificado.tsx
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -26,14 +27,15 @@ const SidebarActividadContador = () => {
     setUsername(storedUser);
     setRol(storedRol);
 
-    axios.get("https://react-vitenestjs-mysql-production.up.railway.app/reservas").then((res) => {
-      const vencidas = res.data.filter((r: any) => {
-        const h1 = new Date(`2000-01-01T${r.hentrada}`);
-        const h2 = new Date(`2000-01-01T${r.hsalida}`);
-        return h2.getTime() - h1.getTime() > 4 * 60 * 60 * 1000;
-      });
-      setVencidas(vencidas.length);
-    });
+    const leerAlertas = () => {
+      const cantidad = localStorage.getItem("alertasHabitaciones");
+      setVencidas(cantidad ? parseInt(cantidad) : 0);
+    };
+
+    leerAlertas();
+    const interval = setInterval(leerAlertas, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const logout = () => {
