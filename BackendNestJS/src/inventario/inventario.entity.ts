@@ -1,4 +1,3 @@
-// inventario.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -20,7 +19,7 @@ export class Inventario {
   @Column('int') CONDONES: number;
   @Column('int') BONOS: number;
 
-  @Column() fecha: string;
-  @Column() turno: string;
   @Column() colaborador: string;
-} 
+  @Column() turno: string;
+  @Column() fecha: string;
+}
