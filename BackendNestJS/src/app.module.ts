@@ -11,6 +11,8 @@ import { Cuadre } from './cuadrecaja/cuadre.entity';
 import { AdminModule } from './admin/admin.module';
 import { ReservasClienteModule } from './cliente/reservas_cliente.module';
 import { InventarioModule } from './inventario/inventario.module';
+import { Inventario } from './inventario/inventario.entity';
+
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { InventarioModule } from './inventario/inventario.module';
       //username: process.env.DB_USERNAME,
       //password: process.env.DB_PASSWORD,
       //database: process.env.DB_NAME,
-      entities: [Reserva, User, Cuadre], // Se incluye la entidad User
+      entities: [Reserva, User, Cuadre, Inventario], // Se incluye la entidad User
       synchronize: true, // Solo para desarrollo
     }),
     CuadreModule,
