@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import InventarioModal from './InventarioModal';
-import { crearInventario, consultarInventario } from '../services/inventarioService';
+import { crearInventario } from '../services/inventarioService';
 
 interface Props {
   onSubmit: (data: { colaborador: string; turno: string; fecha: string }) => void;
@@ -59,7 +59,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
       alert('Por favor complete todos los campos');
       return;
     }
-
+  
     try {
       const token = localStorage.getItem('token');
       await api.post('/cuadre', {
@@ -71,21 +71,22 @@ const FormularioTurno = ({ onSubmit }: Props) => {
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      localStorage.setItem('datosTurno', JSON.stringify({ colaborador, fecha: fechaActual, turno, turnoCerrado: null }));
+  
+      localStorage.setItem('datosTurno', JSON.stringify({ colaborador, fecha: fechaActual, turno }));
+  
       alert('Turno registrado correctamente');
       onSubmit({ colaborador, turno, fecha: fechaActual });
-
-      const inventarioExistente = await consultarInventario(fechaActual, turno, colaborador);
-      if (!inventarioExistente) {
-        setDatosTurno({ colaborador, turno, fecha: fechaActual });
-        setShowInventario(true);
-      }
+  
+      // Siempre mostrar modal de inventario
+      setDatosTurno({ colaborador, turno, fecha: fechaActual });
+      setShowInventario(true);
+  
     } catch (error: any) {
       console.error('Error al registrar el turno:', error);
       alert(error.response?.data?.message || 'No se pudo registrar el turno');
     }
   };
+  
 
   return (
     <AnimatePresence>
