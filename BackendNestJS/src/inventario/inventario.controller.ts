@@ -16,6 +16,7 @@ export class InventarioController {
     return this.service.remove(+id);
   }
 
+  // ✅ ESTA ES LA RUTA QUE NECESITAS
   @Get('buscar')
   findByTurno(
     @Query('fecha') fecha: string,
