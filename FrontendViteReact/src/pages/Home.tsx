@@ -69,11 +69,6 @@ const Home = () => {
         </button>
         </div>
       </div>
-      
-      {/* Target para reservar */}
-      <div id="reserva-cliente-section" className="w-full py-5 px-3 bg-white text-black">
-        <ReservarCliente />
-      </div>
 
       <Footer />
     </>
