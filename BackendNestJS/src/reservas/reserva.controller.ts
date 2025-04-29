@@ -1,36 +1,41 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { ReservaService } from './reserva.service';
+import { CreateReservaDto } from './dto/create-reserva.dto';
+import { UpdateReservaDto } from './dto/update-reserva.dto';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Reserva } from './reserva.entity';
+import { Repository } from 'typeorm';
 
 @Controller('reservas')
-@UseGuards(JwtAuthGuard) // Protege todas las rutas con JWT
 export class ReservaController {
-  constructor(private readonly reservaService: ReservaService) {}
+  constructor(
+    private readonly reservaService: ReservaService,
+    @InjectRepository(Reserva) private readonly reservaRepo: Repository<Reserva>
+  ) {}
 
   @Post()
-  create(@Body() reserva: Partial<Reserva>) {
-    return this.reservaService.create(reserva);
+  create(@Body() createReservaDto: CreateReservaDto) {
+    return this.reservaService.create(createReservaDto);
   }
 
   @Get()
   findAll() {
-    console.log('→ Entró a GET /reservas');
     return this.reservaService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.reservaService.findOne(id);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: number, @Body() reserva: Partial<Reserva>) {
-    return this.reservaService.update(id, reserva);
+  findOne(@Param('id') id: string) {
+    return this.reservaService.findOne(+id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.reservaService.remove(id);
+  remove(@Param('id') id: string) {
+    return this.reservaService.remove(+id);
+  }
+
+  @Delete('reset')
+  async resetReservas() {
+    await this.reservaRepo.query('TRUNCATE TABLE reserva');
+    return { message: 'Reservas reiniciadas correctamente' };
   }
 }
