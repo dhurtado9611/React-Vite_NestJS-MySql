@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import TablaUsuarios from './TablaUsuarios';
 import TablaReservas from './TablaReservas';
 import TablaCuadre from './TablaCuadre';
+import TablaInventarioAdmin from './TablaInventarioAdmin';
 
 const AdminDashboard = () => {
-  const [selectedTable, setSelectedTable] = useState<'users' | 'reservas' | 'cuadre'>('users');
+  const [selectedTable, setSelectedTable] = useState<'users' | 'reservas' | 'cuadre' | 'inventario'>('users');
 
   return (
     <div className="relative min-h-screen text-auto pt-20 pb-10 lg:pl-24">
@@ -29,12 +30,19 @@ const AdminDashboard = () => {
         >
           Cuadre
         </button>
+        <button
+          onClick={() => setSelectedTable('inventario')}
+          className={`px-4 py-2 text-sm sm:text-base rounded-lg shadow-md transition-all duration-300 ${selectedTable === 'inventario' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-blue-100'}`}
+        >
+          Inventario
+        </button>
       </div>
 
       <div className="rounded-xl bg-white text-black p-4 shadow-xl overflow-auto">
         {selectedTable === 'users' && <TablaUsuarios />}
         {selectedTable === 'reservas' && <TablaReservas />}
         {selectedTable === 'cuadre' && <TablaCuadre />}
+        {selectedTable === 'inventario' && <TablaInventarioAdmin />}
       </div>
     </div>
   );
