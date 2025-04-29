@@ -14,10 +14,9 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   const [turno, setTurno] = useState('');
   const [baseCaja, setBaseCaja] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [turnoActivo, setTurnoActivo] = useState<{ colaborador: string; turno: string; turnoCerrado?: string } | null>(null);
   const [showInventario, setShowInventario] = useState(false);
   const [datosTurno, setDatosTurno] = useState<{ colaborador: string; turno: string; fecha: string } | null>(null);
+  const [mostrarFormulario, setMostrarFormulario] = useState(true);
 
   const fechaActual = new Date().toISOString().split('T')[0];
   const navigate = useNavigate();
@@ -40,9 +39,17 @@ const FormularioTurno = ({ onSubmit }: Props) => {
         );
 
         if (turnoHoy) {
-          setTurnoActivo({ colaborador: turnoHoy.colaborador, turno: turnoHoy.turno, turnoCerrado: turnoHoy.turnoCerrado });
-          setShowAlert(true);
-          setTimeout(() => navigate('/'), 3000);
+          const confirmacion = window.confirm(
+            `Ya hay un turno abierto por ${turnoHoy.colaborador} iniciado a las ${turnoHoy.turno}.\n\n¿Deseas cerrarlo y abrir uno nuevo?`
+          );
+          if (confirmacion) {
+            await api.patch(`/cuadre/cerrar/${turnoHoy.id}`, {}, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            setMostrarFormulario(true);
+          } else {
+            navigate('/');
+          }
         }
       } catch (error) {
         console.error('Error al verificar turno activo:', error);
@@ -77,7 +84,6 @@ const FormularioTurno = ({ onSubmit }: Props) => {
       alert('Turno registrado correctamente');
       onSubmit({ colaborador, turno, fecha: fechaActual });
 
-      // Mostrar modal de inventario
       setDatosTurno({ colaborador, turno, fecha: fechaActual });
       setShowInventario(true);
 
@@ -87,19 +93,13 @@ const FormularioTurno = ({ onSubmit }: Props) => {
     }
   };
 
+  if (!mostrarFormulario) return null;
+
   return (
     <>
       <AnimatePresence>
         <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.3 }} className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative">
-            {showAlert && turnoActivo && (
-              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-800 px-4 py-2 rounded shadow-lg z-50 text-base text-center">
-                Ya hay un turno abierto<br />
-                por <strong>{turnoActivo.colaborador}</strong><br />
-                Iniciado a las <strong>{turnoActivo.turno}</strong>
-              </div>
-            )}
-
             <form onSubmit={handleSubmit}>
               <h3 className="text-center text-2xl font-bold text-gray-900 mb-8">Inicio de Turno - Invitado</h3>
 
@@ -128,7 +128,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
                 <input type="date" id="fecha" value={fechaActual} disabled className="block w-full px-4 py-2 text-base text-gray-800 bg-gray-100 border border-gray-300 rounded-md shadow-sm" />
               </div>
 
-              <button type="submit" disabled={!!turnoActivo} className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 px-4 rounded-md shadow-md transition-colors">
+              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 px-4 rounded-md shadow-md transition-colors">
                 Iniciar Turno
               </button>
             </form>
