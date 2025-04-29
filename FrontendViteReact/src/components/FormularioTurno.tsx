@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import LogoLoader from './LogoLoader';
 
 interface Props {
   onSubmit: (data: { colaborador: string; turno: string; fecha: string }) => void;
@@ -12,6 +13,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   const [turno, setTurno] = useState('');
   const [baseCaja, setBaseCaja] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   const [inventario, setInventario] = useState({
     AGUARDIENTE: 0,
     RON: 0,
@@ -38,37 +40,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
     const id = localStorage.getItem('userId');
     if (username) setColaborador(username);
     if (id) setUserId(Number(id));
-
-    const verificarTurno = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await api.get('/cuadre', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const turnoHoy = response.data.find(
-          (item: any) => item.fecha === fechaActual && item.turnoCerrado === null
-        );
-
-        if (turnoHoy) {
-          const confirmacion = window.confirm(
-            `Ya hay un turno abierto por ${turnoHoy.colaborador} iniciado a las ${turnoHoy.turno}.\n\n¿Deseas cerrarlo y abrir uno nuevo?`
-          );
-          if (confirmacion) {
-            await api.patch(`/cuadre/cerrar/${turnoHoy.id}`, {}, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-          } else {
-            navigate('/');
-          }
-        }
-      } catch (error) {
-        console.error('Error al verificar turno activo:', error);
-      }
-    };
-
-    verificarTurno();
-  }, [navigate, fechaActual]);
+  }, []);
 
   const validarCampos = () => {
     const nuevosErrores: { turno?: string; baseCaja?: string } = {};
@@ -83,14 +55,24 @@ const FormularioTurno = ({ onSubmit }: Props) => {
     if (!validarCampos()) return;
 
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
+
       await api.post('/cuadre', {
         colaborador,
         fecha: fechaActual,
         turno,
         turnoCerrado: null,
         basecaja: Number(baseCaja),
-        ...inventario
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      await api.post('/inventario', {
+        ...inventario,
+        colaborador,
+        fecha: fechaActual,
+        turno,
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -100,8 +82,10 @@ const FormularioTurno = ({ onSubmit }: Props) => {
       navigate('/');
 
     } catch (error: any) {
-      console.error('Error al registrar turno e inventario:', error);
+      console.error('Error al registrar turno o inventario:', error);
       alert(error.response?.data?.message || 'No se pudo registrar');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,76 +95,82 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   };
 
   return (
-    <AnimatePresence>
-      <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.3 }} className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-3xl relative overflow-y-auto max-h-screen">
-          <form onSubmit={handleSubmit}>
-            <h3 className="text-center text-2xl font-bold text-gray-900 mb-8">Inicio de Turno + Inventario</h3>
+    <>
+      {loading && <LogoLoader />}
+      <AnimatePresence>
+        <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.3 }} className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-3xl relative overflow-y-auto max-h-screen">
+            <form onSubmit={handleSubmit}>
+              <h3 className="text-center text-2xl font-bold text-gray-900 mb-8">Inicio de Turno + Inventario</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Colaborador</label>
-                <input type="text" value={colaborador} disabled className="block w-full px-4 py-2 text-gray-800 bg-gray-100 border border-gray-300 rounded-md" />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Colaborador</label>
+                  <input type="text" value={colaborador} disabled className="block w-full px-4 py-2 text-gray-800 bg-gray-100 border border-gray-300 rounded-md" />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Turno</label>
-                <select
-                  value={turno}
-                  onChange={(e) => setTurno(e.target.value)}
-                  className={`block w-full px-4 py-2 text-gray-800 bg-white border ${errores.turno ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                >
-                  <option value="">-- Selecciona turno --</option>
-                  <option value="07:00">Mañana (7am - 2pm)</option>
-                  <option value="14:00">Tarde (2pm - 9pm)</option>
-                  <option value="21:00">Noche (9pm - 7am)</option>
-                </select>
-                {errores.turno && <p className="text-red-500 text-sm mt-1">{errores.turno}</p>}
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Turno</label>
+                  <select
+                    value={turno}
+                    onChange={(e) => setTurno(e.target.value)}
+                    className={`block w-full px-4 py-2 text-gray-800 bg-white border ${errores.turno ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                    disabled={loading}
+                  >
+                    <option value="">-- Selecciona turno --</option>
+                    <option value="07:00">Mañana (7am - 2pm)</option>
+                    <option value="14:00">Tarde (2pm - 9pm)</option>
+                    <option value="21:00">Noche (9pm - 7am)</option>
+                  </select>
+                  {errores.turno && <p className="text-red-500 text-sm mt-1">{errores.turno}</p>}
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Base de Caja</label>
-                <input
-                  type="number"
-                  value={baseCaja}
-                  onChange={(e) => setBaseCaja(e.target.value)}
-                  className={`block w-full px-4 py-2 text-gray-800 bg-white border ${errores.baseCaja ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                  placeholder="Monto en efectivo"
-                />
-                {errores.baseCaja && <p className="text-red-500 text-sm mt-1">{errores.baseCaja}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-                <input type="date" value={fechaActual} disabled className="block w-full px-4 py-2 text-gray-800 bg-gray-100 border border-gray-300 rounded-md" />
-              </div>
-            </div>
-
-            <h4 className="text-xl font-semibold mt-8 mb-4">Inventario</h4>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {Object.entries(inventario).map(([key, value]) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{key.replace(/_/g, ' ')}</label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Base de Caja</label>
                   <input
                     type="number"
-                    name={key}
-                    value={value}
-                    onChange={handleInventarioChange}
-                    min={0}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-800 bg-white"
+                    value={baseCaja}
+                    onChange={(e) => setBaseCaja(e.target.value)}
+                    className={`block w-full px-4 py-2 text-gray-800 bg-white border ${errores.baseCaja ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                    placeholder="Monto en efectivo"
+                    disabled={loading}
                   />
+                  {errores.baseCaja && <p className="text-red-500 text-sm mt-1">{errores.baseCaja}</p>}
                 </div>
-              ))}
-            </div>
 
-            <button type="submit" className="mt-8 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-semibold text-lg">
-              Registrar Turno e Inventario
-            </button>
-          </form>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                  <input type="date" value={fechaActual} disabled className="block w-full px-4 py-2 text-gray-800 bg-gray-100 border border-gray-300 rounded-md" />
+                </div>
+              </div>
+
+              <h4 className="text-xl font-semibold mt-8 mb-4">Inventario</h4>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {Object.entries(inventario).map(([key, value]) => (
+                  <div key={key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{key.replace(/_/g, ' ')}</label>
+                    <input
+                      type="number"
+                      name={key}
+                      value={value}
+                      onChange={handleInventarioChange}
+                      min={0}
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-800 bg-white"
+                      disabled={loading}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <button type="submit" disabled={loading} className="mt-8 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-semibold text-lg">
+                {loading ? 'Registrando...' : 'Registrar Turno e Inventario'}
+              </button>
+            </form>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   );
 };
 
