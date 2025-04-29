@@ -32,17 +32,28 @@ const TablaReservas = () => {
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
   const [fechaTurno, setFechaTurno] = useState<string>(new Date().toISOString().split('T')[0]);
 
+  const fetchData = async () => {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    const res = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/reservas', { headers });
+    const cuad = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/cuadre', { headers });
+    setReservas(res.data);
+    setCuadres(cuad.data);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem('token');
-      const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/reservas', { headers });
-      const cuad = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/cuadre', { headers });
-      setReservas(res.data);
-      setCuadres(cuad.data);
-    };
     fetchData();
   }, []);
+
+  const resetearReservas = async () => {
+    const token = localStorage.getItem('token');
+    if (window.confirm('¿Estás seguro de borrar todas las reservas y reiniciar los IDs?')) {
+      await axios.delete('https://react-vitenestjs-mysql-production.up.railway.app/reservas/reset', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchData();
+    }
+  };
 
   const ingresosMensuales = reservas.reduce((acc: any, r) => {
     const fecha = new Date(r.fecha);
@@ -109,6 +120,9 @@ const TablaReservas = () => {
             value={fechaTurno}
             onChange={(e) => setFechaTurno(e.target.value)}
           />
+        </div>
+        <div className="col d-flex align-items-end">
+          <button className="btn btn-danger w-100" onClick={resetearReservas}>Resetear Reservas</button>
         </div>
       </div>
 
