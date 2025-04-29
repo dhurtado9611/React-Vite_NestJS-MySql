@@ -20,6 +20,10 @@ export class InventarioService {
     return this.inventarioRepo.delete(id);
   }
 
+  findAll() {
+    return this.inventarioRepo.find();
+  }
+  
   async findByTurno(fecha: string, turno: string, colaborador: string) {
     return this.inventarioRepo.findOne({ where: { fecha, turno, colaborador } });
   }
