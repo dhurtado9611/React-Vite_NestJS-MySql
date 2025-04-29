@@ -147,6 +147,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
             try {
               await crearInventario(data);
               alert('Inventario registrado correctamente');
+              navigate('/');
             } catch {
               alert('Error al registrar inventario');
             }
