@@ -1,7 +1,8 @@
 // reserva.controller.ts
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { ReservaService } from './reserva.service';
 import { Reserva } from './reserva.entity';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('reservas')
 export class ReservaController {
@@ -28,7 +29,14 @@ export class ReservaController {
   }
 
   @Delete('reset')
-  async resetearReservas(): Promise<void> {
-    return this.reservaService.resetearTodas();
+  @UseGuards(JwtAuthGuard)
+  async resetearReservas(): Promise<{ message: string }> {
+    try {
+      await this.reservaService.resetearTodas();
+      return { message: 'Reservas eliminadas correctamente' };
+    } catch (error) {
+      console.error('Error en resetearReservas:', error);
+      throw new HttpException('Error al eliminar reservas', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
