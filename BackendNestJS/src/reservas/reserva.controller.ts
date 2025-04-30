@@ -1,41 +1,34 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+// reserva.controller.ts
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { ReservaService } from './reserva.service';
-import { CreateReservaDto } from './dto/create-reserva.dto';
-import { UpdateReservaDto } from './dto/update-reserva.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Reserva } from './reserva.entity';
-import { Repository } from 'typeorm';
 
 @Controller('reservas')
 export class ReservaController {
-  constructor(
-    private readonly reservaService: ReservaService,
-    @InjectRepository(Reserva) private readonly reservaRepo: Repository<Reserva>
-  ) {}
-
-  @Post()
-  create(@Body() createReservaDto: CreateReservaDto) {
-    return this.reservaService.create(createReservaDto);
-  }
+  constructor(private readonly reservaService: ReservaService) {}
 
   @Get()
-  findAll() {
+  async findAll(): Promise<Reserva[]> {
     return this.reservaService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservaService.findOne(+id);
+  @Post()
+  async create(@Body() reserva: Reserva): Promise<Reserva> {
+    return this.reservaService.create(reserva);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() reserva: Reserva): Promise<Reserva> {
+    return this.reservaService.update(id, reserva);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reservaService.remove(+id);
+  async remove(@Param('id') id: number): Promise<void> {
+    return this.reservaService.remove(id);
   }
 
   @Delete('reset')
-  async resetReservas() {
-    await this.reservaRepo.query('TRUNCATE TABLE reserva');
-    return { message: 'Reservas reiniciadas correctamente' };
+  async resetearReservas(): Promise<void> {
+    return this.reservaService.resetearTodas();
   }
 }
