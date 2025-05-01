@@ -35,13 +35,12 @@ export class ReservaService {
   async resetearTodas(): Promise<void> {
     try {
       console.log('Entrando a resetearTodas()');
-      await this.reservaRepository.clear(); // elimina respetando relaciones
+      await this.reservaRepository.clear();
       await this.reservaRepository.query('ALTER TABLE reservas AUTO_INCREMENT = 1');
       console.log('Reservas eliminadas y AUTO_INCREMENT reiniciado');
     } catch (error) {
       console.error('Error en resetearTodas():', error);
       throw new Error('Falló el reseteo de reservas');
     }
-  }  
-  
+  }
 }

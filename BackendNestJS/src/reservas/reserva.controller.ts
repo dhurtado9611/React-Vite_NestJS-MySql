@@ -23,11 +23,6 @@ export class ReservaController {
     return this.reservaService.update(id, reserva);
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: number): Promise<void> {
-    return this.reservaService.remove(id);
-  }
-
   @Delete('reset')
   @UseGuards(JwtAuthGuard)
   async resetearReservas(): Promise<{ message: string }> {
@@ -38,5 +33,10 @@ export class ReservaController {
       console.error('Error en resetearReservas:', error);
       throw new HttpException('Error al eliminar reservas', HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: number): Promise<void> {
+    return this.reservaService.remove(id);
   }
 }
