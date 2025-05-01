@@ -1,53 +1,42 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  NotFoundException,
-} from '@nestjs/common';
+// cuadre.controller.ts
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { CuadreService } from './cuadre.service';
-import { CreateCuadreDto } from './dto/create-cuadre.dto';
-import { UpdateCuadreDto } from './dto/update-cuadre.dto';
+import { Cuadre } from './cuadre.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Roles } from '../auth/roles.decorator';
-import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('cuadre')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class CuadreController {
   constructor(private readonly cuadreService: CuadreService) {}
 
-  @Post()
-  @Roles('admin', 'invitado') // ✅ Permitir ambos roles
-  create(@Body() createCuadreDto: CreateCuadreDto) {
-    return this.cuadreService.create(createCuadreDto);
-  }
-
   @Get()
-  findAll() {
+  async findAll(): Promise<Cuadre[]> {
     return this.cuadreService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const cuadre = await this.cuadreService.findOne(+id);
-    if (!cuadre) {
-      throw new NotFoundException(`Cuadre con ID ${id} no encontrado`);
-    }
-    return cuadre;
+  @Post()
+  async create(@Body() cuadre: Cuadre): Promise<Cuadre> {
+    return this.cuadreService.create(cuadre);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCuadreDto: UpdateCuadreDto) {
-    return this.cuadreService.update(+id, updateCuadreDto);
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() cuadre: Cuadre): Promise<Cuadre> {
+    return this.cuadreService.update(id, cuadre);
+  }
+
+  @Delete('reset')
+  @UseGuards(JwtAuthGuard)
+  async resetearCuadre(): Promise<{ message: string }> {
+    try {
+      await this.cuadreService.resetearTodo();
+      return { message: 'Cuadre eliminado correctamente' };
+    } catch (error) {
+      console.error('Error al resetear cuadre:', error);
+      throw new HttpException('Error al eliminar cuadre', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cuadreService.remove(+id);
+  async remove(@Param('id') id: number): Promise<void> {
+    return this.cuadreService.remove(id);
   }
 }

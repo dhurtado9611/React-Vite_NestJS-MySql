@@ -1,3 +1,5 @@
+// TablaCuadre.tsx completo con botón "Resetear Cuadre" y gráfica
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
@@ -33,13 +35,30 @@ const TablaCuadre = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-
-      const res = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/cuadre', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/cuadre`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCuadres(res.data);
     } catch (err) {
       console.error('Error al cargar cuadre:', err);
+    }
+  };
+
+  const resetearCuadre = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    if (window.confirm('¿Estás seguro de borrar todos los registros de cuadre y reiniciar los IDs?')) {
+      try {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/cuadre/reset`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        alert('Registros de cuadre eliminados correctamente.');
+        cargarCuadres();
+      } catch (err) {
+        console.error('Error al resetear cuadre:', err);
+        alert('Error al eliminar registros de cuadre.');
+      }
     }
   };
 
@@ -53,7 +72,7 @@ const TablaCuadre = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      await axios.delete(`https://react-vitenestjs-mysql-production.up.railway.app/cuadre/${cuadreEliminar.id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/cuadre/${cuadreEliminar.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCuadres(cuadres.filter((c) => c.id !== cuadreEliminar.id));
@@ -85,7 +104,7 @@ const TablaCuadre = () => {
 
   return (
     <div className="container-fluid px-3 py-3">
-      {/* Filtros de mes y año */}
+      {/* Filtros y botón de reset */}
       <div className="row g-3 mb-3">
         <div className="col">
           <label className="form-label">Mes</label>
@@ -104,9 +123,14 @@ const TablaCuadre = () => {
             onChange={(e) => setAnio(Number(e.target.value))}
           />
         </div>
+        <div className="col d-flex align-items-end">
+          <button className="btn btn-danger w-100" onClick={resetearCuadre}>
+            Resetear Cuadre
+          </button>
+        </div>
       </div>
 
-      {/* Gráfica totalEntregado por fecha */}
+      {/* Gráfica total entregado */}
       <div className="card shadow-sm mb-4">
         <div className="card-body p-2">
           <h6 className="text-primary text-sm mb-2">Total entregado por fecha</h6>
@@ -127,7 +151,7 @@ const TablaCuadre = () => {
         </div>
       </div>
 
-      {/* Tabla con scroll completo */}
+      {/* Tabla con scroll */}
       <div className="card shadow-sm">
         <div className="card-body p-2">
           <h6 className="text-dark text-sm mb-2">Registros de Cuadre</h6>
