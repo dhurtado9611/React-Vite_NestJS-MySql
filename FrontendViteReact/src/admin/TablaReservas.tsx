@@ -47,13 +47,29 @@ const TablaReservas = () => {
 
   const resetearReservas = async () => {
     const token = localStorage.getItem('token');
+    console.log('TOKEN ENVIADO:', token);
+  
+    if (!token) {
+      alert('No hay token. Por favor inicia sesión nuevamente.');
+      return;
+    }
+  
     if (window.confirm('¿Estás seguro de borrar todas las reservas y reiniciar los IDs?')) {
-      await axios.delete('https://react-vitenestjs-mysql-production.up.railway.app/reservas/reset', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchData();
+      try {
+        const res = await axios.delete(`${import.meta.env.VITE_API_URL}/reservas/reset`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log('Respuesta backend:', res.data);
+        fetchData(); // recarga los datos
+      } catch (error: any) {
+        console.error('Error al resetear reservas:', error);
+        alert('Error al resetear reservas. Consulta la consola para más detalles.');
+      }
     }
   };
+  
 
   const ingresosMensuales = reservas.reduce((acc: any, r) => {
     const fecha = new Date(r.fecha);
