@@ -26,12 +26,13 @@ export class CuadreController {
   @Delete('reset')
   @UseGuards(JwtAuthGuard)
   async resetearCuadre(): Promise<{ message: string }> {
+    console.log('✅ Entrando a resetearCuadre()');
+
     try {
       await this.cuadreService.resetearTodo();
       return { message: 'Cuadre eliminado correctamente' };
     } catch (error) {
-      console.error('Error en resetearCuadre():', error);
-      console.error('Error al resetear cuadre:', error);
+      console.error('❌ Error en resetearCuadre():', error);
       throw new HttpException('Error al eliminar cuadre', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

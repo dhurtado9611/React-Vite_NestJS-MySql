@@ -34,12 +34,13 @@ export class CuadreService {
 
   async resetearTodo(): Promise<void> {
     try {
-      console.log('Entrando a resetearTodo()');
+      console.log('📌 Ejecutando resetearTodo()');
       await this.cuadreRepository.clear();
+      console.log('✅ Registros eliminados');
       await this.cuadreRepository.query('ALTER TABLE cuadre AUTO_INCREMENT = 1');
-      console.log('Cuadre eliminado y AUTO_INCREMENT reiniciado');
+      console.log('🔄 AUTO_INCREMENT reiniciado');
     } catch (error) {
-      console.error('Error en resetearTodo():', error);
+      console.error('❌ Error en resetearTodo():', error);
       throw new Error('Falló el reseteo de cuadre');
     }
   }
