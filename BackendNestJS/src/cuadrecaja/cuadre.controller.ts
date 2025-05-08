@@ -30,6 +30,7 @@ export class CuadreController {
       await this.cuadreService.resetearTodo();
       return { message: 'Cuadre eliminado correctamente' };
     } catch (error) {
+      console.error('Error en resetearCuadre():', error);
       console.error('Error al resetear cuadre:', error);
       throw new HttpException('Error al eliminar cuadre', HttpStatus.INTERNAL_SERVER_ERROR);
     }
