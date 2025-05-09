@@ -13,7 +13,7 @@ const LogoLoader = () => {
         setProgress(30);
         await new Promise((res) => setTimeout(res, 500));
         setProgress(60);
-        await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/cuadre");
+        await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/reservas");
         setProgress(100);
         setTimeout(() => setIsAnimating(false), 500);
       } catch (error) {

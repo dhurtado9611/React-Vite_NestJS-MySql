@@ -40,7 +40,7 @@ export class CuadreService {
       await this.cuadreRepository.query('ALTER TABLE cuadre AUTO_INCREMENT = 1');
       console.log('🔄 AUTO_INCREMENT reiniciado');
     } catch (error) {
-      console.error('❌ Error en resetearTodo():', error);
+      console.error('❌ Error en resetearTodo():', error.message);
       throw new Error('Falló el reseteo de cuadre');
     }
   }
