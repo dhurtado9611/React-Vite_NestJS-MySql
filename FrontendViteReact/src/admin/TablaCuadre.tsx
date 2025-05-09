@@ -50,7 +50,7 @@ const TablaCuadre = () => {
 
     if (window.confirm('¿Estás seguro de borrar todos los registros de cuadre y reiniciar los IDs?')) {
       try {
-        await axios.delete(`${import.meta.env.VITE_API_URL}/cuadre/reset`, {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/cuadre/reset-cuadre`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         alert('Registros de cuadre eliminados correctamente.');
