@@ -1,5 +1,15 @@
-// cuadre.controller.ts
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  UseGuards,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { CuadreService } from './cuadre.service';
 import { Cuadre } from './cuadre.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -23,11 +33,11 @@ export class CuadreController {
     return this.cuadreService.update(id, cuadre);
   }
 
+  // ⚠️ ESTA RUTA DEBE IR ANTES QUE :id
   @Delete('reset')
   @UseGuards(JwtAuthGuard)
   async resetearCuadre(): Promise<{ message: string }> {
     console.log('✅ Entrando a resetearCuadre()');
-
     try {
       await this.cuadreService.resetearTodo();
       return { message: 'Cuadre eliminado correctamente' };
