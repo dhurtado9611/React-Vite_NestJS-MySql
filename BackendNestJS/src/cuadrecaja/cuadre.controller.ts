@@ -23,7 +23,7 @@ export class CuadreController {
     return this.cuadreService.update(id, cuadre);
   }
 
-  // ⚠️ Esta ruta debe ir antes que ':id'
+  // ✅ Esta ruta debe ir antes que ':id' y no debe repetirse
   @Delete('reset-cuadre')
   @UseGuards(JwtAuthGuard)
   async resetearCuadre(): Promise<{ message: string }> {
