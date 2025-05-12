@@ -58,14 +58,19 @@ const TablaInventarioAdmin = () => {
   const resetearInventario = async () => {
     if (window.confirm('¿Estás seguro de borrar todo el inventario y reiniciar IDs?')) {
       try {
-        await api.delete('/inventario/reset');
+        const token = localStorage.getItem('token');
+        await api.delete('/inventario/admin/reset/inventario', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert('Inventario reseteado correctamente');
         obtenerDatos();
       } catch (error) {
+        console.error('Error al resetear inventario:', error);
         alert('Error al resetear inventario');
       }
     }
   };
-
+  
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
