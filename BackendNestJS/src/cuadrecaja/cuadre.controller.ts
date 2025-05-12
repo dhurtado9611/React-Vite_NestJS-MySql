@@ -24,7 +24,7 @@ export class CuadreController {
   }
 
   // ✅ Esta ruta debe ir antes que ':id' y no debe repetirse
-  @Delete('reset-cuadre')
+  @Delete('admin/reset/cuadre')
   @UseGuards(JwtAuthGuard)
   async resetearCuadre(): Promise<{ message: string }> {
     console.log('✅ Entrando a resetearCuadre()');
