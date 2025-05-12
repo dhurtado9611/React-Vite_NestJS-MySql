@@ -61,6 +61,7 @@ const TablaReservas = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+        alert('Reservas reseteadas correctamente');
         console.log('Respuesta backend:', res.data);
         fetchData(); // recarga los datos
       } catch (error: any) {
