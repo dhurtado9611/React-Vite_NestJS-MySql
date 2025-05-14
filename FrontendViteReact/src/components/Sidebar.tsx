@@ -5,6 +5,7 @@ import {
   CalendarPlus,
   Home,
   Clock,
+  ShoppingCart,
   ListChecks,
   BarChart3,
   LogIn,
@@ -56,13 +57,15 @@ const SidebarActividadContador = () => {
         { to: "/", icon: Home, label: "Inicio" },
         { to: "/CrearReservasAdmin", icon: CalendarPlus, label: "Reservas" },
         { to: "/ActividadAdmin", icon: Clock, label: "Actividad" },
+        { to: "/Marketplace", icon: ShoppingCart, label: "Tienda" },
         { to: "/AdminDashboard", icon: BarChart3, label: "Admin" }
       ];
     } else if (rol === "invitado") {
       return [
         { to: "/", icon: Home, label: "Inicio" },
         { to: "/CrearReservasInvitado", icon: CalendarPlus, label: "Reservas" },
-        { to: "/ActividadInvitado", icon: Clock, label: "Actividad" }
+        { to: "/ActividadInvitado", icon: Clock, label: "Actividad" },
+        { to: "/Marketplace", icon: ShoppingCart, label: "Tienda" },
       ];
     }
     return [];
