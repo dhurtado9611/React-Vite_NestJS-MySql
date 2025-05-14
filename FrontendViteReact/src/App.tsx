@@ -10,6 +10,7 @@ import CrearReservasAdmin from './pages/CrearReservasAdmin'
 import ActividadAdmin from './pages/ActividadAdmin'
 import CrearReservasInvitado from './pages/CrearReservasInvitado'
 import ActividadInvitado from './pages/ActividadInvitado'
+import Marketplace from './pages/Marketplace'
 
 import RutaProtegidaInvitado from './components/RutaProtegidaInvitado'
 import RutaProtegidaAdmin from './components/RutaProtegidaAdmin'
@@ -64,6 +65,15 @@ function App() {
               }
             />
 
+            <Route 
+              path="/Marketplace" 
+              element={
+                <RutaProtegidaAdmin>
+                  <Marketplace />
+                </RutaProtegidaAdmin>
+              }
+            />
+
             <Route
               path="/CrearReservasInvitado"
               element={
@@ -78,6 +88,15 @@ function App() {
               element={
                 <RutaProtegidaInvitado>
                   <ActividadInvitado />
+                </RutaProtegidaInvitado>
+              }
+            />
+
+            <Route 
+              path="/Marketplace" 
+              element={
+                <RutaProtegidaInvitado>
+                  <Marketplace />
                 </RutaProtegidaInvitado>
               }
             />
