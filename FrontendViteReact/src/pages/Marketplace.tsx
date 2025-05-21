@@ -72,7 +72,7 @@ const Marketplace = () => {
       const { data: reserva } = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, { headers });
   
       const observacionesAnteriores = reserva.observaciones || '';
-      const nuevasObservaciones = `${observacionesAnteriores}\nVenta: ${nombre} - $${precio}`;
+      const nuevasObservaciones = `${observacionesAnteriores}\nVenta: ${nombre} + $${precio}`;
       const valorActual = parseFloat(reserva.valor) || 0;
       const nuevoValor = valorActual + precio;
   
