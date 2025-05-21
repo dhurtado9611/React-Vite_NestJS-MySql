@@ -10,11 +10,15 @@ interface InventarioCompleto {
   fecha: string;
 }
 
-interface ProductoEditable {
+interface ProductoBase {
   nombre: string;
   imagen: string;
   precio: number;
   cantidad: number;
+}
+
+interface ProductoEditable extends ProductoBase {
+  original?: ProductoBase;
 }
 
 const MarketplaceAdmin = () => {
@@ -30,12 +34,15 @@ const MarketplaceAdmin = () => {
 
         const tempProductos: ProductoEditable[] = Object.keys(ultimo)
           .filter(k => !['id', 'colaborador', 'turno', 'fecha'].includes(k))
-          .map(nombre => ({
-            nombre,
-            imagen: '',
-            precio: 0,
-            cantidad: Number(ultimo[nombre]) || 0,
-          }));
+          .map(nombre => {
+            const base = {
+              nombre,
+              imagen: '',
+              precio: 0,
+              cantidad: Number(ultimo[nombre]) || 0,
+            };
+            return { ...base, original: { ...base } };
+          });
 
         setProductosEditables(tempProductos);
       })
@@ -64,20 +71,32 @@ const MarketplaceAdmin = () => {
         }]
       }, { headers });
       console.log(`Producto "${producto.nombre}" actualizado exitosamente.`);
+
+      const actualizados = productosEditables.map(p =>
+        p.nombre === producto.nombre ? { ...producto, original: { ...producto } } : p
+      );
+      setProductosEditables(actualizados);
     } catch (err: any) {
       console.error(err);
     }
   };
 
-  const handleAutoSave = (index: number, field: keyof ProductoEditable, value: string | number) => {
+  const handleChange = (index: number, field: keyof ProductoBase, value: string | number) => {
     const nuevos = [...productosEditables];
     if (field === 'precio' || field === 'cantidad') {
-      nuevos[index][field] = parseFloat(value as string);
+      nuevos[index][field] = parseFloat(String(value));
     } else {
       nuevos[index][field] = value as string;
     }
     setProductosEditables(nuevos);
-    guardarProducto(nuevos[index]);
+  };
+
+  const esDiferente = (p: ProductoEditable) => {
+    return (
+      p.imagen !== p.original?.imagen ||
+      p.precio !== p.original?.precio ||
+      p.cantidad !== p.original?.cantidad
+    );
   };
 
   return (
@@ -93,7 +112,7 @@ const MarketplaceAdmin = () => {
               <input
                 type="text"
                 value={prod.imagen}
-                onChange={(e) => handleAutoSave(idx, 'imagen', e.target.value)}
+                onChange={(e) => handleChange(idx, 'imagen', e.target.value)}
                 placeholder="URL de imagen"
                 className="w-full p-1 border rounded"
               />
@@ -103,7 +122,7 @@ const MarketplaceAdmin = () => {
               <input
                 type="number"
                 value={prod.precio}
-                onChange={(e) => handleAutoSave(idx, 'precio', e.target.value)}
+                onChange={(e) => handleChange(idx, 'precio', e.target.value)}
                 className="w-full p-1 border rounded"
               />
             </div>
@@ -112,10 +131,17 @@ const MarketplaceAdmin = () => {
               <input
                 type="number"
                 value={prod.cantidad}
-                onChange={(e) => handleAutoSave(idx, 'cantidad', e.target.value)}
+                onChange={(e) => handleChange(idx, 'cantidad', e.target.value)}
                 className="w-full p-1 border rounded"
               />
             </div>
+            <button
+              onClick={() => guardarProducto(prod)}
+              className={`mt-2 w-full py-2 rounded text-white ${esDiferente(prod) ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
+              disabled={!esDiferente(prod)}
+            >
+              Guardar
+            </button>
           </div>
         ))}
       </div>
