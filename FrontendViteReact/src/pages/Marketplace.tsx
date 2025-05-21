@@ -55,26 +55,45 @@ const Marketplace = () => {
 
   const manejarVenta = async (nombre: string, precio: number) => {
     const reservaId = prompt('Ingrese el ID de la reserva a asignar:');
-    if (!reservaId || !inventario) return;
-
+    if (!reservaId || isNaN(Number(reservaId))) {
+      alert('ID no válido');
+      return;
+    }
+  
+    const token = localStorage.getItem('token'); // O usa sessionStorage si lo guardaste allí
+    if (!token) {
+      alert('Usuario no autenticado');
+      return;
+    }
+  
     try {
-      const { data: reserva } = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`);
-
-      const nuevasObservaciones = `${reserva.observaciones || ''}\nVenta: ${nombre} - $${precio}`;
-      const nuevoValor = reserva.valor + precio;
-
+      const headers = { Authorization: `Bearer ${token}` };
+  
+      const { data: reserva } = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, { headers });
+  
+      const observacionesAnteriores = reserva.observaciones || '';
+      const nuevasObservaciones = `${observacionesAnteriores}\nVenta: ${nombre} - $${precio}`;
+      const valorActual = parseFloat(reserva.valor) || 0;
+      const nuevoValor = valorActual + precio;
+  
       await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, {
         ...reserva,
         observaciones: nuevasObservaciones,
         valor: nuevoValor
-      });
-
+      }, { headers });
+  
       alert('Producto asignado a la reserva con éxito.');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('Error al asignar producto.');
+      if (error.response?.status === 401) {
+        alert('No autorizado. Inicia sesión.');
+      } else if (error.response?.status === 404) {
+        alert('Reserva no encontrada.');
+      } else {
+        alert('Error al asignar producto.');
+      }
     }
-  };
+  };  
 
   return (
     <div className="container py-4">

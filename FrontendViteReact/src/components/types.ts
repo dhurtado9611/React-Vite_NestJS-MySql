@@ -1,6 +1,6 @@
 export type Reserva = {
   id: number;
-  fecha: string; // ✅ Nueva propiedad agregada
+  fecha: string;
   vehiculo: string;
   placa: string;
   habitacion: number;
