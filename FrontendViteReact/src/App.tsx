@@ -11,6 +11,8 @@ import ActividadAdmin from './pages/ActividadAdmin'
 import CrearReservasInvitado from './pages/CrearReservasInvitado'
 import ActividadInvitado from './pages/ActividadInvitado'
 import Marketplace from './pages/Marketplace'
+import MarketplaceInvitado from './pages/MarketplaceInvitado'
+
 
 import RutaProtegidaInvitado from './components/RutaProtegidaInvitado'
 import RutaProtegidaAdmin from './components/RutaProtegidaAdmin'
@@ -93,10 +95,10 @@ function App() {
             />
 
             <Route 
-              path="/Marketplace" 
+              path="/MarketplaceInvitado" 
               element={
                 <RutaProtegidaInvitado>
-                  <Marketplace />
+                  <MarketplaceInvitado />
                 </RutaProtegidaInvitado>
               }
             />

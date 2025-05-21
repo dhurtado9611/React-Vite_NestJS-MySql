@@ -1,47 +1,25 @@
-// Marketplace.tsx
+// MarketplaceInvitado.tsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 interface InventarioCompleto {
   id: number;
-  AGUARDIENTE: number;
-  RON: number;
-  POKER: number;
-  ENERGIZANTE: number;
-  JUGOS_HIT: number;
-  AGUA: number;
-  GASEOSA: number;
-  PAPEL_HIGIENICO: number;
-  ALKA_SELTZER: number;
-  SHAMPOO: number;
-  TOALLA_HIGIENICA: number;
-  CONDONES: number;
-  BONOS: number;
+  [key: string]: any;
   colaborador: string;
   turno: string;
   fecha: string;
 }
 
-const productos = [
-  { nombre: 'AGUARDIENTE', imagen: 'src/assets/Aguardiente.jpg', precio: 7000 },
-  { nombre: 'RON', imagen: '/src/assets/ron.jpg', precio: 7500 },
-  { nombre: 'POKER', imagen: '/src/assets/poker.jpg', precio: 3500 },
-  { nombre: 'ENERGIZANTE', imagen: '/src/assets/energizante.jpg', precio: 4000 },
-  { nombre: 'JUGOS_HIT', imagen: '/src/assets/jugos.jpg', precio: 2000 },
-  { nombre: 'AGUA', imagen: '/src/assets/agua.jpg', precio: 1500 },
-  { nombre: 'GASEOSA', imagen: '/src/assets/gaseosa.jpg', precio: 2500 },
-  { nombre: 'PAPEL_HIGIENICO', imagen: '/src/assets/papel.jpg', precio: 2000 },
-  { nombre: 'ALKA_SELTZER', imagen: '/src/assets/alka.jpg', precio: 3000 },
-  { nombre: 'SHAMPOO', imagen: '/src/assets/shampoo.jpg', precio: 3000 },
-  { nombre: 'TOALLA_HIGIENICA', imagen: '/src/assets/toalla.jpg', precio: 2500 },
-  { nombre: 'CONDONES', imagen: '/src/assets/condones.jpg', precio: 2000 },
-  { nombre: 'BONOS', imagen: '/src/assets/bono.jpg', precio: 5000 },
-];
+interface ProductoEditable {
+  nombre: string;
+  imagen: string;
+  precio: number;
+  cantidad: number;
+}
 
 const Marketplace = () => {
   const [inventario, setInventario] = useState<InventarioCompleto | null>(null);
-  const navigate = useNavigate();
+  const [productosEditables, setProductosEditables] = useState<ProductoEditable[]>([]);
 
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/inventario`)
@@ -49,74 +27,97 @@ const Marketplace = () => {
         const data = res.data;
         const ultimo = data[data.length - 1];
         setInventario(ultimo);
+
+        const tempProductos: ProductoEditable[] = Object.keys(ultimo)
+          .filter(k => !['id', 'colaborador', 'turno', 'fecha'].includes(k))
+          .map(nombre => ({
+            nombre,
+            imagen: '',
+            precio: 0,
+            cantidad: Number(ultimo[nombre]) || 0,
+          }));
+
+        setProductosEditables(tempProductos);
       })
       .catch(err => console.error(err));
   }, []);
 
-  const manejarVenta = async (nombre: string, precio: number) => {
-    const reservaId = prompt('Ingrese el ID de la reserva a asignar:');
-    if (!reservaId || isNaN(Number(reservaId))) {
-      alert('ID no válido');
-      return;
+  const handleChange = (index: number, field: keyof ProductoEditable, value: string | number) => {
+    const nuevos = [...productosEditables];
+    if (field === 'precio' || field === 'cantidad') {
+      nuevos[index][field] = parseFloat(value as string);
+    } else {
+      nuevos[index][field] = value as string;
     }
-  
-    const token = localStorage.getItem('token'); // O usa sessionStorage si lo guardaste allí
+    setProductosEditables(nuevos);
+  };
+
+  const guardarProducto = async (producto: ProductoEditable) => {
+    if (!inventario) return;
+
+    const token = localStorage.getItem('token');
     if (!token) {
       alert('Usuario no autenticado');
       return;
     }
-  
+
+    const headers = { Authorization: `Bearer ${token}` };
+    const nuevoInventario = { ...inventario, [producto.nombre]: producto.cantidad };
+
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-  
-      const { data: reserva } = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, { headers });
-  
-      const observacionesAnteriores = reserva.observaciones || '';
-      const nuevasObservaciones = `${observacionesAnteriores}\nVenta: ${nombre} + $${precio}`;
-      const valorActual = parseFloat(reserva.valor) || 0;
-      const nuevoValor = valorActual + precio;
-  
-      await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, {
-        ...reserva,
-        observaciones: nuevasObservaciones,
-        valor: nuevoValor
+      await axios.put(`${import.meta.env.VITE_API_URL}/inventario/${inventario.id}`, nuevoInventario, { headers });
+      await axios.post(`${import.meta.env.VITE_API_URL}/precios-inventario/bulk-update`, {
+        productos: [{
+          nombre: producto.nombre,
+          precio: producto.precio,
+          imagen: producto.imagen?.trim() || null
+        }]
       }, { headers });
-  
-      alert('Producto asignado a la reserva con éxito.');
-    } catch (error: any) {
-      console.error(error);
-      if (error.response?.status === 401) {
-        alert('No autorizado. Inicia sesión.');
-      } else if (error.response?.status === 404) {
-        alert('Reserva no encontrada.');
-      } else {
-        alert('Error al asignar producto.');
-      }
+      alert(`Producto "${producto.nombre}" actualizado exitosamente.`);
+    } catch (err: any) {
+      console.error(err);
+      const msg = err.response?.data?.message || 'Error al guardar los cambios';
+      alert(msg);
     }
-  };  
+  };
 
   return (
     <div className="container py-4">
-      <h2 className="text-2xl font-bold mb-4">Tienda</h2>
+      <h2 className="text-2xl font-bold mb-4">Editar Tienda (Invitado)</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {inventario && productos.map(prod => {
-          const cantidad = Number(inventario[prod.nombre as keyof InventarioCompleto]);
-          return (
-            <div key={prod.nombre} className="p-4 shadow-lg border rounded">
-              <img src={prod.imagen} alt={prod.nombre} className="w-full h-40 object-cover rounded" />
-              <h3 className="text-lg font-semibold mt-2">{prod.nombre}</h3>
-              <p className="text-sm">Precio: ${prod.precio}</p>
-              <p className="text-sm">Disponibles: {cantidad}</p>
-              <button
-                disabled={cantidad <= 0}
-                onClick={() => manejarVenta(prod.nombre, prod.precio)}
-                className="mt-2 w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-              >
-                Vender
-              </button>
-            </div>
-          );
-        })}
+        {productosEditables.map((prod, idx) => (
+          <div key={prod.nombre} className="p-4 shadow-lg border rounded">
+            <input
+              type="text"
+              placeholder="URL de la imagen"
+              value={prod.imagen}
+              onChange={(e) => handleChange(idx, 'imagen', e.target.value)}
+              className="w-full mb-2 p-1 border rounded"
+            />
+            {prod.imagen && <img src={prod.imagen} alt={prod.nombre} className="w-full h-40 object-cover rounded" />}
+            <h3 className="text-lg font-semibold mt-2">{prod.nombre}</h3>
+            <input
+              type="number"
+              value={prod.precio}
+              onChange={(e) => handleChange(idx, 'precio', e.target.value)}
+              className="w-full my-1 p-1 border rounded"
+              placeholder="Precio"
+            />
+            <input
+              type="number"
+              value={prod.cantidad}
+              onChange={(e) => handleChange(idx, 'cantidad', e.target.value)}
+              className="w-full my-1 p-1 border rounded"
+              placeholder="Cantidad"
+            />
+            <button
+              onClick={() => guardarProducto(prod)}
+              className="mt-2 w-full bg-blue-600 text-white py-2 rounded"
+            >
+              Guardar Producto
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
