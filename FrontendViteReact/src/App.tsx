@@ -17,8 +17,6 @@ import MarketplaceInvitado from './pages/MarketplaceInvitado'
 import RutaProtegidaInvitado from './components/RutaProtegidaInvitado'
 import RutaProtegidaAdmin from './components/RutaProtegidaAdmin'
 
-import LogoLoader from './components/LogoLoader'
-
 function App() {
   const handleCloseModal = () => {
     console.log('Modal cerrado')
@@ -26,7 +24,6 @@ function App() {
 
   return (
     <>
-      <LogoLoader />
       <Router>
         <Routes>
           <Route element={<MainLayout />}>
