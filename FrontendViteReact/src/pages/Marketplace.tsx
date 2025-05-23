@@ -49,18 +49,34 @@ const Marketplace = () => {
   const [precios, setPrecios] = useState<PrecioItem[]>([]);
   const navigate = useNavigate();
 
+  const config = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  };
+
+  const manejarErrorAuth = (error: any) => {
+    if (error.response && error.response.status === 401) {
+      alert('Sesión expirada. Por favor inicia sesión nuevamente.');
+      localStorage.removeItem('token');
+      navigate('/login');
+    } else {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/inventario`)
+    axios.get(`${import.meta.env.VITE_API_URL}/inventario`, config)
       .then(res => {
         const data = res.data;
         const ultimo = data[data.length - 1];
         setInventario(ultimo);
       })
-      .catch(err => console.error(err));
+      .catch(manejarErrorAuth);
 
-    axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`)
+    axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`, config)
       .then(res => setPrecios(res.data))
-      .catch(err => console.error(err));
+      .catch(manejarErrorAuth);
   }, []);
 
   const obtenerPrecio = (nombre: string): number | null => {
@@ -75,7 +91,7 @@ const Marketplace = () => {
     if (!reservaId || !inventario) return;
 
     try {
-      const { data: reserva } = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`);
+      const { data: reserva } = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, config);
 
       const nuevasObservaciones = `${reserva.observaciones || ''}\nVenta: ${nombre} - $${precio}`;
       const nuevoValor = reserva.valor + precio;
@@ -84,14 +100,14 @@ const Marketplace = () => {
         ...reserva,
         observaciones: nuevasObservaciones,
         valor: nuevoValor
-      });
+      }, config);
 
       const nuevoInventario = {
         ...inventario,
         [nombre]: (inventario[nombre as keyof InventarioCompleto] as number) - 1
       };
 
-      await axios.put(`${import.meta.env.VITE_API_URL}/inventario/${inventario.id}`, nuevoInventario);
+      await axios.put(`${import.meta.env.VITE_API_URL}/inventario/${inventario.id}`, nuevoInventario, config);
       setInventario(nuevoInventario);
 
       await axios.post(`${import.meta.env.VITE_API_URL}/historialVentas`, {
@@ -99,11 +115,11 @@ const Marketplace = () => {
         precio,
         reservaId: Number(reservaId),
         fecha: new Date().toISOString()
-      });
+      }, config);
 
       alert('Producto asignado, descontado y registrado en el historial.');
     } catch (error) {
-      console.error(error);
+      manejarErrorAuth(error);
       alert('Error al procesar la venta.');
     }
   };
