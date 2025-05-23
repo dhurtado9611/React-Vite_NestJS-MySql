@@ -1,5 +1,4 @@
-// reserva.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reserva } from './reserva.entity';
@@ -8,7 +7,7 @@ import { Reserva } from './reserva.entity';
 export class ReservaService {
   constructor(
     @InjectRepository(Reserva)
-    private readonly reservaRepository: Repository<Reserva>,
+    private readonly reservaRepository: Repository<Reserva>
   ) {}
 
   async findAll(): Promise<Reserva[]> {
@@ -21,11 +20,9 @@ export class ReservaService {
 
   async update(id: number, reserva: Reserva): Promise<Reserva> {
     await this.reservaRepository.update(id, reserva);
-    const updatedReserva = await this.reservaRepository.findOneBy({ id });
-    if (!updatedReserva) {
-      throw new Error(`Reserva with id ${id} not found`);
-    }
-    return updatedReserva;
+    const updated = await this.reservaRepository.findOne({ where: { id } });
+    if (!updated) throw new NotFoundException('Reserva no encontrada');
+    return updated;
   }
 
   async remove(id: number): Promise<void> {
@@ -33,14 +30,6 @@ export class ReservaService {
   }
 
   async resetearTodas(): Promise<void> {
-    try {
-      console.log('Entrando a resetearTodas()');
-      await this.reservaRepository.clear();
-      await this.reservaRepository.query('ALTER TABLE reservas AUTO_INCREMENT = 1');
-      console.log('Reservas eliminadas y AUTO_INCREMENT reiniciado');
-    } catch (error) {
-      console.error('Error en resetearTodas():', error);
-      throw new Error('Falló el reseteo de reservas');
-    }
+    await this.reservaRepository.clear();
   }
 }

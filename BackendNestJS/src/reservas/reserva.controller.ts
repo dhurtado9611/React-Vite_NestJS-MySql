@@ -22,9 +22,10 @@ export class ReservaController {
     return this.reservaService.update(id, reserva);
   }
 
-  @Delete('reset')
+  @Delete('reset-all')
   @UseGuards(JwtAuthGuard)
   async resetearReservas(): Promise<{ message: string }> {
+    console.log('>>> EJECUTANDO resetearReservas');
     try {
       await this.reservaService.resetearTodas();
       return { message: 'Reservas eliminadas correctamente' };
