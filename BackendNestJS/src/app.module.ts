@@ -1,8 +1,9 @@
+// app.module.ts actualizado correctamente con PreciosInventarioModule
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { Reserva } from './reservas/reserva.entity';
-import { User } from './auth/user.entity'; // Asegúrate de que la ruta sea correcta
+import { User } from './auth/user.entity';
 import { ReservaService } from './reservas/reserva.service';
 import { ReservaController } from './reservas/reserva.controller';
 import { AuthModule } from './auth/auth.module';
@@ -13,7 +14,7 @@ import { ReservasClienteModule } from './cliente/reservas_cliente.module';
 import { InventarioModule } from './inventario/inventario.module';
 import { Inventario } from './inventario/inventario.entity';
 import { PreciosInventarioModule } from './preciosInventario/precios-inventario.module';
-
+import { PreciosInventario } from './preciosInventario/precios-inventario.entity';
 
 @Module({
   imports: [
@@ -24,12 +25,11 @@ import { PreciosInventarioModule } from './preciosInventario/precios-inventario.
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      url: process.env.MYSQL_URL, 
-      entities: [Reserva, User, Cuadre, Inventario], 
-      synchronize: true, 
+      url: process.env.MYSQL_URL,
+      entities: [Reserva, User, Cuadre, Inventario, PreciosInventario],
+      synchronize: true,
     }),
     CuadreModule,
-    TypeOrmModule.forFeature([Reserva]),
     AuthModule,
   ],
   controllers: [ReservaController],
