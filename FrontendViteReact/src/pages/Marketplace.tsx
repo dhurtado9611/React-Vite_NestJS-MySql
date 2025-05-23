@@ -1,63 +1,27 @@
-// Marketplace.tsx
+// Marketplace.tsx (extensión con edición de precio, imagen y cantidad)
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-interface InventarioCompleto {
-  id: number;
-  AGUARDIENTE: number;
-  RON: number;
-  POKER: number;
-  ENERGIZANTE: number;
-  JUGOS_HIT: number;
-  AGUA: number;
-  GASEOSA: number;
-  PAPEL_HIGIENICO: number;
-  ALKA_SELTZER: number;
-  SHAMPOO: number;
-  TOALLA_HIGIENICA: number;
-  CONDONES: number;
-  BONOS: number;
-  colaborador: string;
-  turno: string;
-  fecha: string;
-}
-
 interface PrecioItem {
+  id: number;
   producto: string;
   precio: number;
+  imagen?: string;
+  cantidad?: number;
 }
 
-const productos = [
-  { nombre: 'AGUARDIENTE', imagen: '/images/aguardiente.jpg' },
-  { nombre: 'RON', imagen: '/images/ron.jpg' },
-  { nombre: 'POKER', imagen: '/images/poker.jpg' },
-  { nombre: 'ENERGIZANTE', imagen: '/images/energizante.jpg' },
-  { nombre: 'JUGOS_HIT', imagen: '/images/jugos.jpg' },
-  { nombre: 'AGUA', imagen: '/images/agua.jpg' },
-  { nombre: 'GASEOSA', imagen: '/images/gaseosa.jpg' },
-  { nombre: 'PAPEL_HIGIENICO', imagen: '/images/papel.jpg' },
-  { nombre: 'ALKA_SELTZER', imagen: '/images/alka.jpg' },
-  { nombre: 'SHAMPOO', imagen: '/images/shampoo.jpg' },
-  { nombre: 'TOALLA_HIGIENICA', imagen: '/images/toalla.jpg' },
-  { nombre: 'CONDONES', imagen: '/images/condones.jpg' },
-  { nombre: 'BONOS', imagen: '/images/bono.jpg' },
-];
-
 const Marketplace = () => {
-  const [inventario, setInventario] = useState<InventarioCompleto | null>(null);
   const [precios, setPrecios] = useState<PrecioItem[]>([]);
   const navigate = useNavigate();
 
   const config = {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
   };
 
   const manejarErrorAuth = (error: any) => {
     if (error.response && error.response.status === 401) {
-      alert('Sesión expirada. Por favor inicia sesión nuevamente.');
+      alert('Sesión expirada. Inicia sesión nuevamente.');
       localStorage.removeItem('token');
       navigate('/login');
     } else {
@@ -66,99 +30,77 @@ const Marketplace = () => {
   };
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/inventario`, config)
-      .then(res => {
-        const data = res.data;
-        const ultimo = data[data.length - 1];
-        setInventario(ultimo);
-      })
-      .catch(manejarErrorAuth);
-
     axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`, config)
       .then(res => setPrecios(res.data))
       .catch(manejarErrorAuth);
   }, []);
 
-  const obtenerPrecio = (nombre: string): number | null => {
-    const item = precios.find(p => p.producto === nombre);
-    return item ? item.precio : null;
-  };
-
-  const manejarVenta = async (nombre: string) => {
-    const precio = obtenerPrecio(nombre);
-    if (precio === null) return alert('Este producto no tiene precio definido.');
-    const reservaId = prompt('Ingrese el ID de la reserva a asignar:');
-    if (!reservaId || !inventario) return;
-
+  const actualizarCampo = async (id: number, campo: string, valor: string | number) => {
     try {
-      const { data: reserva } = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, config);
-
-      const nuevasObservaciones = `${reserva.observaciones || ''}\nVenta: ${nombre} - $${precio}`;
-      const nuevoValor = reserva.valor + precio;
-
-      await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, {
-        ...reserva,
-        observaciones: nuevasObservaciones,
-        valor: nuevoValor
+      await axios.put(`${import.meta.env.VITE_API_URL}/preciosInventario/${id}`, {
+        [campo]: valor
       }, config);
-
-      const nuevoInventario = {
-        ...inventario,
-        [nombre]: (inventario[nombre as keyof InventarioCompleto] as number) - 1
-      };
-
-      await axios.put(`${import.meta.env.VITE_API_URL}/inventario/${inventario.id}`, nuevoInventario, config);
-      setInventario(nuevoInventario);
-
-      await axios.post(`${import.meta.env.VITE_API_URL}/historialVentas`, {
-        producto: nombre,
-        precio,
-        reservaId: Number(reservaId),
-        fecha: new Date().toISOString()
-      }, config);
-
-      alert('Producto asignado, descontado y registrado en el historial.');
-    } catch (error) {
-      manejarErrorAuth(error);
-      alert('Error al procesar la venta.');
+      alert(`${campo} actualizado con éxito.`);
+      setPrecios(prev =>
+        prev.map(item =>
+          item.id === id ? { ...item, [campo]: valor } : item
+        )
+      );
+    } catch (err) {
+      manejarErrorAuth(err);
+      alert(`Error al actualizar ${campo}`);
     }
   };
 
   return (
     <div className="container py-8 mx-auto">
-      <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">🛍️ Tienda de Productos</h2>
+      <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">🛒 Gestión de Productos</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {inventario && productos.map(prod => {
-          const cantidad = Number(inventario[prod.nombre as keyof InventarioCompleto]);
-          const precio = obtenerPrecio(prod.nombre);
-          const agotado = cantidad <= 0 || precio === null;
-          return (
-            <div
-              key={prod.nombre}
-              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 p-4 flex flex-col items-center text-center"
-            >
-              <img
-                src={prod.imagen}
-                alt={prod.nombre}
-                className="w-32 h-32 object-cover rounded-lg mb-4 hover:scale-105 transition-transform"
-              />
-              <h3 className="text-lg font-semibold text-gray-700 mb-1">{prod.nombre}</h3>
-              <p className="text-sm text-gray-500">
-                {precio !== null ? `$${precio}` : 'Precio no disponible'}
-              </p>
-              <p className={`text-sm mt-1 ${agotado ? 'text-red-600' : 'text-green-600'}`}>
-                {agotado ? 'Agotado' : `Disponibles: ${cantidad}`}
-              </p>
+        {precios.map(prod => (
+          <div
+            key={prod.id}
+            className="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center"
+          >
+            <img
+              src={prod.imagen || '/images/default.jpg'}
+              alt={prod.producto}
+              className="w-32 h-32 object-cover rounded mb-2"
+            />
+            <h3 className="text-lg font-semibold">{prod.producto}</h3>
+            <p className="text-sm text-gray-600">Precio: ${prod.precio}</p>
+            <p className="text-sm text-gray-500">Cantidad: {prod.cantidad ?? 'N/D'}</p>
+
+            <div className="flex flex-col gap-2 mt-3 w-full">
               <button
-                disabled={agotado}
-                onClick={() => manejarVenta(prod.nombre)}
-                className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={() => {
+                  const nuevo = prompt('Nuevo precio:', String(prod.precio));
+                  if (nuevo) actualizarCampo(prod.id, 'precio', Number(nuevo));
+                }}
+                className="bg-yellow-400 hover:bg-yellow-500 text-white py-1 rounded"
               >
-                Vender
+                Editar precio
+              </button>
+              <button
+                onClick={() => {
+                  const nueva = prompt('Nueva URL de imagen:', prod.imagen || '');
+                  if (nueva) actualizarCampo(prod.id, 'imagen', nueva);
+                }}
+                className="bg-indigo-500 hover:bg-indigo-600 text-white py-1 rounded"
+              >
+                Editar imagen
+              </button>
+              <button
+                onClick={() => {
+                  const nueva = prompt('Nueva cantidad:', String(prod.cantidad ?? 0));
+                  if (nueva) actualizarCampo(prod.id, 'cantidad', Number(nueva));
+                }}
+                className="bg-green-500 hover:bg-green-600 text-white py-1 rounded"
+              >
+                Editar cantidad
               </button>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
+// precios-inventario.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PreciosInventario } from './precios-inventario.entity';
-import { BulkUpdatePreciosDto } from './bulk-update-precios.dto';
+import { UpdatePrecioInventarioDto } from './dto/update-precio-inventario.dto';
 
 @Injectable()
 export class PreciosInventarioService {
@@ -11,22 +12,12 @@ export class PreciosInventarioService {
     private readonly repo: Repository<PreciosInventario>,
   ) {}
 
-  async bulkUpdate({ productos }: BulkUpdatePreciosDto) {
-    for (const prod of productos) {
-      const existente = await this.repo.findOne({ where: { nombre: prod.nombre } });
-      if (existente) {
-        existente.precio = prod.precio;
-        existente.imagen = prod.imagen ?? '';
-        await this.repo.save(existente);
-      } else {
-        const nuevo = this.repo.create(prod);
-        await this.repo.save(nuevo);
-      }
-    }
-    return { message: 'Precios actualizados correctamente' };
+  findAll(): Promise<PreciosInventario[]> {
+    return this.repo.find();
   }
 
-  async findAll() {
-    return this.repo.find();
+  async update(id: number, dto: UpdatePrecioInventarioDto) {
+    await this.repo.update(id, dto);
+    return { message: 'Precio actualizado correctamente' };
   }
 }

@@ -1,20 +1,21 @@
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
-import { PreciosInventarioService } from './precios-inventario.service';
-import { BulkUpdatePreciosDto } from './bulk-update-precios.dto';
+// precios-inventario.controller.ts
+import { Controller, Get, Put, Param, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PreciosInventarioService } from './precios-inventario.service';
+import { UpdatePrecioInventarioDto } from './dto/update-precio-inventario.dto';
 
-@Controller('precios-inventario')
 @UseGuards(JwtAuthGuard)
+@Controller('preciosInventario')
 export class PreciosInventarioController {
-  constructor(private readonly service: PreciosInventarioService) {}
-
-  @Post('bulk-update')
-  async bulkUpdate(@Body() body: BulkUpdatePreciosDto) {
-    return this.service.bulkUpdate(body);
-  }
+  constructor(private readonly preciosService: PreciosInventarioService) {}
 
   @Get()
-  async findAll() {
-    return this.service.findAll();
+  findAll() {
+    return this.preciosService.findAll();
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() dto: UpdatePrecioInventarioDto) {
+    return this.preciosService.update(id, dto);
   }
 }
