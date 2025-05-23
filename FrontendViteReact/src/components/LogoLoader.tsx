@@ -17,7 +17,7 @@ const LogoLoader = () => {
         setProgress(100);
         setTimeout(() => setIsAnimating(false), 500);
       } catch (error) {
-        console.error("Error al cargar datos:", error);
+        console.error("Error al cargar datos logoLoader:", error);
         setProgress(100);
         setTimeout(() => setIsAnimating(false), 500);
       }
