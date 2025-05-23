@@ -1,5 +1,5 @@
 // reserva.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reserva } from './reserva.entity';
@@ -8,34 +8,39 @@ import { Reserva } from './reserva.entity';
 export class ReservaService {
   constructor(
     @InjectRepository(Reserva)
-    private readonly repo: Repository<Reserva>
+    private readonly reservaRepository: Repository<Reserva>,
   ) {}
 
   async findAll(): Promise<Reserva[]> {
-    return this.repo.find();
-  }
-
-  async findOne(id: number): Promise<Reserva> {
-    const reserva = await this.repo.findOne({ where: { id } });
-    if (!reserva) throw new NotFoundException('Reserva no encontrada');
-    return reserva;
+    return this.reservaRepository.find();
   }
 
   async create(reserva: Reserva): Promise<Reserva> {
-    return this.repo.save(reserva);
+    return this.reservaRepository.save(reserva);
   }
 
   async update(id: number, reserva: Reserva): Promise<Reserva> {
-    await this.repo.update(id, reserva);
-    return this.findOne(id);
+    await this.reservaRepository.update(id, reserva);
+    const updatedReserva = await this.reservaRepository.findOneBy({ id });
+    if (!updatedReserva) {
+      throw new Error(`Reserva with id ${id} not found`);
+    }
+    return updatedReserva;
   }
 
-  async deleteById(id: number) {
-    return this.repo.delete(id);
+  async remove(id: number): Promise<void> {
+    await this.reservaRepository.delete(id);
   }
 
-  async resetAll() {
-    await this.repo.delete({});
-    return { message: 'Todas las reservas han sido eliminadas.' };
+  async resetearTodas(): Promise<void> {
+    try {
+      console.log('Entrando a resetearTodas()');
+      await this.reservaRepository.clear();
+      await this.reservaRepository.query('ALTER TABLE reservas AUTO_INCREMENT = 1');
+      console.log('Reservas eliminadas y AUTO_INCREMENT reiniciado');
+    } catch (error) {
+      console.error('Error en resetearTodas():', error);
+      throw new Error('Falló el reseteo de reservas');
+    }
   }
 }
