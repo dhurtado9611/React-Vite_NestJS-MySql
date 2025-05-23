@@ -1,4 +1,3 @@
-// app.module.ts actualizado correctamente con PreciosInventarioModule
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -13,8 +12,9 @@ import { AdminModule } from './admin/admin.module';
 import { ReservasClienteModule } from './cliente/reservas_cliente.module';
 import { InventarioModule } from './inventario/inventario.module';
 import { Inventario } from './inventario/inventario.entity';
+import { PreciosInventario } from './preciosInventario/precios-inventario.entity'; 
 import { PreciosInventarioModule } from './preciosInventario/precios-inventario.module';
-import { PreciosInventario } from './preciosInventario/precios-inventario.entity';
+
 
 @Module({
   imports: [
@@ -25,9 +25,9 @@ import { PreciosInventario } from './preciosInventario/precios-inventario.entity
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      url: process.env.MYSQL_URL,
-      entities: [Reserva, User, Cuadre, Inventario, PreciosInventario],
-      synchronize: true,
+      url: process.env.MYSQL_URL, 
+      entities: [Reserva, User, Cuadre, Inventario, PreciosInventario], 
+      synchronize: true, 
     }),
     CuadreModule,
     AuthModule,
