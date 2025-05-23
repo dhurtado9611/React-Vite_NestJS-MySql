@@ -24,14 +24,14 @@ export class ReservaController {
     return this.reservaService.create(reserva);
   }
 
-  @Put(':id')
-  update(@Param('id') id: number, @Body() reserva: Reserva): Promise<Reserva> {
-    return this.reservaService.update(id, reserva);
-  }
-
   @Delete('reset')
   async resetAll() {
     return this.reservaService.resetAll();
+  }
+
+  @Put(':id')
+  update(@Param('id') id: number, @Body() reserva: Reserva): Promise<Reserva> {
+    return this.reservaService.update(id, reserva);
   }
 
   @Delete(':id')
