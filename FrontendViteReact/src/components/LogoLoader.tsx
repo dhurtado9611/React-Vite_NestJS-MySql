@@ -8,23 +8,37 @@ const LogoLoader = () => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setProgress(30);
-        await new Promise((res) => setTimeout(res, 500));
-        setProgress(60);
-        await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/reservas");
-        setProgress(100);
-        setTimeout(() => setIsAnimating(false), 500);
-      } catch (error) {
-        console.error("Error al cargar datos logoLoader:", error);
-        setProgress(100);
-        setTimeout(() => setIsAnimating(false), 500);
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn("No hay token JWT, se omite llamada.");
+        setIsAnimating(false);
+        return;
       }
-    };
 
-    fetchData();
+      setProgress(30);
+      await new Promise((res) => setTimeout(res, 500));
+      setProgress(60);
+
+      await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/reservas", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setProgress(100);
+      setTimeout(() => setIsAnimating(false), 500);
+    } catch (error) {
+      console.error("Error al cargar datos logoLoader:", error);
+      setProgress(100);
+      setTimeout(() => setIsAnimating(false), 500);
+    }
+  };
+
+  fetchData();
   }, []);
+
 
   const radius = 75;
   const circumference = 2 * Math.PI * radius;
