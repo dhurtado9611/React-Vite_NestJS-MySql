@@ -1,42 +1,41 @@
 // reserva.controller.ts
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Body, Param, Put, UseGuards } from '@nestjs/common';
 import { ReservaService } from './reserva.service';
-import { Reserva } from './reserva.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Reserva } from './reserva.entity';
 
+@UseGuards(JwtAuthGuard)
 @Controller('reservas')
 export class ReservaController {
   constructor(private readonly reservaService: ReservaService) {}
 
   @Get()
-  async findAll(): Promise<Reserva[]> {
+  findAll(): Promise<Reserva[]> {
     return this.reservaService.findAll();
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: number): Promise<Reserva> {
+    return this.reservaService.findOne(id);
+  }
+
   @Post()
-  async create(@Body() reserva: Reserva): Promise<Reserva> {
+  create(@Body() reserva: Reserva): Promise<Reserva> {
     return this.reservaService.create(reserva);
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() reserva: Reserva): Promise<Reserva> {
+  update(@Param('id') id: number, @Body() reserva: Reserva): Promise<Reserva> {
     return this.reservaService.update(id, reserva);
   }
 
   @Delete('reset')
-  @UseGuards(JwtAuthGuard)
-  async resetearReservas(): Promise<{ message: string }> {
-    try {
-      await this.reservaService.resetearTodas();
-      return { message: 'Reservas eliminadas correctamente' };
-    } catch (error) {
-      console.error('Error en resetearReservas:', error);
-      throw new HttpException('Error al eliminar reservas', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  async resetAll() {
+    return this.reservaService.resetAll();
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<void> {
-    return this.reservaService.remove(id);
+  async delete(@Param('id') id: number) {
+    return this.reservaService.deleteById(id);
   }
 }
