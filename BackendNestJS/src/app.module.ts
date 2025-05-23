@@ -32,9 +32,12 @@ import { ReservasModule } from './reservas/reservas.module';
       entities: [Reserva, User, Cuadre, Inventario, PreciosInventario],
       synchronize: true,
     }),
+    TypeOrmModule.forFeature([Reserva]),
     CuadreModule,
     ReservasModule,
     AuthModule,
   ],
+  controllers: [ReservaController],
+  providers: [ReservaService],
 })
 export class AppModule {}
