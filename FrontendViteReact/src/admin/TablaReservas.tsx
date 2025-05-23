@@ -56,7 +56,7 @@ const TablaReservas = () => {
   
     if (window.confirm('¿Estás seguro de borrar todas las reservas y reiniciar los IDs?')) {
       try {
-        const res = await axios.delete(`${import.meta.env.VITE_API_URL}/reservas/reset-all`, {
+        const res = await axios.delete(`${import.meta.env.VITE_API_URL}/reservas/reset-todo-456`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

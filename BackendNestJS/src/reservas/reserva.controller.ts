@@ -1,8 +1,10 @@
+// reserva.controller.ts
 import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { ReservaService } from './reserva.service';
 import { Reserva } from './reserva.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('reservas')
 export class ReservaController {
   constructor(private readonly reservaService: ReservaService) {}
@@ -22,10 +24,8 @@ export class ReservaController {
     return this.reservaService.update(id, reserva);
   }
 
-  @Delete('reset-all')
-  @UseGuards(JwtAuthGuard)
+  @Delete('reset-todo-456')
   async resetearReservas(): Promise<{ message: string }> {
-    console.log('>>> EJECUTANDO resetearReservas');
     try {
       await this.reservaService.resetearTodas();
       return { message: 'Reservas eliminadas correctamente' };

@@ -1,3 +1,4 @@
+// reserva.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,13 +10,6 @@ export class ReservaService {
     @InjectRepository(Reserva)
     private readonly reservaRepository: Repository<Reserva>
   ) {}
-
-  async resetearTodas(): Promise<void> {
-    await this.reservaRepository.createQueryBuilder()
-      .delete()
-      .from(Reserva)
-      .execute();
-  }
 
   async findAll(): Promise<Reserva[]> {
     return this.reservaRepository.find();
@@ -34,5 +28,12 @@ export class ReservaService {
 
   async remove(id: number): Promise<void> {
     await this.reservaRepository.delete(id);
+  }
+
+  async resetearTodas(): Promise<void> {
+    await this.reservaRepository.createQueryBuilder()
+      .delete()
+      .from(Reserva)
+      .execute();
   }
 }
