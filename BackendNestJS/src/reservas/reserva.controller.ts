@@ -29,7 +29,6 @@ export class ReservaController {
     return this.reservaService.update(id, reserva);
   }
 
-  // 🔁 ESTA RUTA DEBE IR ANTES
   @Delete('reset')
   async resetAll() {
     return this.reservaService.resetAll();
