@@ -1,4 +1,4 @@
-// Marketplace.tsx (extensión con edición de precio, imagen y cantidad)
+// Marketplace.tsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -12,93 +12,69 @@ interface PrecioItem {
 }
 
 const Marketplace = () => {
-  const [precios, setPrecios] = useState<PrecioItem[]>([]);
+  const [productos, setProductos] = useState<PrecioItem[]>([]);
   const navigate = useNavigate();
 
   const config = {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   };
 
   const manejarErrorAuth = (error: any) => {
-    if (error.response && error.response.status === 401) {
-      alert('Sesión expirada. Inicia sesión nuevamente.');
+    if (error.response?.status === 401) {
+      alert('Sesión expirada. Por favor inicia sesión nuevamente.');
       localStorage.removeItem('token');
       navigate('/login');
     } else {
-      console.error(error);
+      console.error('Error cargando datos:', error);
     }
   };
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`, config)
-      .then(res => setPrecios(res.data))
-      .catch(manejarErrorAuth);
+    const fetchData = async () => {
+      try {
+        const [preciosRes, inventarioRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`, config),
+          axios.get(`${import.meta.env.VITE_API_URL}/inventario`, config),
+        ]);
+
+        const inventario = inventarioRes.data.at(-1); // último inventario registrado
+
+        const productosConCantidad = preciosRes.data.map((item: PrecioItem) => {
+          const nombreCampo = item.producto.toUpperCase().replace(/\s/g, '_');
+          const cantidad = inventario[nombreCampo] ?? 0;
+          return { ...item, cantidad };
+        });
+
+        setProductos(productosConCantidad);
+      } catch (error) {
+        manejarErrorAuth(error);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const actualizarCampo = async (id: number, campo: string, valor: string | number) => {
-    try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/preciosInventario/${id}`, {
-        [campo]: valor
-      }, config);
-      alert(`${campo} actualizado con éxito.`);
-      setPrecios(prev =>
-        prev.map(item =>
-          item.id === id ? { ...item, [campo]: valor } : item
-        )
-      );
-    } catch (err) {
-      manejarErrorAuth(err);
-      alert(`Error al actualizar ${campo}`);
-    }
-  };
-
   return (
-    <div className="container py-8 mx-auto">
-      <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">🛒 Gestión de Productos</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {precios.map(prod => (
+    <div className="container py-4">
+      <h2 className="text-center text-xl font-bold mb-4">🛍️ Productos Disponibles</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {productos.map((prod) => (
           <div
             key={prod.id}
-            className="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center"
+            className="bg-white shadow-md rounded-xl p-4 flex flex-col items-center text-center"
           >
             <img
               src={prod.imagen || '/images/default.jpg'}
               alt={prod.producto}
-              className="w-32 h-32 object-cover rounded mb-2"
+              className="w-28 h-28 object-cover rounded mb-2"
             />
-            <h3 className="text-lg font-semibold">{prod.producto}</h3>
-            <p className="text-sm text-gray-600">Precio: ${prod.precio}</p>
-            <p className="text-sm text-gray-500">Cantidad: {prod.cantidad ?? 'N/D'}</p>
-
-            <div className="flex flex-col gap-2 mt-3 w-full">
-              <button
-                onClick={() => {
-                  const nuevo = prompt('Nuevo precio:', String(prod.precio));
-                  if (nuevo) actualizarCampo(prod.id, 'precio', Number(nuevo));
-                }}
-                className="bg-yellow-400 hover:bg-yellow-500 text-white py-1 rounded"
-              >
-                Editar precio
-              </button>
-              <button
-                onClick={() => {
-                  const nueva = prompt('Nueva URL de imagen:', prod.imagen || '');
-                  if (nueva) actualizarCampo(prod.id, 'imagen', nueva);
-                }}
-                className="bg-indigo-500 hover:bg-indigo-600 text-white py-1 rounded"
-              >
-                Editar imagen
-              </button>
-              <button
-                onClick={() => {
-                  const nueva = prompt('Nueva cantidad:', String(prod.cantidad ?? 0));
-                  if (nueva) actualizarCampo(prod.id, 'cantidad', Number(nueva));
-                }}
-                className="bg-green-500 hover:bg-green-600 text-white py-1 rounded"
-              >
-                Editar cantidad
-              </button>
-            </div>
+            <h3 className="text-md font-semibold text-gray-700">{prod.producto}</h3>
+            <p className="text-sm text-gray-500 mb-1">Precio: ${prod.precio}</p>
+            <p className={`text-sm font-medium ${prod.cantidad === 0 ? 'text-red-600' : 'text-green-600'}`}>
+              {prod.cantidad === 0 ? 'Agotado' : `Disponibles: ${prod.cantidad}`}
+            </p>
           </div>
         ))}
       </div>
