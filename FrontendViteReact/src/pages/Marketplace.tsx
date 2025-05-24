@@ -1,85 +1,124 @@
-// Marketplace.tsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-interface PrecioItem {
+interface InventarioCompleto {
   id: number;
-  producto: string;
-  precio: number;
-  imagen?: string;
-  cantidad?: number;
+  AGUARDIENTE: number;
+  RON: number;
+  POKER: number;
+  ENERGIZANTE: number;
+  JUGOS_HIT: number;
+  AGUA: number;
+  GASEOSA: number;
+  PAPEL_HIGIENICO: number;
+  ALKA_SELTZER: number;
+  SHAMPOO: number;
+  TOALLA_HIGIENICA: number;
+  CONDONES: number;
+  BONOS: number;
+  colaborador: string;
+  turno: string;
+  fecha: string;
 }
 
-const Marketplace = () => {
-  const [productos, setProductos] = useState<PrecioItem[]>([]);
+const productos = [
+  { nombre: 'AGUARDIENTE', imagen: 'src/assets/Aguardiente.jpg', precio: 7000 },
+  { nombre: 'RON', imagen: '/src/assets/ron.jpg', precio: 7500 },
+  { nombre: 'POKER', imagen: '/src/assets/poker.jpg', precio: 3500 },
+  { nombre: 'ENERGIZANTE', imagen: '/src/assets/energizante.jpg', precio: 4000 },
+  { nombre: 'JUGOS_HIT', imagen: '/src/assets/jugos.jpg', precio: 2000 },
+  { nombre: 'AGUA', imagen: '/src/assets/agua.jpg', precio: 1500 },
+  { nombre: 'GASEOSA', imagen: '/src/assets/gaseosa.jpg', precio: 2500 },
+  { nombre: 'PAPEL_HIGIENICO', imagen: '/src/assets/papel.jpg', precio: 2000 },
+  { nombre: 'ALKA_SELTZER', imagen: '/src/assets/alka.jpg', precio: 3000 },
+  { nombre: 'SHAMPOO', imagen: '/src/assets/shampoo.jpg', precio: 3000 },
+  { nombre: 'TOALLA_HIGIENICA', imagen: '/src/assets/toalla.jpg', precio: 2500 },
+  { nombre: 'CONDONES', imagen: '/src/assets/condones.jpg', precio: 2000 },
+  { nombre: 'BONOS', imagen: '/src/assets/bono.jpg', precio: 5000 },
+];
+
+const MarketplaceInvitado = () => {
+  const [inventario, setInventario] = useState<InventarioCompleto | null>(null);
   const navigate = useNavigate();
 
-  const config = {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-  };
-
-  const manejarErrorAuth = (error: any) => {
-    if (error.response?.status === 401) {
-      alert('Sesión expirada. Por favor inicia sesión nuevamente.');
-      localStorage.removeItem('token');
-      navigate('/login');
-    } else {
-      console.error('Error cargando datos:', error);
-    }
-  };
-
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [preciosRes, inventarioRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`, config),
-          axios.get(`${import.meta.env.VITE_API_URL}/inventario`, config),
-        ]);
-
-        const inventario = inventarioRes.data.at(-1); // último inventario registrado
-
-        const productosConCantidad = preciosRes.data.map((item: PrecioItem) => {
-          const nombreCampo = item.producto.toUpperCase().replace(/\s/g, '_');
-          const cantidad = inventario[nombreCampo] ?? 0;
-          return { ...item, cantidad };
-        });
-
-        setProductos(productosConCantidad);
-      } catch (error) {
-        manejarErrorAuth(error);
-      }
-    };
-
-    fetchData();
+    axios.get(`${import.meta.env.VITE_API_URL}/inventario`)
+      .then(res => {
+        const data = res.data;
+        const ultimo = data[data.length - 1];
+        setInventario(ultimo);
+      })
+      .catch(err => console.error(err));
   }, []);
+
+  const manejarVenta = async (nombre: string, precio: number) => {
+    const reservaId = prompt('Ingrese el ID de la reserva a asignar:');
+    if (!reservaId || isNaN(Number(reservaId))) {
+      alert('ID no válido');
+      return;
+    }
+  
+    const token = localStorage.getItem('token'); // O usa sessionStorage si lo guardaste allí
+    if (!token) {
+      alert('Usuario no autenticado');
+      return;
+    }
+  
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+  
+      const { data: reserva } = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, { headers });
+  
+      const observacionesAnteriores = reserva.observaciones || '';
+      const nuevasObservaciones = `${observacionesAnteriores}\nVenta: ${nombre} + $${precio}`;
+      const valorActual = parseFloat(reserva.valor) || 0;
+      const nuevoValor = valorActual + precio;
+  
+      await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, {
+        ...reserva,
+        observaciones: nuevasObservaciones,
+        valor: nuevoValor
+      }, { headers });
+  
+      alert('Producto asignado a la reserva con éxito.');
+    } catch (error: any) {
+      console.error(error);
+      if (error.response?.status === 401) {
+        alert('No autorizado. Inicia sesión.');
+      } else if (error.response?.status === 404) {
+        alert('Reserva no encontrada.');
+      } else {
+        alert('Error al asignar producto.');
+      }
+    }
+  };  
 
   return (
     <div className="container py-4">
-      <h2 className="text-center text-xl font-bold mb-4">🛍️ Productos Disponibles</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {productos.map((prod) => (
-          <div
-            key={prod.id}
-            className="bg-white shadow-md rounded-xl p-4 flex flex-col items-center text-center"
-          >
-            <img
-              src={prod.imagen || '/images/default.jpg'}
-              alt={prod.producto}
-              className="w-28 h-28 object-cover rounded mb-2"
-            />
-            <h3 className="text-md font-semibold text-gray-700">{prod.producto}</h3>
-            <p className="text-sm text-gray-500 mb-1">Precio: ${prod.precio}</p>
-            <p className={`text-sm font-medium ${prod.cantidad === 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {prod.cantidad === 0 ? 'Agotado' : `Disponibles: ${prod.cantidad}`}
-            </p>
-          </div>
-        ))}
+      <h2 className="text-2xl font-bold mb-4">Tienda</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {inventario && productos.map(prod => {
+          const cantidad = Number(inventario[prod.nombre as keyof InventarioCompleto]);
+          return (
+            <div key={prod.nombre} className="p-4 shadow-lg border rounded">
+              <img src={prod.imagen} alt={prod.nombre} className="w-full h-40 object-cover rounded" />
+              <h3 className="text-lg font-semibold mt-2">{prod.nombre}</h3>
+              <p className="text-sm">Precio: ${prod.precio}</p>
+              <p className="text-sm">Disponibles: {cantidad}</p>
+              <button
+                disabled={cantidad <= 0}
+                onClick={() => manejarVenta(prod.nombre, prod.precio)}
+                className="mt-2 w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
+              >
+                Vender
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 };
 
-export default Marketplace;
+export default MarketplaceInvitado;
