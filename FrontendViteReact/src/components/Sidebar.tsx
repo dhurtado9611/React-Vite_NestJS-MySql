@@ -65,7 +65,7 @@ const SidebarActividadContador = () => {
         { to: "/", icon: Home, label: "Inicio" },
         { to: "/CrearReservasInvitado", icon: CalendarPlus, label: "Reservas" },
         { to: "/ActividadInvitado", icon: Clock, label: "Actividad" },
-        { to: "/Marketplace", icon: ShoppingCart, label: "Tienda" },
+        { to: "/MarketplaceInvitado", icon: ShoppingCart, label: "Tienda" },
       ];
     }
     return [];
