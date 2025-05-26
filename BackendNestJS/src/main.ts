@@ -14,6 +14,7 @@ async function bootstrap() {
       'https://react-vite-nest-js-my-ds74mxdem-danielhurtados-projects.vercel.app',
       'https://react-vite-nest-js-my-sql.vercel.app',
       'https://elesconditemotel.lat',
+      'https://www.elesconditemotel.lat',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
