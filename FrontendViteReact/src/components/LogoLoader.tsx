@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import logoSrc from "../assets/Logo-PNG.png";
+import logoSrc from "/assets/Logo-PNG.png";
 
 const LogoLoader = () => {
   const [isAnimating, setIsAnimating] = useState(true);
