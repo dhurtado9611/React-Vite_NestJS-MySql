@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { FaCalendarAlt } from "react-icons/fa";
 import Carousel from "../components/Home/Carousel";
-import fondo1 from "../assets/fondo1.jpg";
+import fondo1 from "/assets/fondo1.jpg";
 import Footer from "../components/Home/Footer";
 import ReservarCliente from "../pages/ReservarCliente";
-import Logo from "../assets/Logo-PNG.png";
+import Logo from "/assets/Logo-PNG.png";
 
 const Home = () => {
   const location = useLocation();
