@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import Logo from '../assets/Logo-PNG.png';
+import Logo from '/assets/Logo-PNG.png';
 
 const NavbarTop = () => {
   const location = useLocation();
