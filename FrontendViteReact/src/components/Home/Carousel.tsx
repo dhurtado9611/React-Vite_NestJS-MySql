@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 
+// ✅ CORREGIDO: Rutas directas a la carpeta public (sin new URL, sin import)
 const images = [
-  new URL("/src/assets/habSen1.jpg", import.meta.url).href,
-  new URL("/src/assets/habSen2.jpg", import.meta.url).href,
-  new URL("/src/assets/habSuite1.jpg", import.meta.url).href,
-  new URL("/src/assets/habSuite2.jpg", import.meta.url).href,
-  new URL("/src/assets/habSen3.jpg", import.meta.url).href
+  "/assets/habSen1.jpg",
+  "/assets/habSen2.jpg",
+  "/assets/habSuite1.jpg",
+  "/assets/habSuite2.jpg",
+  "/assets/habSen3.jpg"
 ];
 
 const Carousel = ({ setBackground }: { setBackground: (src: string) => void }) => {
