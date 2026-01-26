@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { FaCalendarAlt } from "react-icons/fa";
 import Carousel from "../components/Home/Carousel";
-import fondo1 from "/assets/fondo1.jpg";
+// ❌ ELIMINADO: import fondo1 from "/assets/fondo1.jpg";
 import Footer from "../components/Home/Footer";
-import ReservarCliente from "../pages/ReservarCliente";
-import Logo from "/assets/Logo-PNG.png";
+// ReservarCliente no se usa en el render, pero si lo necesitas déjalo, si no, bórralo.
+// ❌ ELIMINADO: import Logo from "/assets/Logo-PNG.png";
 
 const Home = () => {
   const location = useLocation();
-  const [background, setBackground] = useState(fondo1);
+  
+  // ✅ CORREGIDO: Usamos la ruta como texto directo (string)
+  const [background, setBackground] = useState("/assets/fondo1.jpg");
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
@@ -41,8 +43,9 @@ const Home = () => {
         )}
 
         <div className="z-10">
+          {/* ✅ CORREGIDO: src apunta directo a la carpeta public */}
           <img
-            src={Logo}
+            src="/assets/Logo-PNG.png"
             alt="Logo principal"
             className="w-40 sm:w-56 md:w-64 lg:w-72 xl:w-80 mb-4 drop-shadow-xl"
           />
@@ -61,12 +64,12 @@ const Home = () => {
         </div>
 
         <div className="col">
-        <button
-          onClick={handleScrollToReserva}
-          className="z-10 mt-6 px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-semibold rounded-lg shadow-md transition flex items-center gap-2 animate-bounce"
-        >
-          <FaCalendarAlt className="text-lg" /> Reservar ahora
-        </button>
+          <button
+            onClick={handleScrollToReserva}
+            className="z-10 mt-6 px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-semibold rounded-lg shadow-md transition flex items-center gap-2 animate-bounce"
+          >
+            <FaCalendarAlt className="text-lg" /> Reservar ahora
+          </button>
         </div>
       </div>
 
