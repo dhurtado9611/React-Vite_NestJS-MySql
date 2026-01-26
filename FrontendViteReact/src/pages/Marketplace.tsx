@@ -32,7 +32,7 @@ const catalogoBase: ProductoBase[] = [
   { nombre: 'SHAMPOO', imagen: '/assets/shampoo.jpg', precio: 3000 },
   { nombre: 'TOALLA_HIGIENICA', imagen: '/assets/toalla.jpg', precio: 2500 },
   { nombre: 'CONDONES', imagen: '/assets/condones.jpg', precio: 2000 },
-  { nombre: 'BONOS', imagen: '/assets/bono.jpg', precio: 5000 },
+  { nombre: 'BONOS', imagen: '/assets/bono.jpg', precio: 15000 },
 ];
 
 const MarketplaceCliente = () => {
