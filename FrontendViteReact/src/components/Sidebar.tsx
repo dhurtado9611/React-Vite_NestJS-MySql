@@ -6,14 +6,14 @@ import {
   Home,
   Clock,
   ShoppingCart,
-  ListChecks,
   BarChart3,
   LogIn,
   LogOut
 } from "lucide-react";
-import logoSrc from "../assets/Logo-PNG.png";
+// ❌ ELIMINADO: import logoSrc from "../assets/Logo-PNG.png"; 
 import LoginModal from "./LoginModal";
-import axios from "axios";
+// axios no se estaba usando en el render, pero lo dejo por si acaso lo usas en lógica futura
+// import axios from "axios"; 
 
 const SidebarActividadContador = () => {
   const [username, setUsername] = useState<string | null>(null);
@@ -75,7 +75,9 @@ const SidebarActividadContador = () => {
     <>
       <aside className="hidden md:flex fixed top-0 bottom-0 w-20 bg-white text-black z-50 flex-col justify-between items-center py-10 gap-8 border-r border-black shadow-xl overflow-y-auto">
         <div className="flex flex-col items-center gap-10">
-          <img src={logoSrc} alt="Logo" className="w-16 h-16 object-contain" />
+          {/* ✅ CORREGIDO: Ruta directa a public */}
+          <img src="/assets/Logo-PNG.png" alt="Logo" className="w-16 h-16 object-contain" />
+          
           <nav className="flex flex-col gap-4 items-center text-xs">
             {username && getLinks().map((link) => (
               <NavLink
@@ -144,7 +146,9 @@ const SidebarActividadContador = () => {
 
       {/* Versión móvil */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-black flex items-center justify-around z-50 shadow-inner text-xs overflow-x-auto">
-        <img src={logoSrc} alt="Logo" className="w-10 h-10 object-contain" />
+        {/* ✅ CORREGIDO: Ruta directa a public */}
+        <img src="/assets/Logo-PNG.png" alt="Logo" className="w-10 h-10 object-contain" />
+        
         {username && getLinks().map((link) => (
           <NavLink
             key={link.to}
