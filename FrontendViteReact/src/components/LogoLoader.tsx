@@ -1,44 +1,43 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import logoSrc from "/assets/Logo-PNG.png";
+// ❌ ELIMINADO: import logoSrc from "/assets/Logo-PNG.png";
 
 const LogoLoader = () => {
   const [isAnimating, setIsAnimating] = useState(true);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn("No hay token JWT, se omite llamada.");
-        setIsAnimating(false);
-        return;
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn("No hay token JWT, se omite llamada.");
+          setIsAnimating(false);
+          return;
+        }
+
+        setProgress(30);
+        await new Promise((res) => setTimeout(res, 500));
+        setProgress(60);
+
+        await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/reservas", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setProgress(100);
+        setTimeout(() => setIsAnimating(false), 500);
+      } catch (error) {
+        console.error("Error al cargar datos logoLoader:", error);
+        setProgress(100);
+        setTimeout(() => setIsAnimating(false), 500);
       }
+    };
 
-      setProgress(30);
-      await new Promise((res) => setTimeout(res, 500));
-      setProgress(60);
-
-      await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/reservas", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setProgress(100);
-      setTimeout(() => setIsAnimating(false), 500);
-    } catch (error) {
-      console.error("Error al cargar datos logoLoader:", error);
-      setProgress(100);
-      setTimeout(() => setIsAnimating(false), 500);
-    }
-  };
-
-  fetchData();
+    fetchData();
   }, []);
-
 
   const radius = 75;
   const circumference = 2 * Math.PI * radius;
@@ -85,7 +84,8 @@ const LogoLoader = () => {
                 transition={{ duration: 0.1 }}
               />
             </svg>
-            <img src={logoSrc} alt="Logo" className="w-24 h-24 object-contain z-10" />
+            {/* ✅ CORREGIDO: Ruta directa como string */}
+            <img src="/assets/Logo-PNG.png" alt="Logo" className="w-24 h-24 object-contain z-10" />
           </motion.div>
         </motion.div>
       )}
