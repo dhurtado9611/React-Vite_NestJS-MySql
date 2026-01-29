@@ -4,7 +4,6 @@ import { Reserva } from '../components/types';
 import api from '../services/api';
 import { Modal, Button } from 'react-bootstrap';
 
-// ✅ Extender el tipo Reserva para incluir valores convertidos
 type ReservaExtendida = Reserva & {
   hentradaNum: number;
   hsalidamaxNum: number;
@@ -16,26 +15,44 @@ const Historial = () => {
   const [reservaSeleccionada, setReservaSeleccionada] = useState<ReservaExtendida | null>(null);
   const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<number | null>(null);
 
-  // ✅ Obtener datos desde la API
+  // Mantenemos una variable de "ahora" para forzar re-renderizado del tiempo cada minuto
+  const [now, setNow] = useState(new Date());
+
   const fetchDatosReservas = async () => {
     try {
       const response = await api.get('/reservas');
-      const reservasConvertidas = response.data.map((reserva: Reserva) => ({
-        ...reserva,
-        hsalida: reserva.hsalida ?? '',
-        hentradaNum: convertirHoraANumero(reserva.hentrada),
-        hsalidamaxNum: convertirHoraANumero(reserva.hsalidamax)
-      }));
-      setReservas(reservasConvertidas);
+      // No necesitamos conversiones complejas aquí, usaremos la función de cálculo dinámica
+      setReservas(response.data);
     } catch (error) {
       console.error('Error al obtener las reservas:', error);
     }
   };
 
-  const convertirHoraANumero = (hora: string): number => {
-    if (!hora) return 0;
-    const [h, m] = hora.split(':').map(Number);
-    return h * 100 + m;
+  // ✅ NUEVA LÓGICA: Calcula diferencia real en minutos usando fechas
+  const calcularEstadoTiempo = (horaEntrada: string) => {
+    if (!horaEntrada) return { minutosPasados: 0, minutosRestantes: 240, excedido: false };
+
+    const fechaActual = new Date();
+    const [h, m] = horaEntrada.split(':').map(Number);
+    
+    // Crear fecha de entrada basada en el día de hoy
+    const fechaEntrada = new Date();
+    fechaEntrada.setHours(h, m, 0, 0);
+
+    // Si la hora de entrada es mayor a la actual, asumimos que fue ayer (ej. entró 11pm, ahora es 1am)
+    if (fechaEntrada > fechaActual) {
+      fechaEntrada.setDate(fechaEntrada.getDate() - 1);
+    }
+
+    const diferenciaMs = fechaActual.getTime() - fechaEntrada.getTime();
+    const minutosPasados = Math.floor(diferenciaMs / 60000);
+    const LIMITE_TIEMPO = 240; // 4 horas * 60 minutos
+    
+    return {
+      minutosPasados,
+      minutosRestantes: LIMITE_TIEMPO - minutosPasados,
+      excedido: minutosPasados >= LIMITE_TIEMPO
+    };
   };
 
   const getEstadoHabitacion = (habitacion: number) => {
@@ -44,18 +61,9 @@ const Historial = () => {
     );
   
     if (reservaActiva) {
-      const { hentradaNum } = reservaActiva;
-      // Obtenemos la hora actual en formato "HH:mm"
-      const now = new Date();
-      const currentHour = now.getHours().toString().padStart(2, '0');
-      const currentMinute = now.getMinutes().toString().padStart(2, '0');
-      const currentTimeString = `${currentHour}:${currentMinute}`;
-      const currentTimeNum = Math.abs(convertirHoraANumero(currentTimeString));
-  
-      // Si la diferencia entre la hora actual y la hora de entrada es >= 400, la habitación se marca como 'critica'
-      const diferencia = currentTimeNum - hentradaNum;
-      //console.log(`Diferencia entre la hora actual y la hora de entrada: ${diferencia}`);
-      return diferencia >= 400 ? 'critica' : 'ocupada';
+      const { excedido } = calcularEstadoTiempo(reservaActiva.hentrada);
+      // Si se pasó de 4 horas, devuelve 'critica' (parpadeo), si no 'ocupada' (rojo)
+      return excedido ? 'critica' : 'ocupada';
     }
   
     return 'libre';
@@ -64,32 +72,50 @@ const Historial = () => {
   const handleClickHabitacion = async (habitacion: number) => {
     setHabitacionSeleccionada(habitacion);
     try {
-      const response = await api.get(`/reservas`);
-      const reservasHabitacion = response.data.filter(
-        (reserva: Reserva) => reserva.habitacion === habitacion && !reserva.hsalida
-      );
-      if (reservasHabitacion.length > 0) {
-        const reservaActiva = reservasHabitacion[reservasHabitacion.length - 1];
-        setReservaSeleccionada({
-          ...reservaActiva,
-          hentradaNum: convertirHoraANumero(reservaActiva.hentrada),
-          hsalidamaxNum: convertirHoraANumero(reservaActiva.hsalidamax)
-        });
-      } else {
-        setReservaSeleccionada(null);
-      }
+        // Optimización: Usamos los datos que ya tenemos en memoria si es posible
+        const reservaActiva = reservas.find(
+            (reserva) => reserva.habitacion === habitacion && !reserva.hsalida
+        );
+
+        if (reservaActiva) {
+            setReservaSeleccionada(reservaActiva as ReservaExtendida);
+        } else {
+            setReservaSeleccionada(null);
+        }
     } catch (error) {
-      console.error('Error al consultar la base de datos:', error);
+      console.error('Error al seleccionar habitación:', error);
       setReservaSeleccionada(null);
     }
     setShowModal(true);
   };
 
+  // Formatea los minutos restantes a formato legible (ej: "1h 30m")
+  const formatoTiempoRestante = (minutos: number) => {
+    if (minutos <= 0) return "Tiempo finalizado";
+    const h = Math.floor(minutos / 60);
+    const m = minutos % 60;
+    return `${h}h ${m}m`;
+  };
+
   useEffect(() => {
     fetchDatosReservas();
-    const updateInterval = setInterval(fetchDatosReservas, 10000);
-    return () => clearInterval(updateInterval);
+    
+    // Actualizar datos cada 10 segundos
+    const dataInterval = setInterval(fetchDatosReservas, 10000);
+    
+    // Actualizar el reloj interno cada minuto para refrescar cálculos de tiempo restante
+    const clockInterval = setInterval(() => setNow(new Date()), 60000);
+
+    return () => {
+        clearInterval(dataInterval);
+        clearInterval(clockInterval);
+    };
   }, []);
+
+  // Calculamos el estado actual para el modal
+  const estadoModal = reservaSeleccionada 
+    ? calcularEstadoTiempo(reservaSeleccionada.hentrada) 
+    : null;
 
   return (
     <div className="relative w-full min-h-screen px-10 sm:px-6 lg:px-8 pt-16 pb-20 lg:pl-24">
@@ -108,14 +134,15 @@ const Historial = () => {
                         : estado === 'ocupada'
                         ? 'btn-danger'
                         : estado === 'critica'
-                        ? 'btn-warning'
+                        ? 'btn-warning' // Base amarilla, pero la animación cambiará los colores
                         : ''
                     }`}
                     style={{
                       animation:
                         estado === 'critica' ? 'parpadeo 1s infinite' : 'none',
-                      color: estado === 'critica' ? '#000' : undefined,
-                      border: estado === 'critica' ? '1px solid #ff6347' : undefined
+                      color: estado === 'critica' ? '#000' : '#fff',
+                      fontWeight: 'bold',
+                      border: estado === 'critica' ? '2px solid red' : undefined
                     }}
                     onClick={() => handleClickHabitacion(i + 1)}
                   >
@@ -130,29 +157,52 @@ const Historial = () => {
       <style>
         {`
           @keyframes parpadeo {
-            0% { background-color: #ffc107; border-color: #ff6347; }
-            50% { background-color: #ff6347; border-color: #ffc107; }
-            100% { background-color: #ffc107; border-color: #ff6347; }
+            0% { background-color: #dc3545; color: white; transform: scale(1); } /* Rojo */
+            50% { background-color: #ffc107; color: black; transform: scale(1.05); } /* Amarillo */
+            100% { background-color: #dc3545; color: white; transform: scale(1); } /* Rojo */
           }
         `}
       </style>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Habitación {habitacionSeleccionada}</Modal.Title>
+        <Modal.Header closeButton className={estadoModal?.excedido ? 'bg-danger text-white' : 'bg-primary text-white'}>
+          <Modal.Title>
+            Habitación {habitacionSeleccionada} 
+            {estadoModal?.excedido && " (TIEMPO EXCEDIDO)"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {reservaSeleccionada ? (
-            <>
+          {reservaSeleccionada && estadoModal ? (
+            <div className="fs-5">
               <p><strong>Fecha:</strong> {reservaSeleccionada.fecha}</p>
-              <p><strong>Vehículo:</strong> {reservaSeleccionada.vehiculo}</p>
-              <p><strong>Placa:</strong> {reservaSeleccionada.placa}</p>
-              <p><strong>Hora Entrada:</strong> {reservaSeleccionada.hentrada}</p>
-              <p><strong>Hora Salida Máxima:</strong> {reservaSeleccionada.hsalidamax}</p>
-              <p><strong>Hora Salida:</strong> {reservaSeleccionada.hsalida || '---'}</p>
+              <p><strong>Vehículo:</strong> {reservaSeleccionada.vehiculo} - <strong>Placa:</strong> {reservaSeleccionada.placa}</p>
+              <hr />
+              <div className="row text-center">
+                  <div className="col-6">
+                      <small className="text-muted">Hora Entrada</small>
+                      <h3>{reservaSeleccionada.hentrada}</h3>
+                  </div>
+                  <div className="col-6">
+                      <small className="text-muted">Salida Máxima</small>
+                      <h3>{reservaSeleccionada.hsalidamax}</h3>
+                  </div>
+              </div>
+              
+              <div className={`alert mt-3 text-center ${estadoModal.excedido ? 'alert-danger' : 'alert-success'}`}>
+                  <strong>
+                      {estadoModal.excedido ? 'TIEMPO EXCEDIDO POR:' : 'TIEMPO RESTANTE:'}
+                  </strong>
+                  <h2 className="display-4 fw-bold">
+                      {estadoModal.excedido 
+                        ? formatoTiempoRestante(Math.abs(estadoModal.minutosRestantes)) 
+                        : formatoTiempoRestante(estadoModal.minutosRestantes)
+                      }
+                  </h2>
+              </div>
+
               <p><strong>Valor:</strong> ${reservaSeleccionada.valor}</p>
               <p><strong>Observaciones:</strong> {reservaSeleccionada.observaciones || 'Sin observaciones'}</p>
-            </>
+            </div>
           ) : (
             <p>La habitación está libre.</p>
           )}
@@ -163,6 +213,7 @@ const Historial = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
       <div className="col-md-6">
           <h2 className="mb-4 text-center">Estadísticas</h2>
           <div className="card shadow p-3">
