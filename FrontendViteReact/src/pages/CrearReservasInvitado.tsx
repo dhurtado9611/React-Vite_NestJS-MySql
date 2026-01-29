@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-// Definimos la interfaz aquí también para asegurar tipado fuerte
 interface Reserva {
   id: number;
   vehiculo: string;
@@ -8,10 +7,10 @@ interface Reserva {
   habitacion: number;
   valor: number;
   hentrada: string;
-  hsalidamax: string;
+  hsalidamax: string; // Formato esperado "HH:mm"
   hsalida: string;
   observaciones: string;
-  fecha: string;
+  fecha: string; // Formato esperado "YYYY-MM-DD"
   colaborador: string;
 }
 
@@ -21,13 +20,43 @@ interface Props {
 }
 
 const TableCrearReservas: React.FC<Props> = ({ reservas }) => {
-  
-  // Función auxiliar para formatear dinero
+  const [now, setNow] = useState(new Date());
+
+  // Actualizamos el reloj cada minuto para que las alertas sean en tiempo real
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(amount);
   };
 
-  // Si no hay datos, mostramos un estado vacío elegante
+  // Función lógica para verificar si está vencido
+  const checkVencimiento = (reserva: Reserva) => {
+    // Si ya tiene hora de salida marcada (ya se fue), no está vencido
+    if (reserva.hsalida && reserva.hsalida.trim() !== '') return { vencido: false, minutosTarde: 0 };
+
+    try {
+      // Crear fecha completa de vencimiento combinando fecha de reserva y hora máxima
+      const fechaVencimiento = new Date(`${reserva.fecha}T${reserva.hsalidamax}:00`);
+      
+      // Si la fecha es inválida (ej: formato incorrecto), asumimos que no está vencido
+      if (isNaN(fechaVencimiento.getTime())) return { vencido: false, minutosTarde: 0 };
+
+      const diffMs = now.getTime() - fechaVencimiento.getTime();
+      const minutosTarde = Math.floor(diffMs / 60000);
+
+      // Si minutosTarde > 0, significa que se pasó del tiempo
+      return { 
+        vencido: minutosTarde > 0, 
+        minutosTarde: minutosTarde > 0 ? minutosTarde : 0 
+      };
+    } catch (e) {
+      return { vencido: false, minutosTarde: 0 };
+    }
+  };
+
   if (reservas.length === 0) {
     return (
       <div className="text-center py-10">
@@ -37,130 +66,119 @@ const TableCrearReservas: React.FC<Props> = ({ reservas }) => {
           </svg>
         </div>
         <h3 className="mt-2 text-sm font-medium text-gray-900">No hay reservas activas</h3>
-        <p className="mt-1 text-sm text-gray-500">Comienza registrando un vehículo en el formulario.</p>
       </div>
     );
   }
 
   return (
     <div className="w-full">
-      
-      {/* ==========================================
-          VISTA MÓVIL (Tarjetas)
-          Se muestra solo en pantallas pequeñas (block md:hidden)
-      ========================================== */}
+      {/* VISTA MÓVIL (Tarjetas) */}
       <div className="block md:hidden space-y-4 p-4">
-        {reservas.map((reserva) => (
-          <div key={reserva.id} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
-            
-            {/* Cabecera de la Tarjeta: Placa y Habitación */}
-            <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                 <span className="font-bold text-gray-900 text-lg">{reserva.placa}</span>
-                 <span className="text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-200 px-2 py-0.5 rounded-md">
-                   {reserva.vehiculo}
-                 </span>
+        {reservas.map((reserva) => {
+          const { vencido, minutosTarde } = checkVencimiento(reserva);
+          
+          return (
+            <div 
+              key={reserva.id} 
+              className={`bg-white border rounded-xl shadow-sm overflow-hidden transition-all duration-200 
+                ${vencido ? 'border-red-500 ring-1 ring-red-500 shadow-red-100' : 'border-gray-200 hover:shadow-md'}
+              `}
+            >
+              {/* Cabecera con alerta visual si está vencido */}
+              <div className={`px-4 py-3 border-b flex justify-between items-center ${vencido ? 'bg-red-50 border-red-100' : 'bg-gray-50 border-gray-100'}`}>
+                <div className="flex items-center space-x-2">
+                   <span className="font-bold text-gray-900 text-lg">{reserva.placa}</span>
+                   {vencido && (
+                     <span className="animate-pulse bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded border border-red-200">
+                       VENCIDO (+{minutosTarde} min)
+                     </span>
+                   )}
+                </div>
+                <span className="text-xs font-medium text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-200">
+                  Hab: {reserva.habitacion}
+                </span>
               </div>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                Hab: {reserva.habitacion}
-              </span>
-            </div>
 
-            {/* Cuerpo de la Tarjeta: Detalles */}
-            <div className="px-4 py-3 space-y-2">
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-gray-500 text-xs">Entrada</p>
-                  <p className="font-medium text-gray-900">{reserva.hentrada}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs">Salida Max</p>
-                  <p className="font-medium text-red-600">{reserva.hsalidamax}</p>
+              <div className="px-4 py-3 space-y-2">
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-gray-500 text-xs">Entrada</p>
+                    <p className="font-medium text-gray-900">{reserva.hentrada}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-xs">Salida Max</p>
+                    <p className={`font-medium ${vencido ? 'text-red-700 font-bold' : 'text-gray-900'}`}>
+                      {reserva.hsalidamax}
+                    </p>
+                  </div>
                 </div>
               </div>
-              
-              {reserva.observaciones && (
-                <div className="pt-2">
-                  <p className="text-gray-500 text-xs">Observaciones</p>
-                  <p className="text-gray-700 text-sm italic">"{reserva.observaciones}"</p>
-                </div>
-              )}
-            </div>
 
-            {/* Pie de la Tarjeta: Valor y Estado */}
-            <div className="bg-gray-50 px-4 py-3 border-t border-gray-100 flex justify-between items-center">
-              <span className="text-xs text-gray-500">
-                Colab: {reserva.colaborador}
-              </span>
-              <span className="text-lg font-bold text-green-600">
-                {formatMoney(reserva.valor)}
-              </span>
+              <div className="bg-gray-50 px-4 py-3 border-t border-gray-100 flex justify-between items-center">
+                 {/* Sugerencia de cobro extra si está vencido */}
+                 {vencido ? (
+                   <span className="text-xs font-bold text-red-600">
+                     Sugerir recargo
+                   </span>
+                 ) : (
+                   <span className="text-xs text-gray-500">{reserva.vehiculo}</span>
+                 )}
+                <span className="text-lg font-bold text-green-600">
+                  {formatMoney(reserva.valor)}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* ==========================================
-          VISTA ESCRITORIO (Tabla Clásica)
-          Se muestra solo en pantallas medianas hacia arriba (hidden md:block)
-      ========================================== */}
+      {/* VISTA ESCRITORIO (Tabla) */}
       <div className="hidden md:block overflow-x-auto rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Vehículo / Placa
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Habitación
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Horarios
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Observaciones
-              </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Valor
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Placa</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Habitación</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tiempo</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {reservas.map((reserva) => (
-              <tr key={reserva.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-500">
-                      {/* Icono simple de auto */}
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{reserva.placa}</div>
-                      <div className="text-sm text-gray-500">{reserva.vehiculo}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+            {reservas.map((reserva) => {
+              const { vencido, minutosTarde } = checkVencimiento(reserva);
+              return (
+                <tr key={reserva.id} className={vencido ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}>
+                  <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                    {reserva.placa}
+                    <div className="text-xs text-gray-400 font-normal">{reserva.vehiculo}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                     {reserva.habitacion}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">In: {reserva.hentrada}</div>
-                  <div className="text-sm text-red-500 text-xs">Max: {reserva.hsalidamax}</div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-500 truncate max-w-xs" title={reserva.observaciones}>
-                    {reserva.observaciones || '-'}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">
-                  {formatMoney(reserva.valor)}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">In: {reserva.hentrada}</div>
+                    <div className={`text-sm ${vencido ? 'text-red-700 font-bold' : 'text-gray-500'}`}>
+                      Max: {reserva.hsalidamax}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {vencido ? (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                        Vencido (+{minutosTarde} min)
+                      </span>
+                    ) : (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        En tiempo
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">
+                    {formatMoney(reserva.valor)}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
