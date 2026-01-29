@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaShoppingCart, FaTrash, FaPlus, FaMinus } from 'react-icons/fa';
+import { FaShoppingCart, FaTrash, FaPlus, FaMinus, FaSync } from 'react-icons/fa';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-// ✅ RUTAS DE IMÁGENES CORREGIDAS (Carpeta public)
+// ✅ RUTAS DE IMÁGENES (Carpeta public)
 const catalogoBase = [
   { nombre: 'AGUARDIENTE', imagen: '/assets/Aguardiente.jpg', precio: 7000 },
   { nombre: 'RON', imagen: '/assets/ron.jpg', precio: 7500 },
@@ -20,12 +20,21 @@ const catalogoBase = [
   { nombre: 'BONOS', imagen: '/assets/bono.jpg', precio: 5000 },
 ];
 
+// Interface para manejar la lista desplegable de forma segura
+interface ReservaActiva {
+  id: number;
+  habitacion: number;
+}
+
 const MarketplaceCliente = () => {
-  // Inicializamos con stock 0 para que se vea la estructura aunque falle la BD
   const [productos, setProductos] = useState(catalogoBase.map(p => ({ ...p, stock: 0 }))); 
   const [carrito, setCarrito] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [habitacionCliente, setHabitacionCliente] = useState<number | ''>('');
+  
+  // 🔒 CAMBIO CLAVE: Ahora guardamos el ID de la reserva, no solo el número de habitación
+  const [reservaSeleccionadaId, setReservaSeleccionadaId] = useState<number | ''>('');
+  const [listaReservasActivas, setListaReservasActivas] = useState<ReservaActiva[]>([]);
+
   const [precioFinal, setPrecioFinal] = useState<number>(0); 
   const [loading, setLoading] = useState(false);
 
@@ -39,6 +48,13 @@ const MarketplaceCliente = () => {
     const totalCalculado = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
     setPrecioFinal(totalCalculado);
   }, [carrito]);
+
+  // Cargar habitaciones ocupadas cuando se abre el modal
+  useEffect(() => {
+    if (showModal) {
+      fetchReservasActivas();
+    }
+  }, [showModal]);
 
   const fetchInventario = () => {
     axios.get(`${import.meta.env.VITE_API_URL}/inventario`)
@@ -56,7 +72,28 @@ const MarketplaceCliente = () => {
       .catch(err => console.error("Error cargando inventario", err));
   };
 
-  // 2. Funciones del Carrito
+  // 🔒 LÓGICA SEGURA: Buscar habitaciones ocupadas y guardar sus IDs
+  const fetchReservasActivas = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas`);
+      
+      // Filtramos solo las que NO tienen hora de salida (Ocupadas)
+      const activas: ReservaActiva[] = (res.data as any[])
+        .filter((r: any) => r.habitacion && !r.hsalida)
+        .map((r: any) => ({
+          id: r.id,            // Guardamos el ID real de la base de datos
+          habitacion: Number(r.habitacion) // Y el número para mostrarlo
+        }))
+        .sort((a, b) => a.habitacion - b.habitacion);
+
+      setListaReservasActivas(activas);
+      
+    } catch (error) {
+      console.error("Error buscando reservas activas", error);
+    }
+  };
+
+  // Funciones del Carrito (Sin cambios)
   const agregarAlCarrito = (producto: any) => {
     setCarrito(prev => {
       const existe = prev.find((i: any) => i.nombre === producto.nombre);
@@ -83,67 +120,59 @@ const MarketplaceCliente = () => {
     setCarrito(prev => prev.filter((i: any) => i.nombre !== nombre));
   };
 
-  // 3. Confirmar Pedido (Lógica ID Automático)
+  // 🔒 CONFIRMAR PEDIDO (Usando ID Directo)
   const confirmarPedido = async () => {
-    // Validación básica
-    if (!habitacionCliente || Number(habitacionCliente) < 1 || Number(habitacionCliente) > 16) {
-      alert("Por favor ingrese una habitación válida (1-16).");
+    if (!reservaSeleccionadaId) {
+      alert("Por favor seleccione una habitación de la lista.");
       return;
     }
 
     setLoading(true);
     try {
-      // A. OBTENER EL ID (Igual que en MarketplaceInvitado, pero automático)
-      // Pedimos todas las reservas y buscamos la que esté ACTIVA en esa habitación
-      const resReservas = await axios.get(`${import.meta.env.VITE_API_URL}/reservas`);
-      
-      const reservasActivas = resReservas.data.filter((r: any) => 
-        Number(r.habitacion) === Number(habitacionCliente) && !r.hsalida
-      );
+      // 1. OBTENER DATOS ACTUALES DE LA RESERVA USANDO EL ID
+      // Como ya tenemos el ID, vamos directo al grano. Es más seguro.
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaSeleccionadaId}`);
+      const reservaActual = res.data;
 
-      if (reservasActivas.length === 0) {
-        alert("⚠️ No hay una reserva activa en la habitación " + habitacionCliente);
+      if (!reservaActual || reservaActual.hsalida) {
+        alert("⚠️ Error: Parece que esta reserva ya fue cerrada o no existe.");
+        fetchReservasActivas(); // Refrescamos la lista
         setLoading(false);
         return;
       }
 
-      // Tomamos la última reserva activa (esta tiene el ID que necesitamos)
-      const reservaActual = reservasActivas[reservasActivas.length - 1];
-      const reservaId = reservaActual.id; // ¡AQUÍ ESTÁ EL ID!
-
-      // B. Preparar los datos nuevos
+      // 2. Preparar los datos nuevos
       let detalleCompra = "";
       carrito.forEach(item => {
         detalleCompra += ` | 🛒 ${item.nombre} (x${item.cantidad})`;
       });
-      // Añadimos el precio final editado al texto para registro
       detalleCompra += ` | Total Venta: $${precioFinal.toLocaleString()}`;
 
       const nuevasObservaciones = (reservaActual.observaciones || '') + detalleCompra;
       const nuevoValor = parseFloat(reservaActual.valor) + precioFinal;
 
-      // C. ACTUALIZAR LA RESERVA (Igual que MarketplaceInvitado)
-      await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, {
+      // 3. ACTUALIZAR RESERVA
+      await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaSeleccionadaId}`, {
         ...reservaActual, 
         valor: nuevoValor,
         observaciones: nuevasObservaciones
       });
 
-      // D. DESCONTAR DEL INVENTARIO (Si tu backend ya tiene este endpoint)
+      // 4. DESCONTAR INVENTARIO
       try {
         await axios.post(`${import.meta.env.VITE_API_URL}/inventario/venta`, {
             items: carrito.map(item => ({ nombre: item.nombre, cantidad: item.cantidad }))
         });
       } catch (invError) {
-        console.warn("No se pudo descontar inventario automáticamente (Revisar Backend).", invError);
+        console.warn("No se pudo descontar inventario automáticamente.", invError);
       }
 
-      alert(`✅ ¡Éxito! Se cargaron $${precioFinal.toLocaleString()} a la Habitación ${habitacionCliente}`);
+      alert(`✅ ¡Pedido cargado con éxito a la Habitación ${reservaActual.habitacion}!`);
       
       // Limpieza
       setCarrito([]);
       setShowModal(false);
-      setHabitacionCliente('');
+      setReservaSeleccionadaId('');
       setPrecioFinal(0);
       fetchInventario(); 
 
@@ -157,7 +186,6 @@ const MarketplaceCliente = () => {
   };
 
   return (
-    // ✅ CORRECCIÓN DE DISEÑO: 'md:pl-24' evita que el Sidebar tape el contenido
     <div className="relative min-h-screen bg-gray-50 pb-20 md:pl-24">
       
       {/* Header */}
@@ -238,6 +266,7 @@ const MarketplaceCliente = () => {
                     ))}
                     
                     <div className="pt-4 bg-gray-50 p-3 rounded border border-gray-200">
+                        {/* Precio Total Editable */}
                         <div className="mb-3">
                             <Form.Label className="font-bold text-gray-700">Total a Cargar ($):</Form.Label>
                             <Form.Control 
@@ -246,19 +275,35 @@ const MarketplaceCliente = () => {
                                 onChange={(e) => setPrecioFinal(Number(e.target.value))}
                                 className="font-bold text-xl text-red-700 border-red-200"
                             />
-                            <Form.Text className="text-muted text-xs">Puedes editar este valor si aplicas descuento.</Form.Text>
                         </div>
                         
+                        {/* 🔒 SELECTOR SEGURO: Muestra Habitación -> Guarda ID */}
                         <div>
-                            <Form.Label className="font-bold text-gray-700">Habitación Cliente:</Form.Label>
-                            <Form.Control 
-                                type="number" 
-                                placeholder="Ej: 5" 
-                                value={habitacionCliente} 
-                                onChange={e => setHabitacionCliente(Number(e.target.value))} 
-                                autoFocus
-                                className="text-center font-bold text-lg"
-                            />
+                            <div className="flex justify-between items-center mb-1">
+                              <Form.Label className="font-bold text-gray-700 mb-0">Seleccionar Habitación Activa:</Form.Label>
+                              <button onClick={fetchReservasActivas} title="Actualizar lista" className="text-blue-600 text-sm flex items-center gap-1">
+                                <FaSync size={12} /> Refrescar
+                              </button>
+                            </div>
+                            
+                            <Form.Select 
+                              value={reservaSeleccionadaId} 
+                              onChange={e => setReservaSeleccionadaId(Number(e.target.value))}
+                              className="font-bold text-lg border-blue-300 bg-blue-50"
+                              autoFocus
+                            >
+                              <option value="">-- Seleccione --</option>
+                              {listaReservasActivas.length === 0 ? (
+                                <option disabled>No hay habitaciones ocupadas</option>
+                              ) : (
+                                listaReservasActivas.map(reserva => (
+                                  // Aquí está la magia: Value = ID, Label = Habitación
+                                  <option key={reserva.id} value={reserva.id}>
+                                    🚪 Habitación {reserva.habitacion}
+                                  </option>
+                                ))
+                              )}
+                            </Form.Select>
                         </div>
                     </div>
                 </div>
@@ -270,7 +315,7 @@ const MarketplaceCliente = () => {
                 <Button 
                     variant="success" 
                     onClick={confirmarPedido} 
-                    disabled={loading || !habitacionCliente}
+                    disabled={loading || !reservaSeleccionadaId}
                 >
                     {loading ? 'Procesando...' : 'Confirmar Cargo'}
                 </Button>
