@@ -43,4 +43,37 @@ export class InventarioService {
       throw new Error('Falló el reseteo de inventario');
     }
   }
+
+  // ✅ ESTA ES LA FUNCIÓN NUEVA QUE CORRIGE EL ERROR
+  async descontarStock(items: { nombre: string; cantidad: number }[]): Promise<Inventario> {
+    // 1. Buscamos el último inventario registrado (asumiendo que es el turno actual)
+    const inventarios = await this.inventarioRepository.find({
+      order: { id: 'DESC' },
+      take: 1,
+    });
+
+    if (!inventarios || inventarios.length === 0) {
+      throw new Error('No hay inventario activo para descontar. Crea uno primero.');
+    }
+
+    const inventarioActual = inventarios[0];
+
+    // 2. Iterar sobre los productos vendidos y restar
+    items.forEach(item => {
+      const nombreProducto = item.nombre; 
+      
+      // Verificamos si la columna existe en la entidad (ej: "AGUARDIENTE")
+      // TypeScript podría quejarse si no es indexable, por eso validamos undefined
+      if ((inventarioActual as any)[nombreProducto] !== undefined) {
+        const stockActual = Number((inventarioActual as any)[nombreProducto]);
+        const cantidadARestar = Number(item.cantidad);
+
+        // Restamos el stock
+        (inventarioActual as any)[nombreProducto] = stockActual - cantidadARestar;
+      }
+    });
+
+    // 3. Guardar los cambios en la base de datos
+    return this.inventarioRepository.save(inventarioActual);
+  }
 }

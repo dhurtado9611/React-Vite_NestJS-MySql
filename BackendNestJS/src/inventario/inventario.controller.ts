@@ -1,4 +1,4 @@
-// inventario.controller.ts
+// src/inventario/inventario.controller.ts
 import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { InventarioService } from './inventario.service';
 import { Inventario } from './inventario.entity';
@@ -18,8 +18,19 @@ export class InventarioController {
     return this.inventarioService.create(inventario);
   }
 
+  @Post('venta')
+  async registrarVenta(@Body() body: { items: { nombre: string; cantidad: number }[] }) {
+    try {
+      return await this.inventarioService.descontarStock(body.items);
+    } catch (error) {
+      // Manejo de errores si falla la venta (ej: no hay stock o inventario)
+      throw new HttpException(error.message || 'Error procesando venta', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // ✅ CORRECCIÓN: Eliminé ": Promise<Inventario>" para evitar el error de tipos con null
   @Put(':id')
-  async update(@Param('id') id: number, @Body() inventario: Inventario): Promise<Inventario> {
+  async update(@Param('id') id: number, @Body() inventario: Inventario) {
     return this.inventarioService.update(id, inventario);
   }
 
