@@ -1,7 +1,6 @@
-// src/pages/MarketplaceCliente.tsx (o Marketplace.tsx)
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaShoppingCart, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaShoppingCart, FaTrash, FaPlus, FaMinus } from 'react-icons/fa';
 import { Modal, Button, Form } from 'react-bootstrap';
 
 // ✅ IMPORTANTE: Rutas directas a /assets (sin src, sin import)
@@ -22,20 +21,31 @@ const catalogoBase = [
 ];
 
 const MarketplaceCliente = () => {
-  const [productos, setProductos] = useState(catalogoBase.map(p => ({ ...p, stock: 0 }))); // Inicia con stock 0
+  // Inicializamos con stock 0 para evitar pantalla blanca mientras carga la BD
+  const [productos, setProductos] = useState(catalogoBase.map(p => ({ ...p, stock: 0 }))); 
   const [carrito, setCarrito] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [habitacionCliente, setHabitacionCliente] = useState<number | ''>('');
+  const [precioFinal, setPrecioFinal] = useState<number>(0); // Para poder modificar el precio
   const [loading, setLoading] = useState(false);
 
+  // 1. Cargar Inventario
   useEffect(() => {
-    // Cargar inventario, pero si falla o está vacío, ya tenemos el catálogo base visible
+    fetchInventario();
+  }, []);
+
+  // Actualizar el precio final sugerido cada vez que cambia el carrito
+  useEffect(() => {
+    const totalCalculado = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+    setPrecioFinal(totalCalculado);
+  }, [carrito]);
+
+  const fetchInventario = () => {
     axios.get(`${import.meta.env.VITE_API_URL}/inventario`)
       .then(res => {
         const data = res.data;
         if (data && data.length > 0) {
           const ultimoInventario = data[data.length - 1];
-          // Actualizamos stock basado en la BD
           const productosActualizados = catalogoBase.map(prod => ({
             ...prod,
             stock: Number(ultimoInventario[prod.nombre] || 0)
@@ -43,20 +53,110 @@ const MarketplaceCliente = () => {
           setProductos(productosActualizados);
         }
       })
-      .catch(err => console.error("No se pudo cargar inventario (quizás BD vacía)", err));
-  }, []);
+      .catch(err => console.error("Error cargando inventario", err));
+  };
 
-  // ... (El resto de las funciones agregarAlCarrito, confirmarPedido, etc. iguales que antes)
+  // 2. Lógica del Carrito
+  const agregarAlCarrito = (producto: any) => {
+    setCarrito(prev => {
+      const existe = prev.find((i: any) => i.nombre === producto.nombre);
+      if (existe) {
+        if (existe.cantidad + 1 > producto.stock) {
+          alert(`Solo quedan ${producto.stock} unidades de ${producto.nombre}`);
+          return prev;
+        }
+        return prev.map((i: any) => i.nombre === producto.nombre ? { ...i, cantidad: i.cantidad + 1 } : i);
+      }
+      return [...prev, { ...producto, cantidad: 1 }];
+    });
+  };
+
+  const reducirDelCarrito = (producto: any) => {
+    if (producto.cantidad === 1) {
+      setCarrito(prev => prev.filter((i: any) => i.nombre !== producto.nombre));
+    } else {
+      setCarrito(prev => prev.map((i: any) => i.nombre === producto.nombre ? { ...i, cantidad: i.cantidad - 1 } : i));
+    }
+  };
+
+  const removerDelCarrito = (nombre: string) => {
+    setCarrito(prev => prev.filter((i: any) => i.nombre !== nombre));
+  };
+
+  // 3. Confirmar Pedido (Lógica corregida)
+  const confirmarPedido = async () => {
+    if (!habitacionCliente || Number(habitacionCliente) < 1 || Number(habitacionCliente) > 16) {
+      alert("Por favor ingrese una habitación válida.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // A. Buscar la reserva ACTIVA
+      const resReservas = await axios.get(`${import.meta.env.VITE_API_URL}/reservas`);
+      const reservasActivas = resReservas.data.filter((r: any) => 
+        Number(r.habitacion) === Number(habitacionCliente) && !r.hsalida
+      );
+
+      if (reservasActivas.length === 0) {
+        alert("No hay una reserva activa en esa habitación.");
+        setLoading(false);
+        return;
+      }
+
+      const reservaActual = reservasActivas[reservasActivas.length - 1];
+
+      // B. Construir el texto de observaciones
+      let detalleCompra = "";
+      carrito.forEach(item => {
+        detalleCompra += `\n🛒 ${item.nombre} (x${item.cantidad})`;
+      });
+      // Agregamos el precio final por si fue modificado manualmente
+      detalleCompra += ` - Total: $${precioFinal.toLocaleString()}`;
+
+      const nuevasObservaciones = (reservaActual.observaciones || '') + detalleCompra;
+      const nuevoValor = parseFloat(reservaActual.valor) + precioFinal; // Usamos el precioFinal editable
+
+      // C. Actualizar Reserva (Suma Valor y Texto)
+      await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaActual.id}`, {
+        ...reservaActual, // Mantenemos los otros datos
+        valor: nuevoValor,
+        observaciones: nuevasObservaciones
+      });
+
+      // D. Descontar Inventario
+      await axios.post(`${import.meta.env.VITE_API_URL}/inventario/venta`, {
+        items: carrito.map(item => ({ nombre: item.nombre, cantidad: item.cantidad }))
+      });
+
+      alert("✅ Pedido cargado con éxito.");
+      setCarrito([]);
+      setShowModal(false);
+      setHabitacionCliente('');
+      fetchInventario(); // Actualizar stock visualmente
+
+    } catch (error) {
+      console.error(error);
+      alert("Error al procesar el pedido.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="relative min-h-screen bg-gray-50 pb-20">
+    // ✅ CORRECCIÓN VISUAL: 'md:pl-20' mueve el contenido a la derecha para no chocar con el Sidebar
+    <div className="relative min-h-screen bg-gray-50 pb-20 md:pl-20">
+      
       {/* Header */}
-      <div className="bg-red-700 text-white p-4 sticky top-0 z-50 flex justify-between items-center shadow-md">
-        <h2 className="text-xl font-bold">Room Service 🍽️</h2>
-        <div className="relative cursor-pointer bg-white text-red-700 p-2 rounded-full" onClick={() => setShowModal(true)}>
+      <div className="bg-red-700 text-white p-4 sticky top-0 z-40 flex justify-between items-center shadow-md">
+        <h2 className="text-xl font-bold flex items-center gap-2">Room Service 🍽️</h2>
+        <div 
+          className="relative cursor-pointer bg-white text-red-700 p-2 rounded-full hover:bg-gray-200 transition" 
+          onClick={() => setShowModal(true)}
+        >
           <FaShoppingCart size={20} />
           {carrito.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-yellow-400 text-black font-bold rounded-full w-5 h-5 flex items-center justify-center text-xs">
+            <span className="absolute -top-1 -right-1 bg-yellow-400 text-black font-bold rounded-full w-5 h-5 flex items-center justify-center text-xs border border-white">
               {carrito.reduce((acc, item) => acc + item.cantidad, 0)}
             </span>
           )}
@@ -67,31 +167,29 @@ const MarketplaceCliente = () => {
       <div className="container mx-auto p-4">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {productos.map(prod => (
-            <div key={prod.nombre} className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
-              <div className="h-40 bg-gray-200">
+            <div key={prod.nombre} className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition">
+              <div className="h-40 bg-gray-200 relative">
                 <img 
                   src={prod.imagen} 
                   alt={prod.nombre} 
                   className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Imagen+No+Encontrada'; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Sin+Imagen'; }}
                 />
+                {prod.stock <= 0 && (
+                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold">AGOTADO</div>
+                )}
               </div>
               <div className="p-3 flex flex-col flex-grow">
                 <h3 className="font-bold text-gray-800 text-sm">{prod.nombre}</h3>
-                <p className="text-xs text-gray-500">Disponible: {prod.stock}</p>
+                <p className={`text-xs mb-2 ${prod.stock < 5 ? 'text-red-500 font-bold' : 'text-green-600'}`}>
+                  Disponible: {prod.stock}
+                </p>
                 <div className="mt-auto flex justify-between items-center pt-2">
                   <span className="font-bold text-gray-900">${prod.precio.toLocaleString()}</span>
-                  {/* Botón habilitado aunque stock sea 0 para pruebas, puedes cambiar disabled={false} */}
                   <button
-                    onClick={() => {
-                        // Lógica simplificada de agregar
-                        setCarrito(prev => {
-                            const existe = prev.find(i => i.nombre === prod.nombre);
-                            if(existe) return prev.map(i => i.nombre === prod.nombre ? {...i, cantidad: i.cantidad + 1} : i);
-                            return [...prev, {...prod, cantidad: 1}];
-                        });
-                    }}
-                    className="bg-red-600 text-white p-2 rounded-full hover:bg-red-800"
+                    disabled={prod.stock <= 0}
+                    onClick={() => agregarAlCarrito(prod)}
+                    className="bg-red-600 text-white p-2 rounded-full hover:bg-red-800 disabled:opacity-50 transition"
                   >
                     <FaPlus size={12} />
                   </button>
@@ -102,29 +200,62 @@ const MarketplaceCliente = () => {
         </div>
       </div>
       
-      {/* Modal Carrito (Simplificado para el ejemplo) */}
+      {/* Modal Carrito */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-         <Modal.Header closeButton><Modal.Title>Tu Pedido</Modal.Title></Modal.Header>
+         <Modal.Header closeButton><Modal.Title>Resumen del Pedido</Modal.Title></Modal.Header>
          <Modal.Body>
-            {carrito.length === 0 ? <p>Carrito vacío</p> : carrito.map((item, i) => (
-                <div key={i} className="flex justify-between border-b py-2">
-                    <span>{item.nombre} x {item.cantidad}</span>
-                    <span>${(item.precio * item.cantidad).toLocaleString()}</span>
-                </div>
-            ))}
-            {carrito.length > 0 && (
-                <div className="mt-4">
-                    <p className="font-bold">Total: ${carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0).toLocaleString()}</p>
-                    <Form.Control 
-                        type="number" placeholder="Habitación (1-16)" 
-                        value={habitacionCliente} onChange={e => setHabitacionCliente(Number(e.target.value))} 
-                        className="mt-2"
-                    />
+            {carrito.length === 0 ? (
+                <p className="text-center text-gray-500">El carrito está vacío</p>
+            ) : (
+                <div className="space-y-3">
+                    {carrito.map((item, i) => (
+                        <div key={i} className="flex justify-between items-center border-b pb-2">
+                            <div>
+                                <p className="font-bold m-0">{item.nombre}</p>
+                                <p className="text-xs text-gray-500 m-0">${item.precio} x {item.cantidad}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => reducirDelCarrito(item)} className="bg-gray-200 px-2 rounded">-</button>
+                                <span className="font-bold">{item.cantidad}</span>
+                                <button onClick={() => agregarAlCarrito(item)} className="bg-gray-200 px-2 rounded">+</button>
+                                <button onClick={() => removerDelCarrito(item.nombre)} className="text-red-500 ml-2"><FaTrash/></button>
+                            </div>
+                        </div>
+                    ))}
+                    
+                    <div className="pt-4 bg-gray-50 p-3 rounded">
+                        {/* ✅ CORRECCIÓN: Precio Modificable */}
+                        <Form.Label className="font-bold text-gray-700">Total a registrar ($):</Form.Label>
+                        <Form.Control 
+                            type="number" 
+                            value={precioFinal}
+                            onChange={(e) => setPrecioFinal(Number(e.target.value))}
+                            className="font-bold text-lg text-red-700 mb-3"
+                        />
+                        
+                        <Form.Label className="font-bold text-gray-700">Asignar a Habitación:</Form.Label>
+                        <Form.Control 
+                            type="number" 
+                            placeholder="Ej: 5" 
+                            value={habitacionCliente} 
+                            onChange={e => setHabitacionCliente(Number(e.target.value))} 
+                            autoFocus
+                        />
+                    </div>
                 </div>
             )}
          </Modal.Body>
          <Modal.Footer>
-             {carrito.length > 0 && <Button variant="success" disabled={!habitacionCliente}>Confirmar</Button>}
+             <Button variant="secondary" onClick={() => setShowModal(false)}>Cerrar</Button>
+             {carrito.length > 0 && (
+                <Button 
+                    variant="success" 
+                    onClick={confirmarPedido} 
+                    disabled={loading || !habitacionCliente}
+                >
+                    {loading ? 'Procesando...' : 'Confirmar Cargo'}
+                </Button>
+             )}
          </Modal.Footer>
       </Modal>
     </div>
