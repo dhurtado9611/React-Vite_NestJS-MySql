@@ -3,7 +3,7 @@ import axios from 'axios';
 import { FaShoppingCart, FaTrash, FaPlus, FaMinus } from 'react-icons/fa';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-// ✅ IMPORTANTE: Rutas directas a /assets (sin src, sin import)
+// ✅ RUTAS DE IMÁGENES CORREGIDAS (Carpeta public)
 const catalogoBase = [
   { nombre: 'AGUARDIENTE', imagen: '/assets/Aguardiente.jpg', precio: 7000 },
   { nombre: 'RON', imagen: '/assets/ron.jpg', precio: 7500 },
@@ -21,20 +21,20 @@ const catalogoBase = [
 ];
 
 const MarketplaceCliente = () => {
-  // Inicializamos con stock 0 para evitar pantalla blanca mientras carga la BD
+  // Inicializamos con stock 0 para que se vea la estructura aunque falle la BD
   const [productos, setProductos] = useState(catalogoBase.map(p => ({ ...p, stock: 0 }))); 
   const [carrito, setCarrito] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [habitacionCliente, setHabitacionCliente] = useState<number | ''>('');
-  const [precioFinal, setPrecioFinal] = useState<number>(0); // Para poder modificar el precio
+  const [precioFinal, setPrecioFinal] = useState<number>(0); 
   const [loading, setLoading] = useState(false);
 
-  // 1. Cargar Inventario
+  // 1. Cargar Inventario al iniciar
   useEffect(() => {
     fetchInventario();
   }, []);
 
-  // Actualizar el precio final sugerido cada vez que cambia el carrito
+  // Calcular precio total cuando cambia el carrito
   useEffect(() => {
     const totalCalculado = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
     setPrecioFinal(totalCalculado);
@@ -56,7 +56,7 @@ const MarketplaceCliente = () => {
       .catch(err => console.error("Error cargando inventario", err));
   };
 
-  // 2. Lógica del Carrito
+  // 2. Funciones del Carrito
   const agregarAlCarrito = (producto: any) => {
     setCarrito(prev => {
       const existe = prev.find((i: any) => i.nombre === producto.nombre);
@@ -83,69 +83,82 @@ const MarketplaceCliente = () => {
     setCarrito(prev => prev.filter((i: any) => i.nombre !== nombre));
   };
 
-  // 3. Confirmar Pedido (Lógica corregida)
+  // 3. Confirmar Pedido (Lógica ID Automático)
   const confirmarPedido = async () => {
+    // Validación básica
     if (!habitacionCliente || Number(habitacionCliente) < 1 || Number(habitacionCliente) > 16) {
-      alert("Por favor ingrese una habitación válida.");
+      alert("Por favor ingrese una habitación válida (1-16).");
       return;
     }
 
     setLoading(true);
     try {
-      // A. Buscar la reserva ACTIVA
+      // A. OBTENER EL ID (Igual que en MarketplaceInvitado, pero automático)
+      // Pedimos todas las reservas y buscamos la que esté ACTIVA en esa habitación
       const resReservas = await axios.get(`${import.meta.env.VITE_API_URL}/reservas`);
+      
       const reservasActivas = resReservas.data.filter((r: any) => 
         Number(r.habitacion) === Number(habitacionCliente) && !r.hsalida
       );
 
       if (reservasActivas.length === 0) {
-        alert("No hay una reserva activa en esa habitación.");
+        alert("⚠️ No hay una reserva activa en la habitación " + habitacionCliente);
         setLoading(false);
         return;
       }
 
+      // Tomamos la última reserva activa (esta tiene el ID que necesitamos)
       const reservaActual = reservasActivas[reservasActivas.length - 1];
+      const reservaId = reservaActual.id; // ¡AQUÍ ESTÁ EL ID!
 
-      // B. Construir el texto de observaciones
+      // B. Preparar los datos nuevos
       let detalleCompra = "";
       carrito.forEach(item => {
-        detalleCompra += `\n🛒 ${item.nombre} (x${item.cantidad})`;
+        detalleCompra += ` | 🛒 ${item.nombre} (x${item.cantidad})`;
       });
-      // Agregamos el precio final por si fue modificado manualmente
-      detalleCompra += ` - Total: $${precioFinal.toLocaleString()}`;
+      // Añadimos el precio final editado al texto para registro
+      detalleCompra += ` | Total Venta: $${precioFinal.toLocaleString()}`;
 
       const nuevasObservaciones = (reservaActual.observaciones || '') + detalleCompra;
-      const nuevoValor = parseFloat(reservaActual.valor) + precioFinal; // Usamos el precioFinal editable
+      const nuevoValor = parseFloat(reservaActual.valor) + precioFinal;
 
-      // C. Actualizar Reserva (Suma Valor y Texto)
-      await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaActual.id}`, {
-        ...reservaActual, // Mantenemos los otros datos
+      // C. ACTUALIZAR LA RESERVA (Igual que MarketplaceInvitado)
+      await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaId}`, {
+        ...reservaActual, 
         valor: nuevoValor,
         observaciones: nuevasObservaciones
       });
 
-      // D. Descontar Inventario
-      await axios.post(`${import.meta.env.VITE_API_URL}/inventario/venta`, {
-        items: carrito.map(item => ({ nombre: item.nombre, cantidad: item.cantidad }))
-      });
+      // D. DESCONTAR DEL INVENTARIO (Si tu backend ya tiene este endpoint)
+      try {
+        await axios.post(`${import.meta.env.VITE_API_URL}/inventario/venta`, {
+            items: carrito.map(item => ({ nombre: item.nombre, cantidad: item.cantidad }))
+        });
+      } catch (invError) {
+        console.warn("No se pudo descontar inventario automáticamente (Revisar Backend).", invError);
+      }
 
-      alert("✅ Pedido cargado con éxito.");
+      alert(`✅ ¡Éxito! Se cargaron $${precioFinal.toLocaleString()} a la Habitación ${habitacionCliente}`);
+      
+      // Limpieza
       setCarrito([]);
       setShowModal(false);
       setHabitacionCliente('');
-      fetchInventario(); // Actualizar stock visualmente
+      setPrecioFinal(0);
+      fetchInventario(); 
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Error al procesar el pedido.");
+      const msg = error.response?.data?.message || 'Error de conexión';
+      alert(`Error al procesar: ${msg}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    // ✅ CORRECCIÓN VISUAL: 'md:pl-20' mueve el contenido a la derecha para no chocar con el Sidebar
-    <div className="relative min-h-screen bg-gray-50 pb-20 md:pl-20">
+    // ✅ CORRECCIÓN DE DISEÑO: 'md:pl-24' evita que el Sidebar tape el contenido
+    <div className="relative min-h-screen bg-gray-50 pb-20 md:pl-24">
       
       {/* Header */}
       <div className="bg-red-700 text-white p-4 sticky top-0 z-40 flex justify-between items-center shadow-md">
@@ -164,7 +177,7 @@ const MarketplaceCliente = () => {
       </div>
 
       {/* Grid Productos */}
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 pt-6">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {productos.map(prod => (
             <div key={prod.nombre} className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition">
@@ -208,6 +221,7 @@ const MarketplaceCliente = () => {
                 <p className="text-center text-gray-500">El carrito está vacío</p>
             ) : (
                 <div className="space-y-3">
+                    {/* Lista de Items */}
                     {carrito.map((item, i) => (
                         <div key={i} className="flex justify-between items-center border-b pb-2">
                             <div>
@@ -215,32 +229,37 @@ const MarketplaceCliente = () => {
                                 <p className="text-xs text-gray-500 m-0">${item.precio} x {item.cantidad}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button onClick={() => reducirDelCarrito(item)} className="bg-gray-200 px-2 rounded">-</button>
+                                <button onClick={() => reducirDelCarrito(item)} className="bg-gray-200 px-2 rounded hover:bg-gray-300">-</button>
                                 <span className="font-bold">{item.cantidad}</span>
-                                <button onClick={() => agregarAlCarrito(item)} className="bg-gray-200 px-2 rounded">+</button>
+                                <button onClick={() => agregarAlCarrito(item)} className="bg-gray-200 px-2 rounded hover:bg-gray-300">+</button>
                                 <button onClick={() => removerDelCarrito(item.nombre)} className="text-red-500 ml-2"><FaTrash/></button>
                             </div>
                         </div>
                     ))}
                     
-                    <div className="pt-4 bg-gray-50 p-3 rounded">
-                        {/* ✅ CORRECCIÓN: Precio Modificable */}
-                        <Form.Label className="font-bold text-gray-700">Total a registrar ($):</Form.Label>
-                        <Form.Control 
-                            type="number" 
-                            value={precioFinal}
-                            onChange={(e) => setPrecioFinal(Number(e.target.value))}
-                            className="font-bold text-lg text-red-700 mb-3"
-                        />
+                    <div className="pt-4 bg-gray-50 p-3 rounded border border-gray-200">
+                        <div className="mb-3">
+                            <Form.Label className="font-bold text-gray-700">Total a Cargar ($):</Form.Label>
+                            <Form.Control 
+                                type="number" 
+                                value={precioFinal}
+                                onChange={(e) => setPrecioFinal(Number(e.target.value))}
+                                className="font-bold text-xl text-red-700 border-red-200"
+                            />
+                            <Form.Text className="text-muted text-xs">Puedes editar este valor si aplicas descuento.</Form.Text>
+                        </div>
                         
-                        <Form.Label className="font-bold text-gray-700">Asignar a Habitación:</Form.Label>
-                        <Form.Control 
-                            type="number" 
-                            placeholder="Ej: 5" 
-                            value={habitacionCliente} 
-                            onChange={e => setHabitacionCliente(Number(e.target.value))} 
-                            autoFocus
-                        />
+                        <div>
+                            <Form.Label className="font-bold text-gray-700">Habitación Cliente:</Form.Label>
+                            <Form.Control 
+                                type="number" 
+                                placeholder="Ej: 5" 
+                                value={habitacionCliente} 
+                                onChange={e => setHabitacionCliente(Number(e.target.value))} 
+                                autoFocus
+                                className="text-center font-bold text-lg"
+                            />
+                        </div>
                     </div>
                 </div>
             )}
