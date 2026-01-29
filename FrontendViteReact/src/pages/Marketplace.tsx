@@ -31,7 +31,7 @@ const MarketplaceCliente = () => {
   const [carrito, setCarrito] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   
-  // 🔒 CAMBIO CLAVE: Ahora guardamos el ID de la reserva, no solo el número de habitación
+  // Guardamos el ID de la reserva seleccionada
   const [reservaSeleccionadaId, setReservaSeleccionadaId] = useState<number | ''>('');
   const [listaReservasActivas, setListaReservasActivas] = useState<ReservaActiva[]>([]);
 
@@ -56,7 +56,14 @@ const MarketplaceCliente = () => {
     }
   }, [showModal]);
 
+  // Función auxiliar para obtener headers con Token
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const fetchInventario = () => {
+    // El inventario suele ser público, pero si requiere auth, agrega los headers aquí también
     axios.get(`${import.meta.env.VITE_API_URL}/inventario`)
       .then(res => {
         const data = res.data;
@@ -75,11 +82,14 @@ const MarketplaceCliente = () => {
   // 🔒 LÓGICA SEGURA: Buscar habitaciones ocupadas y guardar sus IDs
   const fetchReservasActivas = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas`);
+      // 🟢 CORRECCIÓN: Agregamos el token a la petición
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas`, {
+        headers: getAuthHeaders()
+      });
       
       // Filtramos solo las que NO tienen hora de salida (Ocupadas)
       const activas: ReservaActiva[] = (res.data as any[])
-        .filter((r: any) => r.habitacion && !r.hsalida)
+        .filter((r: any) => r.habitacion && !r.hsalida) // Si no tiene hsalida, está ocupada
         .map((r: any) => ({
           id: r.id,            // Guardamos el ID real de la base de datos
           habitacion: Number(r.habitacion) // Y el número para mostrarlo
@@ -89,11 +99,11 @@ const MarketplaceCliente = () => {
       setListaReservasActivas(activas);
       
     } catch (error) {
-      console.error("Error buscando reservas activas", error);
+      console.error("Error buscando reservas activas. Verifique si inició sesión.", error);
     }
   };
 
-  // Funciones del Carrito (Sin cambios)
+  // Funciones del Carrito
   const agregarAlCarrito = (producto: any) => {
     setCarrito(prev => {
       const existe = prev.find((i: any) => i.nombre === producto.nombre);
@@ -120,7 +130,7 @@ const MarketplaceCliente = () => {
     setCarrito(prev => prev.filter((i: any) => i.nombre !== nombre));
   };
 
-  // 🔒 CONFIRMAR PEDIDO (Usando ID Directo)
+  // 🔒 CONFIRMAR PEDIDO
   const confirmarPedido = async () => {
     if (!reservaSeleccionadaId) {
       alert("Por favor seleccione una habitación de la lista.");
@@ -129,14 +139,15 @@ const MarketplaceCliente = () => {
 
     setLoading(true);
     try {
-      // 1. OBTENER DATOS ACTUALES DE LA RESERVA USANDO EL ID
-      // Como ya tenemos el ID, vamos directo al grano. Es más seguro.
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaSeleccionadaId}`);
+      const headers = getAuthHeaders();
+
+      // 1. OBTENER DATOS ACTUALES DE LA RESERVA
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaSeleccionadaId}`, { headers });
       const reservaActual = res.data;
 
       if (!reservaActual || reservaActual.hsalida) {
-        alert("⚠️ Error: Parece que esta reserva ya fue cerrada o no existe.");
-        fetchReservasActivas(); // Refrescamos la lista
+        alert("⚠️ Error: Esta reserva ya fue cerrada o no existe.");
+        fetchReservasActivas();
         setLoading(false);
         return;
       }
@@ -156,13 +167,13 @@ const MarketplaceCliente = () => {
         ...reservaActual, 
         valor: nuevoValor,
         observaciones: nuevasObservaciones
-      });
+      }, { headers });
 
       // 4. DESCONTAR INVENTARIO
       try {
         await axios.post(`${import.meta.env.VITE_API_URL}/inventario/venta`, {
             items: carrito.map(item => ({ nombre: item.nombre, cantidad: item.cantidad }))
-        });
+        }, { headers });
       } catch (invError) {
         console.warn("No se pudo descontar inventario automáticamente.", invError);
       }
@@ -266,7 +277,6 @@ const MarketplaceCliente = () => {
                     ))}
                     
                     <div className="pt-4 bg-gray-50 p-3 rounded border border-gray-200">
-                        {/* Precio Total Editable */}
                         <div className="mb-3">
                             <Form.Label className="font-bold text-gray-700">Total a Cargar ($):</Form.Label>
                             <Form.Control 
@@ -297,7 +307,6 @@ const MarketplaceCliente = () => {
                                 <option disabled>No hay habitaciones ocupadas</option>
                               ) : (
                                 listaReservasActivas.map(reserva => (
-                                  // Aquí está la magia: Value = ID, Label = Habitación
                                   <option key={reserva.id} value={reserva.id}>
                                     🚪 Habitación {reserva.habitacion}
                                   </option>
