@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import LoginModal from "./LoginModal";
 
-const SidebarActividadContador = () => {
+const Sidebar = () => {
   const [username, setUsername] = useState<string | null>(null);
   const [rol, setRol] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
@@ -197,4 +197,4 @@ const SidebarActividadContador = () => {
   );
 };
 
-export default SidebarActividadContador;
+export default Sidebar;
