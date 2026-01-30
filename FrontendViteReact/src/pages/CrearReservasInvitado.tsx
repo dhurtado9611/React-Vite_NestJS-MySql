@@ -111,9 +111,6 @@ const CrearReservas = () => {
             <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-100">
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-indigo-500 rounded-md p-3">
-                     <span className="text-white text-xl font-bold">$</span>
-                  </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
