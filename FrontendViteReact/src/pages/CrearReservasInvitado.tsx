@@ -4,7 +4,6 @@ import ReservasForm from '../components/CrearReservas/ReservasForm';
 import TableCrearReservas from '../components/CrearReservas/TableCrearReservasInvitado';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import Caja from '../components/Caja';
 
 // Iconos
 const ExcelIcon = () => (
@@ -106,26 +105,6 @@ const CrearReservas = () => {
           
           {/* COLUMNA IZQUIERDA */}
           <div className="lg:col-span-1 space-y-6">
-            
-            {/* Widget de Caja */}
-            <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-100">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Estado de Caja
-                      </dt>
-                      <dd>
-                        <div className="text-lg font-medium text-gray-900">
-                           <Caja />
-                        </div>
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Formulario */}
             <div className="bg-white shadow rounded-lg border border-gray-100 flex flex-col">

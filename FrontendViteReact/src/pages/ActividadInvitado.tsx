@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import GraficaReservas from '../components/CrearReservas/GraficaReservas';
 import { Reserva } from '../components/types';
 import api from '../services/api';
 import { Modal, Button } from 'react-bootstrap';
+import Caja from '../components/Caja';
 
 type ReservaExtendida = Reserva & {
   hentradaNum: number;
@@ -213,13 +213,25 @@ const Historial = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      <div className="col-md-6">
-          <h2 className="mb-4 text-center">Estadísticas</h2>
-          <div className="card shadow p-3">
-            <GraficaReservas reservas={reservas} />
-          </div>
-        </div>
+      {/* Widget de Caja */}
+            <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-100">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Estado de Caja
+                      </dt>
+                      <dd>
+                        <div className="text-lg font-medium text-gray-900">
+                           <Caja />
+                        </div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
       </div>
     </div>
   );

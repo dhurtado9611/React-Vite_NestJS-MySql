@@ -10,7 +10,7 @@ import CrearReservasAdmin from './pages/CrearReservasAdmin'
 import ActividadAdmin from './pages/ActividadAdmin'
 import CrearReservasInvitado from './pages/CrearReservasInvitado'
 import ActividadInvitado from './pages/ActividadInvitado'
-import Marketplace from './pages/Marketplace'
+import Marketplace from './pages/MarketplaceAdmin'
 import MarketplaceInvitado from './pages/MarketplaceInvitado'
 
 
