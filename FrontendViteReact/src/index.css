@@ -88,3 +88,25 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
+/* FORZAR MODO OSCURO EN TABLAS Y TARJETAS */
+.table {
+    color: white !important;
+    background-color: transparent !important;
+}
+
+.table th, .table td {
+    background-color: transparent !important;
+    color: white !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Si usas clases de utilidad como bg-white en algún componente interno que no puedes editar: */
+.bg-white {
+    background-color: rgba(255, 255, 255, 0.05) !important; /* Lo vuelve transparente */
+    color: white !important;
+    backdrop-filter: blur(10px);
+}
+
+.text-gray-900, .text-gray-500, .text-dark {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
