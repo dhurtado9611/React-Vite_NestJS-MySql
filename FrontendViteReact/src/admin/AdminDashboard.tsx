@@ -7,7 +7,6 @@ import TablaInventarioAdmin from './TablaInventarioAdmin';
 const AdminDashboard = () => {
   const [selectedTable, setSelectedTable] = useState<'users' | 'reservas' | 'cuadre' | 'inventario'>('users');
 
-  // Configuración de las pestañas para iterar limpiamente
   const tabs = [
     { id: 'users', label: 'Usuarios' },
     { id: 'reservas', label: 'Reservas' },
@@ -16,37 +15,43 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="relative min-h-screen w-full bg-[#0f172a] overflow-hidden text-white font-sans selection:bg-cyan-500 selection:text-white">
+    // FONDO GENERAL: Oscuro profundo (Slate 950) para que resalte el efecto vidrio
+    <div className="relative min-h-screen w-full bg-[#020617] text-slate-200 font-sans selection:bg-indigo-500 selection:text-white overflow-hidden">
       
-      {/* 1. ORBES DE FONDO (Para el efecto Liquid Glass) */}
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob"></div>
-        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-cyan-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-pink-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-4000"></div>
+      {/* 1. LUCES DE FONDO (AMBIENT LIGHTING) */}
+      {/* Sin bordes, solo luces difusas para dar atmósfera */}
+      <div className="fixed inset-0 w-full h-full pointer-events-none">
+        <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-indigo-600/30 rounded-full blur-[120px] mix-blend-screen opacity-50"></div>
+        <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen opacity-50"></div>
+        <div className="absolute top-[20%] right-[20%] w-[300px] h-[300px] bg-cyan-500/20 rounded-full blur-[100px] opacity-30"></div>
       </div>
 
-      {/* Contenedor Principal Limitado (Evita que se vea gigante) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+      {/* CONTENEDOR PRINCIPAL: Controla el ancho en escritorio */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 z-10">
         
-        {/* 2. ENCABEZADO Y NAVEGACIÓN */}
-        <div className="flex flex-col lg:flex-row justify-between items-center mb-10 gap-6">
-          
-          {/* Título con efecto glass sutil */}
-          <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 drop-shadow-lg">
-            Panel Administrativo
-          </h2>
+        {/* 2. ENCABEZADO MINIMALISTA */}
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+          <div>
+            <h2 className="text-4xl font-bold text-white tracking-tight drop-shadow-lg">
+              Dashboard
+            </h2>
+            <p className="text-slate-400 mt-2 text-sm font-medium">
+              Gestión administrativa y control de ventas
+            </p>
+          </div>
 
-          {/* Navegación tipo "Píldora Flotante" */}
-          <div className="flex p-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
+          {/* 3. NAVEGACIÓN FLOTANTE (SIN BORDES) */}
+          {/* Usamos un fondo muy sutil y sombras internas */}
+          <div className="flex bg-slate-900/50 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl ring-1 ring-white/5">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setSelectedTable(tab.id as any)}
                 className={`
-                  relative px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 ease-out
+                  relative px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-500 ease-out
                   ${selectedTable === tab.id 
-                    ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)] border border-white/20' 
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'}
+                    ? 'text-white bg-indigo-600 shadow-[0_0_20px_rgba(79,70,229,0.4)]' // Glow azul en lugar de borde
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'}
                 `}
               >
                 {tab.label}
@@ -55,35 +60,36 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* 3. ÁREA DE CONTENIDO (GLASS CARD) */}
-        {/* Aquí es donde ocurre la magia del Liquid Glass para los datos */}
-        <div className="relative group">
-          {/* Borde brillante decorativo */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl opacity-20 group-hover:opacity-40 transition duration-500 blur"></div>
+        {/* 4. TARJETA DE CONTENIDO (GLASS LIMPIO) */}
+        {/* Eliminamos border-white. Usamos shadow-black para elevarlo y ring-white/5 para un borde casi invisible */}
+        <div className="relative w-full">
           
-          <div className="relative bg-gray-900/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+          {/* Capa de brillo superior (opcional, para efecto premium) */}
+          <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent opacity-50"></div>
+
+          <div className="bg-[#0f172a]/60 backdrop-blur-2xl rounded-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] ring-1 ring-white/5 overflow-hidden">
             
-            {/* Header de la tarjeta (opcional, para acciones de tabla) */}
-            <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/5">
-              <span className="text-sm text-gray-400 uppercase tracking-wider font-semibold">
-                Vista de datos: <span className="text-cyan-400">{selectedTable}</span>
-              </span>
-              {/* Aquí podrías poner un botón de exportar o filtros globales */}
-              <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div>
+            {/* Barra superior de la tabla (opcional) */}
+            <div className="px-8 py-5 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
+               <div className="flex items-center gap-2">
+                 <div className={`w-2 h-2 rounded-full ${selectedTable === 'inventario' ? 'bg-orange-500 shadow-[0_0_8px_orange]' : 'bg-emerald-500 shadow-[0_0_8px_#10b981]'}`}></div>
+                 <span className="text-sm font-medium text-slate-300 capitalize">{selectedTable}</span>
+               </div>
+               {/* Simulación de botones de acción de ventana */}
+               <div className="flex gap-2 opacity-50">
+                 <div className="w-3 h-3 rounded-full bg-slate-600"></div>
+                 <div className="w-3 h-3 rounded-full bg-slate-600"></div>
+               </div>
             </div>
 
-            {/* Contenedor de la Tabla con Scroll Suave */}
-            <div className="p-6 overflow-x-auto custom-scrollbar">
-              <div className="min-w-full inline-block align-middle">
-                {/* IMPORTANTE: Tus componentes de tabla deben aceptar clases 
-                   o ser transparentes para heredar el fondo glass.
-                */}
-                <div className="text-gray-200">
-                  {selectedTable === 'users' && <TablaUsuarios />}
-                  {selectedTable === 'reservas' && <TablaReservas />}
-                  {selectedTable === 'cuadre' && <TablaCuadre />}
-                  {selectedTable === 'inventario' && <TablaInventarioAdmin />}
-                </div>
+            {/* Contenedor con Scroll y Texto Blanco Forzado */}
+            <div className="p-8 overflow-x-auto">
+              {/* Forzamos que los hijos tengan texto claro si no tienen estilos propios */}
+              <div className="min-w-full text-slate-200 [&_table]:w-full [&_td]:py-3 [&_th]:py-3 [&_th]:text-slate-400 [&_tr]:border-b [&_tr]:border-white/5 [&_tr:hover]:bg-white/5 transition-colors">
+                {selectedTable === 'users' && <TablaUsuarios />}
+                {selectedTable === 'reservas' && <TablaReservas />}
+                {selectedTable === 'cuadre' && <TablaCuadre />}
+                {selectedTable === 'inventario' && <TablaInventarioAdmin />}
               </div>
             </div>
 
