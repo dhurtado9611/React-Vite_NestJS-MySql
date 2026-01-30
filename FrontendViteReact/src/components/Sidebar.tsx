@@ -9,8 +9,6 @@ import {
   LogOut
 } from "lucide-react";
 import LoginModal from "./LoginModal";
-// Importamos la función de logout centralizada (opcional, pero recomendada)
-import { logout as apiLogout } from "../services/api"; 
 
 const Sidebar = () => {
   const [username, setUsername] = useState<string | null>(null);
@@ -20,13 +18,13 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Verificar sesión al montar
+    // 1. Verificación de sesión al cargar
     const checkSession = () => {
       const storedUser = localStorage.getItem("username");
       const storedRol = localStorage.getItem("rol");
       const token = localStorage.getItem("token");
       
-      // Si no hay token, no debería haber usuario (limpieza de seguridad)
+      // Seguridad: Si hay usuario pero no token, forzamos salida
       if (!token && storedUser) {
         handleLogout();
       } else {
@@ -37,7 +35,7 @@ const Sidebar = () => {
 
     checkSession();
 
-    // Sistema de alertas
+    // 2. Sistema de alertas (Polling cada 5s)
     const leerAlertas = () => {
       const cantidad = localStorage.getItem("alertasHabitaciones");
       setVencidas(cantidad ? parseInt(cantidad) : 0);
@@ -49,26 +47,23 @@ const Sidebar = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // --- FUNCIÓN DE LOGOUT CORREGIDA ---
+  // --- FUNCIÓN DE LOGOUT SEGURA ---
   const handleLogout = () => {
-    // Opción A: Usar la función centralizada de api.ts (Recomendado)
-    // apiLogout(); 
-
-    // Opción B: Lógica manual robusta (Por si no has actualizado api.ts aún)
+    // Limpieza profunda de almacenamiento
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("rol");
     localStorage.removeItem("alertasHabitaciones");
     
-    // Limpiamos estado local inmediatamente para feedback visual
+    // Limpieza de estado local
     setUsername(null);
     setRol(null);
 
-    // IMPORTANTE: Usamos window.location en lugar de navigate para forzar
-    // la recarga de la página y limpiar cualquier estado en memoria (Contexts, variables, etc.)
+    // Recarga forzada para limpiar memoria y caché de React
     window.location.href = "/";
   };
 
+  // Definición de enlaces según rol
   const getLinks = () => {
     if (rol === "admin") {
       return [
@@ -87,27 +82,26 @@ const Sidebar = () => {
     return [];
   };
 
-  // --- LOGIN BUTTON (Renderizado condicional) ---
+  // --- BOTÓN DE LOGIN (Si no hay usuario) ---
   if (!username) {
     return (
       <>
-        <div className="fixed top-6 right-6 z-50">
+        <div className="fixed top-6 right-6 z-[100]">
           <button
             onClick={() => setShowLogin(true)}
             className="flex items-center gap-3 px-6 py-3 rounded-full 
-                       bg-white/5 backdrop-blur-2xl border border-white/10 
+                       bg-white/10 backdrop-blur-md border border-white/20 
                        text-white transition-all duration-300
-                       hover:bg-white/10 group shadow-lg hover:shadow-cyan-500/20"
+                       hover:bg-white/20 hover:scale-105 shadow-[0_0_15px_rgba(0,0,0,0.3)]"
           >
-            <LogIn className="w-[1.2rem] h-[1.2rem] !text-white opacity-80 group-hover:opacity-100" />
-            <span className="text-xs font-bold tracking-widest text-white opacity-80 group-hover:opacity-100">INGRESAR</span>
+            <LogIn className="w-[1.2rem] h-[1.2rem] text-white" />
+            <span className="text-xs font-bold tracking-widest text-white">INGRESAR</span>
           </button>
         </div>
         {showLogin && (
           <LoginModal
             onClose={() => {
               setShowLogin(false);
-              // Recargamos datos tras el login exitoso
               setUsername(localStorage.getItem("username"));
               setRol(localStorage.getItem("rol"));
             }}
@@ -117,51 +111,49 @@ const Sidebar = () => {
     );
   }
 
-  // --- ESTILOS DE ENLACE ---
+  // Clases dinámicas para los enlaces (Efecto Glow)
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-500 group
+    `relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 group mb-3
     ${
       isActive
-        ? "bg-white/20 backdrop-blur-md border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]" 
-        : "hover:bg-white/5 border border-transparent"
+        ? "bg-white/20 backdrop-blur-md border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.3)] text-white scale-110" 
+        : "text-white/50 hover:text-white hover:bg-white/10 border border-transparent"
     }`;
-
-  const iconClass = (isActive: boolean) => 
-    `w-[1.4rem] h-[1.4rem] transition-all duration-300 !text-white ${isActive ? 'opacity-100 scale-105' : 'opacity-50 group-hover:opacity-100'}`;
 
   return (
     <>
-      {/* ================= DESKTOP SIDEBAR ================= */}
-      <aside className="hidden md:flex fixed left-6 top-1/2 -translate-y-1/2 z-50 flex-col items-center py-6 px-3 gap-8
-                        bg-black/20 backdrop-blur-[50px]
+      {/* ================= DESKTOP SIDEBAR (Izquierda) ================= */}
+      <aside className="hidden md:flex fixed left-6 top-1/2 -translate-y-1/2 z-[100] flex-col items-center py-8 px-3
+                        bg-black/30 backdrop-blur-xl
                         border border-white/10 rounded-full shadow-2xl">
         
         {/* Logo */}
         <div 
-            className="cursor-pointer opacity-80 hover:opacity-100 transition-opacity p-2 hover:scale-110 duration-300"
+            className="cursor-pointer mb-8 hover:scale-110 transition-transform duration-300 p-1"
             onClick={() => navigate("/")}
         >
-            <img src="/assets/Logo-PNG.png" alt="Logo" className="w-8 h-8 object-contain" />
+            <img src="/assets/Logo-PNG.png" alt="Logo" className="w-8 h-8 object-contain opacity-90" />
         </div>
 
-        {/* Navigation */}
-        <nav className="flex flex-col gap-4">
+        {/* Links de Navegación */}
+        <nav className="flex flex-col gap-2">
           {getLinks().map((link) => (
             <NavLink key={link.to} to={link.to} className={navLinkClass}>
               {({ isActive }) => (
                 <>
+                  {/* Indicador de Alerta (Punto Rojo) */}
                   {link.label === "Actividad" && vencidas > 0 && (
-                    <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500 animate-ping"></span>
+                    <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-red-500 animate-ping shadow-[0_0_10px_red]"></span>
                   )}
                   {link.label === "Actividad" && vencidas > 0 && (
-                    <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                    <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-red-500"></span>
                   )}
                   
-                  <link.icon className={iconClass(isActive)} strokeWidth={1.5} />
+                  <link.icon className="w-[1.4rem] h-[1.4rem]" strokeWidth={1.5} />
                   
-                  {/* Tooltip */}
-                  <div className="absolute left-14 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none translate-x-2 group-hover:translate-x-0">
-                    <span className="bg-black/60 backdrop-blur-xl text-white text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full border border-white/10 whitespace-nowrap shadow-xl">
+                  {/* Tooltip Lateral (Aparece al pasar el mouse) */}
+                  <div className="absolute left-14 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none translate-x-[-10px] group-hover:translate-x-0">
+                    <span className="bg-black/80 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 whitespace-nowrap shadow-xl">
                       {link.label}
                     </span>
                   </div>
@@ -171,53 +163,54 @@ const Sidebar = () => {
           ))}
         </nav>
 
-        {/* Separador */}
-        <div className="w-8 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        {/* Separador Decorativo */}
+        <div className="w-6 h-[1px] bg-white/20 my-6"></div>
 
-        {/* Footer Actions */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/10 text-white font-bold text-sm shadow-inner">
+        {/* Footer (Avatar + Logout) */}
+        <div className="flex flex-col items-center gap-5">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg border border-white/20">
             {username?.charAt(0).toUpperCase()}
           </div>
           
           <button
-            onClick={handleLogout} // Usamos la nueva función
-            className="p-3 rounded-full hover:bg-red-500/20 hover:border-red-500/30 border border-transparent transition-all duration-300 group"
+            onClick={handleLogout}
+            className="p-3 rounded-full text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300"
             title="Cerrar Sesión"
           >
-            <LogOut className="w-[1.2rem] h-[1.2rem] !text-white opacity-50 group-hover:opacity-100 group-hover:text-red-200" strokeWidth={1.5} />
+            <LogOut className="w-5 h-5" strokeWidth={1.5} />
           </button>
         </div>
       </aside>
 
-      {/* ================= MOBILE NAV ================= */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none z-40"></div>
+      {/* ================= MOBILE NAV (Inferior) ================= */}
+      {/* Fondo degradado para mejorar lectura en el borde inferior */}
+      <div className="md:hidden fixed bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black/80 to-transparent pointer-events-none z-[90]"></div>
 
-      <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm h-20 z-50 rounded-full px-4
+      <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[350px] z-[100] h-16 rounded-full px-6
                       flex items-center justify-between
-                      bg-black/40 backdrop-blur-[40px] border border-white/10 shadow-2xl">
+                      bg-black/60 backdrop-blur-[20px] border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         
         {getLinks().map((link) => (
           <NavLink key={link.to} to={link.to} className={({ isActive }) => 
-            `relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300
-            ${isActive ? 'bg-white/20 shadow-[0_0_15px_rgba(255,255,255,0.15)]' : ''}`
+            `relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300
+            ${isActive ? 'bg-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/50'}`
           }>
             {({ isActive }) => (
               <>
                  {link.label === "Actividad" && vencidas > 0 && (
-                    <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
                   )}
-                 <link.icon className={iconClass(isActive)} strokeWidth={1.5} />
+                 <link.icon className="w-5 h-5" strokeWidth={1.5} />
               </>
             )}
           </NavLink>
         ))}
 
         <button 
-          onClick={handleLogout} // Usamos la nueva función aquí también
-          className="flex items-center justify-center w-12 h-12 rounded-full hover:bg-red-500/20 transition-colors border border-transparent hover:border-red-500/30"
+          onClick={handleLogout} 
+          className="flex items-center justify-center w-10 h-10 rounded-full text-white/50 hover:text-red-400 transition-colors"
         >
-          <LogOut className="w-[1.4rem] h-[1.4rem] !text-white opacity-50" strokeWidth={1.5} />
+          <LogOut className="w-5 h-5" strokeWidth={1.5} />
         </button>
       </nav>
     </>
