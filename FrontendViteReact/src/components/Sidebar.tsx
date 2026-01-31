@@ -125,7 +125,7 @@ const Sidebar = () => {
       {/* ================= DESKTOP SIDEBAR (Izquierda) ================= */}
       <aside className="hidden md:flex fixed left-6 top-1/2 -translate-y-1/2 z-[100] flex-col items-center py-8 px-3
                         bg-black/30 backdrop-blur-xl
-                        border border-white/10 rounded-full shadow-2xl">
+                        border border-white/10 rounded-full">
         
         {/* Logo */}
         <div 
