@@ -77,7 +77,7 @@ const CrearReservas = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 pt-4 sm:pt-10">
+    <div className="min-h-screen bg-gray-5 pb-20 pt-4 sm:pt-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* HEADER */}
@@ -108,7 +108,7 @@ const CrearReservas = () => {
 
             {/* Formulario */}
             <div className="bg-white shadow rounded-lg border border-gray-100 flex flex-col">
-              <div className="px-4 py-5 sm:px-6 border-b border-gray-100 bg-gray-50 rounded-t-lg">
+              <div className="px-4 py-5 sm:px-6 border-b border-gray-100 bg-gray-5 rounded-t-lg">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">
                   Nueva Reserva
                 </h3>
@@ -133,7 +133,7 @@ const CrearReservas = () => {
           {/* COLUMNA DERECHA: TABLA */}
           <div className="lg:col-span-2">
             <div className="bg-white shadow rounded-lg border border-gray-100 min-h-[500px] flex flex-col">
-              <div className="px-4 py-5 sm:px-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-lg">
+              <div className="px-4 py-5 sm:px-6 border-b border-gray-100 flex justify-between items-center bg-gray-5 rounded-t-lg">
                 <div>
                   <h3 className="text-lg leading-6 font-medium text-gray-900">
                     Historial del Turno
