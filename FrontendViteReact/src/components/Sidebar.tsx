@@ -89,7 +89,7 @@ const Sidebar = () => {
         <div className="fixed top-6 right-6 z-[100]">
           <button
             onClick={() => setShowLogin(true)}
-            className="flex items-center gap-3 px-6 py-3 rounded-full 
+            className="flex items-center gap-3 px-8 py-2 rounded-full 
                        bg-white/10 backdrop-blur-md border border-white/20 
                        text-white transition-all duration-300
                        hover:bg-white/20 hover:scale-105 shadow-[0_0_15px_rgba(0,0,0,0.3)]"

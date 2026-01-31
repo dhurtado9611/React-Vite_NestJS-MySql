@@ -27,7 +27,6 @@ interface Reserva {
 }
 
 const CrearReservas = () => {
-  // Inicializamos SIEMPRE con un array vacío []
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [formData, setFormData] = useState<Partial<Reserva>>({});
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -41,16 +40,15 @@ const CrearReservas = () => {
   const fetchReservas = async () => {
     try {
       const response = await api.get('/reservas');
-      // CORRECCIÓN CRÍTICA: Validamos que sea un array antes de guardar
       if (response.data && Array.isArray(response.data)) {
         setReservas(response.data);
       } else {
         console.warn('La API no devolvió un array:', response.data);
-        setReservas([]); // Fallback a array vacío para evitar crash
+        setReservas([]);
       }
     } catch (error) {
       console.error('Error fetching reservas:', error);
-      setReservas([]); // En caso de error, array vacío
+      setReservas([]);
     }
   };
 
@@ -77,17 +75,18 @@ const CrearReservas = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-5 pb-20 pt-4 sm:pt-10">
+    // Cambiado el fondo a oscuro (bg-slate-900) y el texto a blanco (text-white)
+    <div className="min-h-screen bg-slate-900 pb-20 pt-4 sm:pt-10 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               Panel de Reservas
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Hola, <span className="font-semibold text-indigo-600">{username || 'Invitado'}</span>. Gestiona tu turno hoy.
+            <p className="mt-1 text-sm text-gray-300">
+              Hola, <span className="font-semibold text-indigo-400">{username || 'Invitado'}</span>. Gestiona tu turno hoy.
             </p>
           </div>
           
@@ -107,13 +106,16 @@ const CrearReservas = () => {
           <div className="lg:col-span-1 space-y-6">
 
             {/* Formulario */}
-            <div className="bg-white shadow rounded-lg border border-gray-100 flex flex-col">
-              <div className="px-4 py-5 sm:px-6 border-b border-gray-100 bg-gray-5 rounded-t-lg">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
+            {/* Tarjeta con fondo oscuro (bg-gray-800) y bordes oscuros */}
+            <div className="bg-gray-800 shadow rounded-lg border border-gray-700 flex flex-col">
+              {/* Encabezado de la tarjeta con fondo más oscuro (bg-gray-700) */}
+              <div className="px-4 py-5 sm:px-6 border-b border-gray-700 bg-gray-700 rounded-t-lg">
+                <h3 className="text-lg leading-6 font-medium text-white">
                   Nueva Reserva
                 </h3>
               </div>
-              <div className="p-4 sm:p-6">
+              {/* Aumentado el padding para dar más espacio al formulario */}
+              <div className="p-6 sm:p-8">
                 <ReservasForm
                   fetchReservas={fetchReservas}
                   formData={formData}
@@ -132,22 +134,23 @@ const CrearReservas = () => {
 
           {/* COLUMNA DERECHA: TABLA */}
           <div className="lg:col-span-2">
-            <div className="bg-white shadow rounded-lg border border-gray-100 min-h-[500px] flex flex-col">
-              <div className="px-4 py-5 sm:px-6 border-b border-gray-100 flex justify-between items-center bg-gray-5 rounded-t-lg">
+            {/* Tarjeta de la tabla con fondo oscuro */}
+            <div className="bg-gray-800 shadow rounded-lg border border-gray-700 min-h-[500px] flex flex-col">
+              <div className="px-4 py-5 sm:px-6 border-b border-gray-700 flex justify-between items-center bg-gray-700 rounded-t-lg">
                 <div>
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  <h3 className="text-lg leading-6 font-medium text-white">
                     Historial del Turno
                   </h3>
                 </div>
-                {/* Protección: Solo mostramos length si reservas existe */}
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                {/* Badge ajustado para modo oscuro */}
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-900 text-indigo-200">
                   {reservas ? reservas.length : 0} Total
                 </span>
               </div>
               
-              <div className="flex-1 overflow-x-auto p-4 sm:p-0">
+              <div className="flex-1 overflow-x-auto p-4 sm:p-0 text-gray-300">
                 <TableCrearReservas
-                  reservas={reservas || []} // Protección EXTRA al pasar la prop
+                  reservas={reservas || []}
                   fetchReservas={fetchReservas}
                 />
               </div>
