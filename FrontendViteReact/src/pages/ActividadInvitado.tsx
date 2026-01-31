@@ -103,8 +103,14 @@ const Historial = () => {
     }
   }, []);
 
- const cerrarTurno = async () => {
-    if (!cuadreId) return alert("No hay turno activo para cerrar (ID nulo).");
+  const cerrarTurno = async () => {
+    // Validación inicial
+    if (!cuadreId) {
+        // INTENTO DE RECUPERACIÓN: Si no hay ID en estado, intenta leerlo de la base de datos primero
+        alert("No se detectó un ID de turno activo. Recargando para verificar...");
+        window.location.reload(); 
+        return;
+    }
     
     const confirmar = window.confirm(`¿Cerrar turno?\nTotal Caja: $${(baseCaja + totalVentas).toLocaleString()}`);
     if (!confirmar) return;
@@ -113,7 +119,8 @@ const Historial = () => {
     
     try {
       const token = localStorage.getItem('token');
-      // Intenta actualizar en el servidor
+      
+      // Intentamos cerrar en el servidor
       await api.patch(`/cuadre/${cuadreId}`, {
         turnoCerrado: horaActual,
         totalEntregado: totalVentas, 
@@ -121,23 +128,22 @@ const Historial = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Si todo sale bien:
+      // Éxito normal
       localStorage.removeItem('datosTurno');
       navigate('/', { state: { turnoCerrado: true } });
 
     } catch (error: any) {
       console.error('Error al cerrar turno:', error);
 
-      // --- CORRECCIÓN AQUÍ ---
-      // Si el servidor dice "404 Not Found", es que el turno ya no existe o se borró.
-      // Forzamos el cierre local para no quedarnos atrapados.
+      // --- CORRECCIÓN CLAVE ---
+      // Si el servidor responde 404 (No encontrado), significa que el ID en memoria
+      // no existe en la BD. Forzamos el cierre local para no quedarnos atrapados.
       if (error.response && error.response.status === 404) {
-        alert("⚠️ Advertencia: Este turno no se encontró en la base de datos (pudo ser eliminado). Se cerrará la sesión localmente.");
-        localStorage.removeItem('datosTurno');
-        navigate('/', { state: { turnoCerrado: true } });
+         alert("El turno ya no existe en el servidor (posiblemente fue borrado). Se cerrará la sesión localmente.");
+         localStorage.removeItem('datosTurno');
+         navigate('/', { state: { turnoCerrado: true } });
       } else {
-        // Otro tipo de error (ej: internet, servidor caído)
-        alert('Error de conexión al cerrar turno. Intenta de nuevo.');
+         alert('Error de conexión. Verifica tu internet e intenta de nuevo.');
       }
     }
   };
