@@ -104,47 +104,66 @@ const Historial = () => {
   }, []);
 
   const cerrarTurno = async () => {
-    // Validación inicial
-    if (!cuadreId) {
-        // INTENTO DE RECUPERACIÓN: Si no hay ID en estado, intenta leerlo de la base de datos primero
-        alert("No se detectó un ID de turno activo. Recargando para verificar...");
-        window.location.reload(); 
-        return;
-    }
-    
-    const confirmar = window.confirm(`¿Cerrar turno?\nTotal Caja: $${(baseCaja + totalVentas).toLocaleString()}`);
+    // 1. Confirmación visual
+    const confirmar = window.confirm(`¿Seguro deseas cerrar turno?\nTotal Caja: $${(baseCaja + totalVentas).toLocaleString()}`);
     if (!confirmar) return;
 
-    const horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
-    
     try {
-      const token = localStorage.getItem('token');
+      // ---------------------------------------------------------
+      // PASO CLAVE: BÚSQUEDA EN TIEMPO REAL
+      // Ignoramos lo que el navegador "cree" saber. Vamos a buscar el ID real a la BD.
+      // ---------------------------------------------------------
+      const hoy = new Date().toISOString().split('T')[0];
       
-      // Intentamos cerrar en el servidor
-      await api.patch(`/cuadre/${cuadreId}`, {
+      // Obtenemos el usuario actual (del estado o del localstorage)
+      const usuarioActual = colaborador || JSON.parse(localStorage.getItem('datosTurno') || '{}').colaborador;
+      
+      if (!usuarioActual) {
+          alert("Error: No se identificó al usuario. Inicia sesión nuevamente.");
+          navigate('/');
+          return;
+      }
+
+      // Hacemos una petición para ver TODOS los cuadres
+      const res = await api.get('/cuadre');
+      
+      // Buscamos cuál es el que está ABIERTO (turnoCerrado === null) para este usuario hoy
+      const turnoReal = res.data.find((c: any) => 
+          c.colaborador === usuarioActual && 
+          !c.turnoCerrado // Importante: Buscamos el que NO tenga fecha de cierre
+      );
+
+      // Si no encontramos ningún turno abierto...
+      if (!turnoReal) {
+         alert("⚠️ No se encontró ningún turno abierto en el sistema. Es posible que ya se haya cerrado.");
+         // Limpiamos todo localmente por si acaso
+         localStorage.removeItem('datosTurno');
+         navigate('/', { state: { turnoCerrado: true } });
+         return;
+      }
+
+      // ---------------------------------------------------------
+      // PASO FINAL: CERRAR EL TURNO ENCONTRADO (turnoReal.id)
+      // ---------------------------------------------------------
+      const horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const token = localStorage.getItem('token');
+
+      // Aquí usamos turnoReal.id (que será el 3) en lugar de la variable vieja
+      await api.patch(`/cuadre/${turnoReal.id}`, {
         turnoCerrado: horaActual,
         totalEntregado: totalVentas, 
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Éxito normal
+      // ¡Éxito!
+      alert(`Turno #${turnoReal.id} cerrado correctamente.`);
       localStorage.removeItem('datosTurno');
       navigate('/', { state: { turnoCerrado: true } });
 
-    } catch (error: any) {
-      console.error('Error al cerrar turno:', error);
-
-      // --- CORRECCIÓN CLAVE ---
-      // Si el servidor responde 404 (No encontrado), significa que el ID en memoria
-      // no existe en la BD. Forzamos el cierre local para no quedarnos atrapados.
-      if (error.response && error.response.status === 404) {
-         alert("El turno ya no existe en el servidor (posiblemente fue borrado). Se cerrará la sesión localmente.");
-         localStorage.removeItem('datosTurno');
-         navigate('/', { state: { turnoCerrado: true } });
-      } else {
-         alert('Error de conexión. Verifica tu internet e intenta de nuevo.');
-      }
+    } catch (error) {
+      console.error('Error al cerrar:', error);
+      alert('Error de conexión o de servidor. Por favor recarga la página.');
     }
   };
 
