@@ -2,8 +2,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Modal, Button } from 'react-bootstrap';
+import { FaBars, FaTimes, FaClock } from 'react-icons/fa'; // Iconos para menú y tiempo
 
-// --- INTERFACES LOCALES (Para evitar errores de tipos) ---
+// --- INTERFACES ---
 interface Reserva {
   id: number;
   habitacion: number;
@@ -35,14 +36,17 @@ interface Cuadre {
 const Historial = () => {
   const navigate = useNavigate();
 
-  // --- ESTADOS HABITACIONES ---
+  // --- ESTADOS ---
   const [reservas, setReservas] = useState<ReservaExtendida[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [reservaSeleccionada, setReservaSeleccionada] = useState<ReservaExtendida | null>(null);
   const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<number | null>(null);
   const [, setNow] = useState(new Date());
+  
+  // Estado para el menú móvil
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
-  // --- ESTADOS CAJA (Para el Navbar) ---
+  // --- ESTADOS CAJA ---
   const [baseCaja, setBaseCaja] = useState<number>(0);
   const [totalVentas, setTotalVentas] = useState<number>(0);
   const [cuadreId, setCuadreId] = useState<number | null>(null);
@@ -50,7 +54,7 @@ const Historial = () => {
   const [turno, setTurno] = useState<string>('');
   const [fecha, setFecha] = useState<string>('');
 
-  // --- LÓGICA CAJA ---
+  // --- LÓGICA ---
   const fetchDatosCaja = useCallback(async () => {
     try {
       const datosTurno = localStorage.getItem('datosTurno');
@@ -74,7 +78,6 @@ const Historial = () => {
       const hoy = new Date().toISOString().split('T')[0];
       setFecha(hoy);
 
-      // 1. Obtener Cuadre
       const resCuadre = await api.get('/cuadre');
       const cuadreActivo = resCuadre.data.find((c: Cuadre) => 
         c.colaborador === nombreUsuario && 
@@ -85,11 +88,9 @@ const Historial = () => {
       if (cuadreActivo) {
         setBaseCaja(cuadreActivo.basecaja || 0);
         setCuadreId(cuadreActivo.id);
-        // Si no tenemos turno del localstorage, tratamos de sacarlo de la BD
         if (!turnoActual) setTurno(cuadreActivo.turno);
       }
 
-      // 2. Calcular Ventas
       const resReservas = await api.get('/reservas');
       const total = resReservas.data
         .filter((r: Reserva) => r.colaborador === nombreUsuario && r.fecha === hoy)
@@ -104,7 +105,6 @@ const Historial = () => {
 
   const cerrarTurno = async () => {
     if (!cuadreId) return alert("No hay turno activo.");
-    
     const confirmar = window.confirm(`¿Cerrar turno?\nTotal Caja: $${(baseCaja + totalVentas).toLocaleString()}`);
     if (!confirmar) return;
 
@@ -124,7 +124,6 @@ const Historial = () => {
     }
   };
 
-  // --- LÓGICA HABITACIONES ---
   const fetchDatosReservas = async () => {
     try {
       const response = await api.get('/reservas');
@@ -156,7 +155,7 @@ const Historial = () => {
   };
 
   const formatoTiempoRestante = (minutos: number) => {
-    if (minutos <= 0) return "Tiempo finalizado";
+    if (minutos <= 0) return "Fin"; // Texto corto para el botón redondo
     const h = Math.floor(minutos / 60);
     const m = minutos % 60;
     return `${h}h ${m}m`;
@@ -165,10 +164,7 @@ const Historial = () => {
   useEffect(() => {
     fetchDatosReservas();
     fetchDatosCaja();
-    const interval = setInterval(() => {
-      fetchDatosReservas();
-      fetchDatosCaja();
-    }, 10000);
+    const interval = setInterval(() => { fetchDatosReservas(); fetchDatosCaja(); }, 10000);
     const clock = setInterval(() => setNow(new Date()), 60000);
     return () => { clearInterval(interval); clearInterval(clock); };
   }, [fetchDatosCaja]);
@@ -176,180 +172,209 @@ const Historial = () => {
   const estadoModal = reservaSeleccionada ? calcularEstadoTiempo(reservaSeleccionada.hentrada) : null;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white font-sans">
+    <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-indigo-500 selection:text-white">
       <style>
         {`
-          .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
+          /* Estilo Neón / Glass para las esferas */
+          .room-sphere {
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.4));
+            backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
+            box-shadow: 
+              inset -2px -2px 6px rgba(0,0,0,0.5),
+              inset 2px 2px 6px rgba(255,255,255,0.1),
+              0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
           }
-          .room-btn {
-            background: rgba(255, 255, 255, 0.05);
-            transition: all 0.2s ease;
-            height: 120px;
-            border-radius: 12px;
+          
+          .room-sphere:active {
+            transform: scale(0.95);
           }
-          .room-btn:hover {
-             background: rgba(255, 255, 255, 0.1);
-             transform: translateY(-2px);
-          }
-          .info-label {
-             font-size: 0.75rem;
-             color: #9ca3af;
-             text-transform: uppercase;
-             font-weight: 700;
-             margin-bottom: 0.25rem;
-          }
-          .info-value {
-             font-size: 1rem;
-             font-weight: 600;
-             color: white;
+
+          /* Anillos de estado (Bordes brillantes) */
+          .status-ring-free { box-shadow: 0 0 10px rgba(74, 222, 128, 0.3), inset 0 0 10px rgba(74, 222, 128, 0.1); border: 2px solid rgba(74, 222, 128, 0.5); }
+          .status-ring-occupied { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), inset 0 0 10px rgba(59, 130, 246, 0.2); border: 2px solid #3b82f6; }
+          .status-ring-critical { box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), inset 0 0 15px rgba(239, 68, 68, 0.3); border: 2px solid #ef4444; animation: pulse-red 1.5s infinite; }
+
+          @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
           }
         `}
       </style>
 
-      {/* --- NAVBAR SUPERIOR FIJO (Datos de Caja) --- */}
-      <div className="fixed-top bg-gray-800 border-b border-gray-700 shadow-lg" style={{ zIndex: 1030 }}>
-        <div className="px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-          
-          {/* Tira de Datos (Izquierda/Centro) */}
-          <div className="flex flex-wrap gap-6 items-center justify-center md:justify-start flex-1">
-             <div className="text-center md:text-left">
-                <div className="info-label">Colaborador</div>
-                <div className="info-value">{colaborador}</div>
-             </div>
-             <div className="text-center md:text-left">
-                <div className="info-label">Fecha</div>
-                <div className="info-value">{fecha}</div>
-             </div>
-             <div className="text-center md:text-left">
-                <div className="info-label">Turno</div>
-                <div className="info-value">{turno || '--'}</div>
-             </div>
-             <div className="text-center md:text-left border-l border-gray-600 pl-4">
-                <div className="info-label">Base</div>
-                <div className="info-value text-blue-300">${baseCaja.toLocaleString()}</div>
-             </div>
-             <div className="text-center md:text-left">
-                <div className="info-label">Ventas</div>
-                <div className="info-value text-green-400">${totalVentas.toLocaleString()}</div>
-             </div>
-             <div className="text-center md:text-left border-l border-gray-600 pl-4">
-                <div className="info-label">Total Caja</div>
-                <div className="info-value text-white font-bold">${(baseCaja + totalVentas).toLocaleString()}</div>
-             </div>
-          </div>
-
-          {/* Botón Cerrar (Derecha) */}
-          <button 
-            onClick={cerrarTurno}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow transition-colors"
-          >
-            Finalizar Jornada y Cerrar Turno
-          </button>
-        </div>
-      </div>
-
-      {/* --- CONTENIDO PRINCIPAL (Habitaciones) --- */}
-      {/* pt-28 compensa la altura del navbar fijo */}
-      <div className="pt-32 pb-10 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="glass-panel p-6">
-            <h2 className="text-xl font-bold mb-6 text-gray-200">Estado de Habitaciones</h2>
+      {/* --- NAVBAR RESPONSIVO (HAMBURGER) --- */}
+      <nav className="fixed w-full z-50 bg-gray-900/95 backdrop-blur-md border-b border-gray-800 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-center h-16">
             
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
-              {[...Array(16)].map((_, i) => {
-                const num = i + 1;
-                const r = reservas.find(res => res.habitacion === num && !res.hsalida);
-                const info = r ? calcularEstadoTiempo(r.hentrada) : null;
-                const estado = !r ? 'libre' : info?.excedido ? 'critica' : 'ocupada';
+            {/* Logo / Título */}
+            <div className="flex items-center gap-2">
+              <div className="bg-indigo-600 p-2 rounded-lg shadow-lg shadow-indigo-500/20">
+                <FaClock className="text-white text-lg" />
+              </div>
+              <div>
+                <span className="font-bold text-lg tracking-wide text-white">CONTROL</span>
+                <span className="text-xs block text-gray-400 -mt-1">{colaborador || 'Invitado'}</span>
+              </div>
+            </div>
 
-                // Colores
-                let borderColor = 'border-gray-600';
-                let textColor = 'text-gray-400';
-                
-                if (estado === 'libre') {
-                    borderColor = 'border-green-500/50';
-                    textColor = 'text-green-400';
-                } else if (estado === 'ocupada') {
-                    borderColor = 'border-blue-500';
-                    textColor = 'text-white';
-                } else if (estado === 'critica') {
-                    borderColor = 'border-red-500';
-                    textColor = 'text-red-500 animate-pulse';
-                }
+            {/* Botón Hamburger (Solo Móvil) */}
+            <div className="md:hidden">
+              <button 
+                onClick={() => setMenuAbierto(!menuAbierto)} 
+                className="text-gray-300 hover:text-white p-2 focus:outline-none transition-transform active:scale-90"
+              >
+                {menuAbierto ? <FaTimes size={24} /> : <FaBars size={24} />}
+              </button>
+            </div>
 
-                return (
-                  <button 
-                    key={num}
-                    onClick={() => handleClickHabitacion(num)}
-                    className={`room-btn relative border-2 flex flex-col items-center justify-center overflow-hidden ${borderColor}`}
-                  >
-                    {/* Barra de progreso sutil en el fondo */}
-                    {info && (
-                       <div 
-                         className="absolute bottom-0 left-0 h-1.5 w-full bg-gray-700"
-                       >
-                         <div 
-                           className="h-full transition-all duration-500"
-                           style={{ 
-                             width: `${info.porcentaje}%`,
-                             backgroundColor: info.excedido ? '#ef4444' : '#3b82f6'
-                           }}
-                         />
-                       </div>
-                    )}
-                    
-                    <span className={`text-4xl font-bold ${textColor}`}>
-                      {num}
-                    </span>
-                    
-                    {r && (
-                        <span className="mt-2 text-xs font-mono bg-black/40 px-2 rounded text-gray-300">
-                           {r.placa}
-                        </span>
-                    )}
-
-                    {info && (
-                        <span className={`absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded ${info.excedido ? 'bg-red-600 text-white' : 'bg-blue-900 text-blue-200'}`}>
-                            {info.excedido ? '!!!' : formatoTiempoRestante(info.minutosRestantes)}
-                        </span>
-                    )}
-                  </button>
-                );
-              })}
+            {/* Datos Desktop (Siempre visibles en PC) */}
+            <div className="hidden md:flex items-center space-x-6 text-sm">
+                <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">FECHA</span><span>{fecha}</span></div>
+                <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">TURNO</span><span>{turno}</span></div>
+                <div className="h-8 w-px bg-gray-700"></div>
+                <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">BASE</span><span className="text-blue-300">${baseCaja.toLocaleString()}</span></div>
+                <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">VENTAS</span><span className="text-green-400 font-bold">+${totalVentas.toLocaleString()}</span></div>
+                <div className="flex flex-col items-center bg-gray-800 px-3 py-1 rounded-lg border border-gray-700"><span className="text-gray-500 text-[10px] font-bold">TOTAL</span><span className="text-white font-bold text-base">${(baseCaja + totalVentas).toLocaleString()}</span></div>
+                <button onClick={cerrarTurno} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-lg shadow-red-900/20 transition-all hover:scale-105">
+                  CERRAR TURNO
+                </button>
             </div>
           </div>
         </div>
+
+        {/* Menú Desplegable (Móvil) */}
+        <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${menuAbierto ? 'max-h-96 opacity-100 border-b border-gray-800' : 'max-h-0 opacity-0'}`}>
+          <div className="px-4 py-4 space-y-4 bg-gray-800/50">
+            <div className="grid grid-cols-2 gap-4 text-center">
+               <div className="bg-gray-900 p-3 rounded-xl border border-gray-700">
+                  <span className="text-gray-400 text-xs block mb-1">BASE EN CAJA</span>
+                  <span className="text-blue-300 font-mono text-lg">${baseCaja.toLocaleString()}</span>
+               </div>
+               <div className="bg-gray-900 p-3 rounded-xl border border-gray-700">
+                  <span className="text-gray-400 text-xs block mb-1">VENTAS TURNO</span>
+                  <span className="text-green-400 font-mono text-lg">+${totalVentas.toLocaleString()}</span>
+               </div>
+            </div>
+            
+            <div className="flex justify-between items-center bg-gray-900 p-4 rounded-xl border border-gray-600">
+               <span className="text-gray-300 font-bold">TOTAL NETO</span>
+               <span className="text-white font-bold text-2xl">${(baseCaja + totalVentas).toLocaleString()}</span>
+            </div>
+
+            <button 
+              onClick={cerrarTurno} 
+              className="w-full bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg active:bg-red-700"
+            >
+              FINALIZAR JORNADA
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* --- CONTENIDO PRINCIPAL (HABITACIONES) --- */}
+      <div className="pt-20 pb-20 px-3 md:px-8 min-h-screen flex flex-col justify-center">
+        <div className="max-w-5xl mx-auto w-full">
+          
+          {/* GRID: 4 columnas en móvil (grid-cols-4), más en desktop */}
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-6 justify-items-center">
+            
+            {[...Array(16)].map((_, i) => {
+              const num = i + 1;
+              const r = reservas.find(res => res.habitacion === num && !res.hsalida);
+              const info = r ? calcularEstadoTiempo(r.hentrada) : null;
+              const estado = !r ? 'libre' : info?.excedido ? 'critica' : 'ocupada';
+
+              // Clases dinámicas
+              const ringClass = estado === 'libre' 
+                ? 'status-ring-free' 
+                : estado === 'ocupada' 
+                  ? 'status-ring-occupied' 
+                  : 'status-ring-critical';
+
+              const textClass = estado === 'libre' ? 'text-gray-400' : 'text-white';
+              
+              return (
+                <button 
+                  key={num}
+                  onClick={() => handleClickHabitacion(num)}
+                  className={`room-sphere w-full max-w-[90px] ${ringClass}`}
+                >
+                  {/* Número de Habitación */}
+                  <span className={`text-2xl md:text-3xl font-black z-10 drop-shadow-md ${textClass}`}>
+                    {num}
+                  </span>
+
+                  {/* Info Flotante (Pequeña para caber en el círculo) */}
+                  {r && (
+                     <div className="absolute bottom-2 flex flex-col items-center w-full px-1">
+                        {/* Indicador de tiempo */}
+                        {info && (
+                          <span className={`text-[9px] md:text-[10px] font-bold px-1.5 rounded-full ${info.excedido ? 'bg-red-600 text-white' : 'bg-blue-600/80 text-white'}`}>
+                             {info.excedido ? '!!!' : formatoTiempoRestante(info.minutosRestantes)}
+                          </span>
+                        )}
+                        {/* Placa muy pequeña */}
+                        <span className="text-[8px] text-gray-300 mt-0.5 font-mono opacity-80 truncate w-full text-center">
+                           {r.placa}
+                        </span>
+                     </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+        </div>
       </div>
 
-      {/* MODAL */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered contentClassName="bg-gray-800 text-white border border-gray-700">
-        <Modal.Header closeButton closeVariant="white" className="border-b border-gray-700">
-          <Modal.Title>Habitación {habitacionSeleccionada}</Modal.Title>
+      {/* --- MODAL (Se mantiene igual pero con estilo oscuro) --- */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered contentClassName="bg-gray-800 text-white border border-gray-600 shadow-2xl">
+        <Modal.Header closeButton closeVariant="white" className="border-b border-gray-700 bg-gray-900/50">
+          <Modal.Title className="font-bold">Habitación {habitacionSeleccionada}</Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-6 text-center">
              {reservaSeleccionada ? (
-                 <div className="space-y-4">
-                    <div>
-                        <p className="text-gray-400 text-sm uppercase">Placa</p>
-                        <p className="text-2xl font-bold font-mono text-blue-300">{reservaSeleccionada.placa}</p>
+                 <div className="space-y-6">
+                    <div className="bg-gray-700/30 p-4 rounded-2xl border border-gray-600">
+                        <p className="text-gray-400 text-xs font-bold tracking-widest uppercase mb-1">Vehículo en sitio</p>
+                        <p className="text-4xl font-black font-mono text-white tracking-wider">{reservaSeleccionada.placa}</p>
                     </div>
+                    
                     <div>
-                        <p className="text-gray-400 text-sm uppercase">Tiempo Restante</p>
-                        <h2 className={`text-3xl font-bold ${estadoModal?.excedido ? 'text-red-500' : 'text-green-400'}`}>
-                            {estadoModal?.excedido ? 'TIEMPO EXCEDIDO' : formatoTiempoRestante(estadoModal?.minutosRestantes || 0)}
-                        </h2>
+                         {estadoModal?.excedido ? (
+                            <div className="inline-block bg-red-500/10 text-red-500 border border-red-500/50 px-6 py-3 rounded-xl animate-pulse">
+                                <span className="block text-xs font-bold uppercase">Estado Crítico</span>
+                                <span className="text-2xl font-bold">TIEMPO EXCEDIDO</span>
+                            </div>
+                         ) : (
+                            <div className="inline-block">
+                                <span className="text-gray-400 text-xs uppercase block mb-1">Tiempo Restante</span>
+                                <span className="text-5xl font-bold text-green-400 font-mono">
+                                  {formatoTiempoRestante(estadoModal?.minutosRestantes || 0)}
+                                </span>
+                            </div>
+                         )}
                     </div>
                  </div>
              ) : (
-                 <p className="text-gray-400 text-lg">Habitación Disponible</p>
+                 <div className="py-8 opacity-50">
+                    <p className="text-xl">Disponible</p>
+                 </div>
              )}
         </Modal.Body>
-        <Modal.Footer className="border-t border-gray-700">
-          <Button variant="secondary" onClick={() => setShowModal(false)}>Cerrar</Button>
+        <Modal.Footer className="border-t border-gray-700 bg-gray-900/30">
+          <Button variant="secondary" onClick={() => setShowModal(false)} className="w-full">Cerrar</Button>
         </Modal.Footer>
       </Modal>
 
