@@ -257,7 +257,7 @@ const MarketplaceCliente = () => {
          <Modal.Header closeButton><Modal.Title>Resumen del Pedido</Modal.Title></Modal.Header>
          <Modal.Body>
             {carrito.length === 0 ? (
-                <p className="text-center text-gray-500">El carrito está vacío</p>
+                <p className="text-center text-gray-900">El carrito está vacío</p>
             ) : (
                 <div className="space-y-3">
                     {/* Lista de Items */}
@@ -265,7 +265,7 @@ const MarketplaceCliente = () => {
                         <div key={i} className="flex justify-between items-center border-b pb-2">
                             <div>
                                 <p className="font-bold m-0">{item.nombre}</p>
-                                <p className="text-xs text-gray-500 m-0">${item.precio} x {item.cantidad}</p>
+                                <p className="text-xs text-gray-900 m-0">${item.precio} x {item.cantidad}</p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button onClick={() => reducirDelCarrito(item)} className="bg-gray-200 px-2 rounded hover:bg-gray-300">-</button>
