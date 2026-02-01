@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 
 const MainLayout = () => {
   return (
-    <div className="flex h-screen w-full bg-slate-900 overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden md:pl-24">
       
       {/* Sidebar fijo a la izquierda */}
       <Sidebar />
