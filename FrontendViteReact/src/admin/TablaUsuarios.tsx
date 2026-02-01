@@ -63,7 +63,7 @@ const TablaUsuarios = () => {
   }, []);
 
   return (
-    <div className="text-black">
+    <div className="text-white">
       <h2 className="text-xl font-bold mb-4 text-auto">Tabla de Usuarios</h2>
 
       {error && (

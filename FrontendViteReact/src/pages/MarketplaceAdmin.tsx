@@ -197,7 +197,7 @@ const MarketplaceCliente = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-50 pb-20 md:pl-24">
+    <div className="relative min-h-screen pb-20 md:pl-24">
       
       {/* Header */}
       <div className="bg-red-700 text-white p-4 sticky top-0 z-40 flex justify-between items-center shadow-md">

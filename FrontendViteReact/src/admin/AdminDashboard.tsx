@@ -16,7 +16,7 @@ const AdminDashboard = () => {
 
   return (
     // FONDO GENERAL: Oscuro profundo (Slate 950) para que resalte el efecto vidrio
-    <div className="relative min-h-screen w-full bg-[#020617] text-slate-200 font-sans selection:bg-indigo-500 selection:text-white overflow-hidden">
+    <div className="relative min-h-screen w-full text-slate-200 font-sans selection:bg-indigo-500 selection:text-white overflow-hidden">
       
       {/* 1. LUCES DE FONDO (AMBIENT LIGHTING) */}
       {/* Sin bordes, solo luces difusas para dar atmósfera */}

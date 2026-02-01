@@ -177,8 +177,7 @@ const MarketplaceCliente = () => {
   };
 
   return (
-    // 1. FONDO PRINCIPAL OSCURO (bg-slate-900)
-    <div className="min-h-screen bg-slate-900 pb-20 text-white">
+    <div className="min-h-screen pb-20 text-white">
       
       {/* 2. NAVBAR FIJO Y OSCURO (Sticky top) */}
       <div className="bg-gray-800 border-b border-gray-700 p-4 sticky top-0 z-40 shadow-lg flex justify-between items-center">
