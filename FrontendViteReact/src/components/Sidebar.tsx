@@ -7,7 +7,7 @@ import {
   BarChart3,
   LogIn,
   LogOut,
-  User
+  UserCircle2
 } from "lucide-react";
 import LoginModal from "./LoginModal";
 
@@ -19,6 +19,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // --- LÓGICA DE SESIÓN Y ALERTAS (Igual que antes) ---
   useEffect(() => {
     const checkSession = () => {
       const storedUser = localStorage.getItem("username");
@@ -70,19 +71,21 @@ const Sidebar = () => {
     return [];
   };
 
+  // --- BOTÓN FLOTANTE DE LOGIN SI NO HAY SESIÓN ---
   if (!username) {
     return (
       <>
-        <div className="fixed top-6 right-6 z-[2000]">
+        <div className="fixed top-6 right-6 z-[100]">
+          {/* Botón Login sin sombra, solo borde y color plano */}
           <button
             onClick={() => setShowLogin(true)}
-            className="flex items-center gap-2 px-6 py-2 rounded-full 
+            className="flex items-center gap-3 px-6 py-2 rounded-full 
                        bg-black border border-red-600 
-                       text-white text-xs font-bold tracking-widest uppercase
-                       hover:bg-red-600 transition-colors duration-300"
+                       text-white transition-all duration-300
+                       hover:bg-red-600 active:scale-95"
           >
-            <LogIn className="w-4 h-4" />
-            Ingresar
+            <LogIn className="w-5 h-5 text-white" />
+            <span className="text-xs font-bold tracking-widest uppercase">Ingresar</span>
           </button>
         </div>
         {showLogin && (
@@ -98,87 +101,106 @@ const Sidebar = () => {
     );
   }
 
+  // --- SIDEBAR PRINCIPAL ---
   return (
-    <>
-      {/* ESTRUCTURA DEL SIDEBAR 
-        - Mobile: fixed bottom-0, w-full, h-16 (Horizontal)
-        - Desktop (md): fixed top-0 left-0, w-24, h-screen (Vertical)
-      */}
-      <nav className="fixed z-[1500] bg-black border-t md:border-t-0 md:border-r border-white/10
-                      /* MOVIL */
-                      bottom-0 left-0 w-full h-16 flex flex-row items-center justify-around px-2
-                      /* DESKTOP */
-                      md:top-0 md:left-0 md:w-24 md:h-[100dvh] md:flex-col md:justify-between md:py-8 md:px-0">
-        
-        {/* LOGO (Solo visible en Desktop) */}
-        <div className="hidden md:flex flex-col items-center justify-center w-full mb-8 cursor-pointer group" onClick={() => navigate("/")}>
-            <div className="w-12 h-12 rounded-full bg-black border border-white/20 flex items-center justify-center overflow-hidden group-hover:border-red-600 transition-colors">
-                 <img src="/assets/Logo-PNG.png" alt="Logo" className="w-8 h-8 object-contain" />
-            </div>
-        </div>
+    <nav className="fixed z-[1000] bg-black transition-all duration-300
+                    /* SIN SOMBRAS (Flat Design) */
+                    
+                    /* MÓVIL: Barra Inferior Horizontal */
+                    bottom-0 left-0 w-full h-16 border-t border-white/10 flex flex-row items-center justify-evenly px-2
 
-        {/* LINKS (Vertical en PC, Horizontal en Móvil) */}
-        <div className="flex flex-1 w-full 
-                        flex-row items-center justify-around /* Móvil */
-                        md:flex-col md:justify-start md:gap-6 /* Desktop */
-                       ">
-          {getLinks().map((link) => {
-             const isActive = location.pathname === link.to;
-             return (
-              <NavLink 
-                key={link.to} 
-                to={link.to}
-                className="relative group flex flex-col items-center justify-center w-full md:w-full"
-              >
-                 {/* Barra lateral roja activa (Solo Desktop) */}
-                 {isActive && (
-                    <span className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-red-600 rounded-r-full shadow-[0_0_10px_#dc2626]"></span>
-                 )}
+                    /* ESCRITORIO: Barra Lateral Vertical */
+                    md:top-0 md:left-0 md:w-[90px] md:h-screen md:border-r md:border-t-0 md:flex-col md:justify-between md:py-6 md:px-0"
+    >
+      
+      {/* 1. SECCIÓN SUPERIOR: LOGO (Solo Desktop) */}
+      <div className="hidden md:flex flex-col items-center justify-center w-full mb-6">
+         {/* Círculo Negro para el Logo */}
+         <div className="w-14 h-14 rounded-full bg-black border border-white/10 flex items-center justify-center p-2 overflow-hidden hover:border-red-600/50 transition-colors duration-500 cursor-pointer" onClick={() => navigate("/")}>
+             <img src="/assets/Logo-PNG.png" alt="Logo" className="w-full h-full object-contain relative z-10" />
+         </div>
+      </div>
 
-                 {/* Contenedor del Icono */}
-                 <div className={`p-2 rounded-xl transition-all duration-300 
-                                  ${isActive ? 'text-white' : 'text-gray-500 hover:text-white'}
-                                  md:group-hover:bg-white/5
-                                `}>
-                     
-                     {/* Punto de notificación */}
-                     {link.label === "Actividad" && vencidas > 0 && (
-                        <span className="absolute top-2 right-1/4 md:top-0 md:right-5 h-2.5 w-2.5 rounded-full bg-red-600 animate-pulse border border-black z-10"></span>
-                      )}
-                     
-                     <link.icon 
-                        strokeWidth={1.5} 
-                        className={`w-6 h-6 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} 
-                     />
-                 </div>
+      {/* 2. SECCIÓN CENTRAL: LINKS DE NAVEGACIÓN */}
+      <div className="flex flex-1 w-full 
+                      flex-row items-center justify-evenly /* Móvil: Horizontal esparcido */
+                      md:flex-col md:justify-start md:gap-3 /* Desktop: Vertical pegado arriba */
+                     ">
+        {getLinks().map((link) => {
+           const isActive = location.pathname === link.to;
+           return (
+          <NavLink 
+            key={link.to} 
+            to={link.to}
+            // 'group' permite que los elementos hijos reaccionen al hover del padre
+            className={`group relative flex items-center justify-center rounded-xl transition-all duration-300 overflow-hidden cursor-pointer
+              /* Tamaños Móvil */
+              h-12 w-12 flex-col
+              /* Tamaños Desktop */
+              md:h-14 md:w-full md:flex-row md:px-0 md:mx-0 md:rounded-none
+              ${isActive ? 'bg-white/5' : 'hover:bg-white/5'}
+            `}
+          >
+             {/* === EFECTO HOVER NOVEDOSO (Solo Desktop) === */}
+             {/* Barra lateral roja que se desliza */}
+             <span className={`absolute left-0 top-0 h-full bg-red-600 transition-all duration-300 ease-out
+                              hidden md:block rounded-r-md
+                              ${isActive ? 'w-[4px]' : 'w-0 group-hover:w-[4px]'}
+                            `}>
+             </span>
 
-                 {/* Texto (Visible abajo en móvil, pequeño en desktop) */}
-                 <span className={`text-[9px] font-bold uppercase tracking-wider mt-1 transition-colors
+             {/* Contenedor de Icono y Texto (Se desplaza al hacer hover) */}
+             <div className={`flex flex-col md:flex-row items-center transition-transform duration-300
+                              ${isActive ? 'md:translate-x-2' : 'md:group-hover:translate-x-2'}`}>
+                 
+                 {/* Alerta Roja (Punto) */}
+                 {link.label === "Actividad" && vencidas > 0 && (
+                    <span className="absolute top-1 right-1 md:top-3 md:left-8 h-2.5 w-2.5 rounded-full bg-red-600 animate-pulse z-10"></span>
+                  )}
+                 
+                 {/* Icono */}
+                 <link.icon 
+                    className={`w-6 h-6 transition-colors duration-300 mb-1 md:mb-0
+                               ${isActive ? 'text-red-500' : 'text-white/40 group-hover:text-white'}
+                               `} 
+                    strokeWidth={1.5} 
+                 />
+
+                 {/* Texto (Visible abajo en móvil, oculto en desktop por ahora para mantenerlo limpio) */}
+                 <span className={`text-[8px] font-bold tracking-widest uppercase transition-colors duration-300
                                    ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-white'}
-                                  `}>
+                                   md:hidden
+                                   `}>
                     {link.label}
                  </span>
-              </NavLink>
-          )})}
+             </div>
+          </NavLink>
+        )})}
+      </div>
+
+      {/* 3. SECCIÓN INFERIOR: USUARIO Y SALIR (Solo Desktop) */}
+      <div className="hidden md:flex flex-col w-full items-center justify-center gap-4 mt-auto">
+        
+        {/* Avatar de Usuario Plano */}
+        <div className="w-10 h-10 rounded-full bg-red-700 flex items-center justify-center text-white font-bold text-sm border border-red-900 cursor-default relative group">
+           {username?.charAt(0).toUpperCase()}
+           {/* Tooltip simple sin sombra */}
+           <span className="absolute left-full ml-2 px-2 py-1 bg-black border border-white/10 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+              {username}
+           </span>
         </div>
 
-        {/* USUARIO (Solo visible en Desktop) */}
-        <div className="hidden md:flex flex-col items-center gap-4 w-full mt-auto">
-           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-black border border-white/10 flex items-center justify-center text-white font-bold text-sm shadow-lg">
-              {username?.charAt(0).toUpperCase()}
-           </div>
-           
-           <button 
-              onClick={handleLogout}
-              className="text-gray-500 hover:text-red-500 transition-colors flex flex-col items-center gap-1"
-              title="Cerrar Sesión"
-           >
-              <LogOut className="w-5 h-5" strokeWidth={1.5} />
-              <span className="text-[8px] uppercase font-bold tracking-widest">Salir</span>
-           </button>
-        </div>
-      </nav>
-    </>
+        {/* Botón Salir Plano */}
+        <button 
+          onClick={handleLogout} 
+          className="group relative flex flex-col items-center justify-center w-full h-14 text-white/30 hover:text-red-500 hover:bg-red-500/10 transition-all"
+          title="Cerrar Sesión"
+        >
+          <LogOut className="w-6 h-6 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+          <span className="text-[8px] mt-1 font-medium tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1">Salir</span>
+        </button>
+      </div>
+    </nav>
   );
 };
 
