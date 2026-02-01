@@ -75,13 +75,13 @@ const Sidebar = () => {
         <div className="fixed top-6 right-6 z-[2000]">
           <button
             onClick={() => setShowLogin(true)}
-            className="flex items-center gap-2 px-6 py-2 rounded-full 
-                       bg-black border border-red-600 
-                       text-white text-xs font-bold tracking-widest uppercase
-                       hover:bg-red-600 transition-colors duration-300"
+            className="group flex items-center gap-3 px-8 py-2 rounded-full 
+                       bg-black border border-red-600/50 
+                       text-white transition-all duration-300
+                       hover:bg-red-600 hover:scale-105 shadow-[0_0_15px_rgba(220,38,38,0.5)]"
           >
-            <LogIn className="w-4 h-4" />
-            Ingresar
+            <LogIn className="w-4 h-4 text-white group-hover:animate-pulse" />
+            <span className="text-xs font-bold tracking-widest text-white">INGRESAR</span>
           </button>
         </div>
         {showLogin && (
@@ -99,83 +99,100 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* CORRECCIÓN IMPORTANTE:
-         1. Se eliminó 'flex-row' para evitar el conflicto con tu CSS global.
-         2. Se agregó 'md:!flex-col'. El signo '!' fuerza la regla sobre cualquier estilo externo.
+      {/* SIDEBAR: Estilo "Gamer/SaaS" con corrección técnica (!flex-col) 
+         - Fondo negro sólido
+         - Borde sutil
       */}
-      <nav className="fixed z-[1500] bg-black border-t md:border-t-0 md:border-r border-white/10
+      <nav className="fixed z-[1500] bg-black border-t md:border-t-0 md:border-r border-white/10 shadow-2xl
                       /* MOVIL */
                       bottom-0 left-0 w-full h-16 flex items-center justify-around px-2
-                      /* DESKTOP (Forzamos columna con !) */
+                      /* DESKTOP */
                       md:top-0 md:left-0 md:w-24 md:h-[100dvh] md:!flex-col md:justify-between md:py-8 md:px-0">
         
-        {/* LOGO (Solo visible en Desktop) */}
-        <div className="hidden md:flex flex-col items-center justify-center w-full mb-8 cursor-pointer group" onClick={() => navigate("/")}>
-            <div className="w-12 h-12 rounded-full bg-black border border-white/20 flex items-center justify-center overflow-hidden group-hover:border-red-600 transition-colors">
-                 <img src="/assets/Logo-PNG.png" alt="Logo" className="w-8 h-8 object-contain" />
+        {/* LOGO (Solo Desktop) - Con efecto Hover de Escala */}
+        <div 
+            className="hidden md:flex flex-col items-center justify-center w-full mb-8 cursor-pointer hover:scale-110 transition-transform duration-300"
+            onClick={() => navigate("/")}
+        >
+            <div className="p-2 rounded-full border border-white/5 bg-white/5 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+               <img src="/assets/Logo-PNG.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]" />
             </div>
         </div>
 
-        {/* LINKS (Vertical en PC, Horizontal en Móvil) */}
-        {/* Aquí también quitamos flex-row y ponemos md:!flex-col */}
+        {/* LINKS DE NAVEGACIÓN */}
         <div className="flex flex-1 w-full 
                         items-center justify-around /* Móvil */
-                        md:!flex-col md:justify-start md:gap-6 /* Desktop */
+                        md:!flex-col md:justify-start md:gap-8 /* Desktop */
                        ">
           {getLinks().map((link) => {
              const isActive = location.pathname === link.to;
              return (
               <NavLink 
                 key={link.to} 
-                to={link.to}
-                className="relative group flex flex-col items-center justify-center w-full md:w-full"
+                to={link.to} 
+                className={({ isActive }) => 
+                  `relative flex flex-col items-center justify-center transition-all duration-300 group
+                  /* Dimensiones */
+                  h-full w-full md:h-16 md:w-16 md:rounded-2xl
+                  ${isActive 
+                    ? 'text-white' // Texto blanco puro al estar activo
+                    : 'text-white/40 hover:text-white' // Texto grisáceo y hover blanco
+                  }`
+                }
               >
-                 {/* Barra lateral roja activa (Solo Desktop) */}
-                 {isActive && (
-                    <span className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-red-600 rounded-r-full shadow-[0_0_10px_#dc2626]"></span>
-                 )}
+                {({ isActive }) => (
+                  <>
+                     {/* FONDO ACTIVO (Glow Rojo y Fondo sutil) - Solo visible si está activo */}
+                     {isActive && (
+                        <div className="absolute inset-0 bg-gradient-to-tr from-red-600/20 to-transparent rounded-2xl border border-red-500/30 shadow-[0_0_20px_rgba(220,38,38,0.2)] md:block hidden"></div>
+                     )}
 
-                 {/* Contenedor del Icono */}
-                 <div className={`p-2 rounded-xl transition-all duration-300 
-                                  ${isActive ? 'text-white' : 'text-gray-500 hover:text-white'}
-                                  md:group-hover:bg-white/5
-                                `}>
-                     
-                     {/* Punto de notificación */}
+                     {/* INDICADOR MÓVIL (Barra superior) */}
+                     {isActive && <div className="absolute top-0 w-8 h-1 bg-red-600 rounded-b-full shadow-[0_0_10px_#ef4444] md:hidden"></div>}
+
+                     {/* PUNTO DE ALERTA (Notificación) */}
                      {link.label === "Actividad" && vencidas > 0 && (
-                        <span className="absolute top-2 right-1/4 md:top-0 md:right-5 h-2.5 w-2.5 rounded-full bg-red-600 animate-pulse border border-black z-10"></span>
+                        <span className="absolute top-3 right-1/3 h-3 w-3 rounded-full bg-red-600 animate-pulse border-2 border-black z-20 shadow-[0_0_10px_#ef4444]"></span>
                       )}
                      
-                     <link.icon 
-                        strokeWidth={1.5} 
-                        className={`w-6 h-6 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} 
-                     />
-                 </div>
-
-                 {/* Texto (Visible abajo en móvil, pequeño en desktop) */}
-                 <span className={`text-[9px] font-bold uppercase tracking-wider mt-1 transition-colors
-                                   ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-white'}
-                                  `}>
-                    {link.label}
-                 </span>
+                     {/* ICONO CON ANIMACIÓN */}
+                     <div className={`relative z-10 p-2 rounded-xl transition-transform duration-300 
+                                      ${isActive ? 'scale-110' : 'group-hover:scale-125 group-hover:-translate-y-1'}
+                                    `}>
+                        <link.icon 
+                            className={`w-6 h-6 ${isActive ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'group-hover:text-red-400'}`} 
+                            strokeWidth={isActive ? 2.5 : 2} 
+                        />
+                     </div>
+                     
+                     {/* TEXTO (Etiqueta) */}
+                     <span className={`relative z-10 text-[9px] font-bold tracking-widest uppercase mt-1 transition-all duration-300
+                                       ${isActive ? 'text-white translate-y-0 opacity-100' : 'opacity-70 group-hover:text-red-400 group-hover:translate-y-0.5'}
+                                      `}>
+                        {link.label}
+                     </span>
+                  </>
+                )}
               </NavLink>
           )})}
         </div>
 
-        {/* USUARIO (Solo visible en Desktop) */}
-        <div className="hidden md:flex flex-col items-center gap-4 w-full mt-auto">
-           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-black border border-white/10 flex items-center justify-center text-white font-bold text-sm shadow-lg">
-              {username?.charAt(0).toUpperCase()}
-           </div>
-           
-           <button 
-              onClick={handleLogout}
-              className="text-gray-500 hover:text-red-500 transition-colors flex flex-col items-center gap-1"
-              title="Cerrar Sesión"
-           >
-              <LogOut className="w-5 h-5" strokeWidth={1.5} />
-              <span className="text-[8px] uppercase font-bold tracking-widest">Salir</span>
-           </button>
+        {/* SECCIÓN USUARIO / SALIR */}
+        <div className="hidden md:flex flex-col items-center justify-center w-full pb-6 gap-4">
+          
+          {/* Inicial del Usuario (Estilo botón arcade) */}
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-700 to-black border border-red-500/30 shadow-[0_0_10px_rgba(220,38,38,0.3)] flex items-center justify-center text-white font-bold text-sm">
+            {username?.charAt(0).toUpperCase()}
+          </div>
+
+          <button 
+            onClick={handleLogout} 
+            className="group flex flex-col items-center justify-center text-white/30 hover:text-red-500 transition-colors"
+            title="Cerrar Sesión"
+          >
+            <LogOut className="w-6 h-6 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" strokeWidth={2} />
+            <span className="text-[8px] mt-1 font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Salir</span>
+          </button>
         </div>
       </nav>
     </>
