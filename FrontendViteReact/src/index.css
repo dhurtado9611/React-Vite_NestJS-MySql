@@ -1,5 +1,8 @@
-@import "tailwindcss";
-/* Importamos una fuente moderna para darle el toque premium */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Importamos la fuente */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
 :root {
@@ -7,106 +10,50 @@
 }
 
 html, body, #root {
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   height: 100%;
   width: 100%;
-  overflow-x: hidden; /* Evita scroll lateral indeseado */
+  overflow-x: hidden;
 }
 
 body {
-  /* EL SECRETO DEL LIQUID GLASS: Fondo animado */
-  /* Usamos tonos oscuros/profundos para que el 'neón' de los botones resalte más */
-  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #4b134f);
-  background-size: 400% 400%;
-  animation: liquidBackground 15s ease infinite;
-  
-  color: white; /* Texto base blanco para contraste */
+  /* Fondo base oscuro para evitar flashes blancos */
+  background-color: #0f172a; 
+  color: white;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Animación suave del fondo */
-@keyframes liquidBackground {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* --- Scrollbar Personalizado (Estilo Minimalista) --- */
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-}
-
-/* Chrome, Edge, Safari */
+/* Scrollbar moderno */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent; 
 }
-
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2); /* Vidrio esmerilado */
-  border-radius: 20px;
-  border: 2px solid transparent; /* Espacio para que flote */
-  background-clip: content-box;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
-/* --- Estilos del Carousel (Optimizados) --- */
-.carousel-container {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  position: relative;
-}
-
-.carousel {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-
-.carousel img {
-  width: 100%;
-  height: 100%; /* Forzamos altura completa */
-  object-fit: cover; /* Recorta la imagen para llenar sin deformar */
-  display: block;
-}
-
-/* Clase utilitaria global para Glassmorphism (opcional para usar en cualquier div) */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-}
-/* FORZAR MODO OSCURO EN TABLAS Y TARJETAS */
+/* Forzar estilos de Bootstrap/Tablas para modo oscuro */
 .table {
+    --bs-table-bg: transparent !important;
+    --bs-table-color: white !important;
     color: white !important;
+}
+.table td, .table th {
     background-color: transparent !important;
-}
-
-.table th, .table td {
-    background-color: transparent !important;
+    border-color: rgba(255,255,255,0.1) !important;
     color: white !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Si usas clases de utilidad como bg-white en algún componente interno que no puedes editar: */
-.bg-white {
-    background-color: rgba(255, 255, 255, 0.05) !important; /* Lo vuelve transparente */
-    color: white !important;
-    backdrop-filter: blur(10px);
-}
-
-.text-gray-900, .text-gray-500, .text-dark {
-    color: rgba(255, 255, 255, 0.9) !important;
+/* Animaciones personalizadas */
+@keyframes slideInLeft {
+  from { width: 0; opacity: 0; }
+  to { width: 4px; opacity: 1; }
 }

@@ -52,6 +52,9 @@ const Historial = () => {
   const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<number | null>(null);
   const [, setNow] = useState(new Date());
   
+  // Estado para el botón de carga
+  const [procesandoSalida, setProcesandoSalida] = useState(false);
+  
   // Estado menú móvil
   const [menuAbierto, setMenuAbierto] = useState(false);
 
@@ -63,7 +66,7 @@ const Historial = () => {
   const [turno, setTurno] = useState<string>('');
   const [fecha, setFecha] = useState<string>('');
 
-  // Control de notificaciones para no repetir alertas
+  // Control de notificaciones
   const habitacionesNotificadas = useRef<Set<number>>(new Set());
 
   // --- LÓGICA DE NOTIFICACIONES ---
@@ -77,7 +80,7 @@ const Historial = () => {
     if (Notification.permission === "granted") {
       new Notification(`¡TIEMPO AGOTADO!`, {
         body: `La habitación ${habitacion} (Placa: ${placa}) ha excedido su tiempo.`,
-        icon: '/assets/Logo-PNG.png' // Asegúrate de que esta ruta exista o quítala
+        icon: '/assets/Logo-PNG.png'
       });
     }
   };
@@ -121,7 +124,6 @@ const Historial = () => {
 
       const resReservas = await api.get('/reservas');
       
-      // Filtramos reservas del usuario hoy
       const misReservasHoy = resReservas.data.filter((r: Reserva) => r.colaborador === nombreUsuario && r.fecha === hoy);
       
       const total = misReservasHoy.reduce((sum: number, r: Reserva) => sum + r.valor, 0);
@@ -140,16 +142,14 @@ const Historial = () => {
       
       // Revisar notificaciones
       reservasData.forEach((r: Reserva) => {
-        if (!r.hsalida) { // Solo si sigue activa
+        if (!r.hsalida) { 
             const estado = calcularEstadoTiempo(r.hentrada);
             if (estado.excedido) {
-                // Si está excedido y NO ha sido notificada en esta sesión
                 if (!habitacionesNotificadas.current.has(r.habitacion)) {
                     enviarNotificacion(r.habitacion, r.placa);
                     habitacionesNotificadas.current.add(r.habitacion);
                 }
             } else {
-                // Si el tiempo se extendió o arregló, permitimos notificar de nuevo en el futuro
                 habitacionesNotificadas.current.delete(r.habitacion);
             }
         }
@@ -166,14 +166,13 @@ const Historial = () => {
     const [h, m] = horaEntrada.split(':').map(Number);
     const fechaEntrada = new Date();
     fechaEntrada.setHours(h, m, 0, 0);
-    // Ajuste por si la entrada fue ayer (casos borde)
     if (fechaEntrada > fechaActual && (fechaEntrada.getTime() - fechaActual.getTime() > 12 * 60 * 60 * 1000)) {
         fechaEntrada.setDate(fechaEntrada.getDate() - 1);
     }
     
     const diferenciaMs = fechaActual.getTime() - fechaEntrada.getTime();
     const minutosPasados = Math.floor(diferenciaMs / 60000);
-    const LIMITE_TIEMPO = 240; // 4 Horas
+    const LIMITE_TIEMPO = 240; 
     const porcentaje = Math.min((minutosPasados / LIMITE_TIEMPO) * 100, 100);
     return { minutosPasados, minutosRestantes: LIMITE_TIEMPO - minutosPasados, porcentaje, excedido: minutosPasados >= LIMITE_TIEMPO };
   };
@@ -190,18 +189,11 @@ const Historial = () => {
     if (!confirmar) return;
 
     try {
-      const hoy = new Date().toISOString().split('T')[0];
       const usuarioActual = colaborador || JSON.parse(localStorage.getItem('datosTurno') || '{}').colaborador;
-      
-      if (!usuarioActual) {
-          alert("Error: No se identificó al usuario.");
-          return;
-      }
+      if (!usuarioActual) { alert("Error: Usuario no identificado."); return; }
 
       const res = await api.get('/cuadre');
-      const turnoReal = res.data.find((c: any) => 
-          c.colaborador === usuarioActual && !c.turnoCerrado
-      );
+      const turnoReal = res.data.find((c: any) => c.colaborador === usuarioActual && !c.turnoCerrado);
 
       if (!turnoReal) {
          alert("⚠️ No se encontró ningún turno abierto.");
@@ -229,32 +221,48 @@ const Historial = () => {
     }
   };
 
-  // --- NUEVA FUNCIÓN: DAR SALIDA DESDE MODAL ---
+  // --- FUNCIÓN CORREGIDA: DAR SALIDA DESDE MODAL ---
   const handleFinalizarReserva = async () => {
     if (!reservaSeleccionada) return;
 
-    const confirmar = window.confirm(`¿Confirmas la salida de la Habitación ${reservaSeleccionada.habitacion}?\nPlaca: ${reservaSeleccionada.placa}`);
+    const confirmar = window.confirm(`¿Deseas dar salida a la Habitación ${reservaSeleccionada.habitacion}?\nPlaca: ${reservaSeleccionada.placa}`);
     if (!confirmar) return;
 
+    setProcesandoSalida(true); // Bloqueamos el botón para evitar doble clic
+
     try {
-        const horaSalida = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
+        // Obtenemos hora en formato HH:mm (formato 24h) compatible con backend
+        const now = new Date();
+        const horaSalida = now.toLocaleTimeString('es-CO', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: false 
+        }); // Ejemplo: "14:30"
         
+        // Hacemos el PATCH al ID específico de la reserva
         await api.patch(`/reservas/${reservaSeleccionada.id}`, {
             hsalida: horaSalida
         });
 
-        // Actualizamos vista
-        await fetchDatosReservas();
-        await fetchDatosCaja();
+        // IMPORTANTE: Recargamos los datos inmediatamente para actualizar la vista
+        await Promise.all([
+            fetchDatosReservas(),
+            fetchDatosCaja()
+        ]);
+
+        // Cerramos modal y limpiamos selección
         setShowModal(false);
         setReservaSeleccionada(null);
-        
-        // Removemos de notificaciones si estaba ahí
         habitacionesNotificadas.current.delete(reservaSeleccionada.habitacion);
+        
+        // Pequeño feedback visual (opcional)
+        // alert("Salida registrada correctamente"); 
 
     } catch (error) {
         console.error("Error finalizando reserva:", error);
-        alert("No se pudo finalizar la reserva. Intenta de nuevo.");
+        alert("Ocurrió un error al intentar dar salida. Por favor revisa la conexión.");
+    } finally {
+        setProcesandoSalida(false);
     }
   };
 
@@ -266,7 +274,7 @@ const Historial = () => {
   };
 
   useEffect(() => {
-    solicitarPermisoNotificacion(); // Pedir permisos al cargar
+    solicitarPermisoNotificacion();
     fetchDatosReservas();
     fetchDatosCaja();
     const interval = setInterval(() => { fetchDatosReservas(); fetchDatosCaja(); }, 10000);
@@ -404,7 +412,6 @@ const Historial = () => {
         <Modal.Body className="p-0 !bg-gray-900">
              {reservaSeleccionada ? (
                  <div className="flex flex-col">
-                    {/* Sección Principal: Tiempo */}
                     <div className={`p-6 text-center ${estadoModal?.excedido ? 'bg-red-900/30' : 'bg-indigo-900/20'} border-b border-gray-700`}>
                         <div className="mb-2 text-xs font-bold uppercase tracking-widest text-gray-400">Tiempo Restante</div>
                         {estadoModal?.excedido ? (
@@ -416,26 +423,21 @@ const Historial = () => {
                         )}
                     </div>
 
-                    {/* Grilla de Información */}
                     <div className="grid grid-cols-2 gap-px bg-gray-700">
-                        {/* Vehículo */}
                         <div className="bg-gray-800 p-4 flex flex-col items-center justify-center gap-1">
                             <FaCar className="text-gray-500 mb-1" />
                             <span className="text-[10px] text-gray-400 uppercase">Vehículo</span>
                             <span className="font-bold text-lg text-white">{reservaSeleccionada.vehiculo || "N/A"}</span>
                         </div>
-                        {/* Placa */}
                         <div className="bg-gray-800 p-4 flex flex-col items-center justify-center gap-1">
                             <span className="text-[10px] text-gray-400 uppercase border border-gray-600 px-1 rounded">PLACA</span>
                             <span className="font-black text-xl text-yellow-400 font-mono tracking-wider">{reservaSeleccionada.placa}</span>
                         </div>
-                        {/* Entrada */}
                         <div className="bg-gray-800 p-4 flex flex-col items-center justify-center gap-1">
                             <FaClock className="text-gray-500 mb-1" />
                             <span className="text-[10px] text-gray-400 uppercase">Hora Entrada</span>
                             <span className="font-bold text-white">{reservaSeleccionada.hentrada}</span>
                         </div>
-                        {/* Valor */}
                         <div className="bg-gray-800 p-4 flex flex-col items-center justify-center gap-1">
                             <FaMoneyBillWave className="text-green-600 mb-1" />
                             <span className="text-[10px] text-gray-400 uppercase">Valor Pagado</span>
@@ -443,7 +445,6 @@ const Historial = () => {
                         </div>
                     </div>
 
-                    {/* Observaciones (si existen) */}
                     {reservaSeleccionada.observaciones && (
                         <div className="bg-gray-800 p-4 border-t border-gray-700">
                             <div className="flex items-center gap-2 mb-2">
@@ -456,14 +457,17 @@ const Historial = () => {
                         </div>
                     )}
                     
-                    {/* Botón de Salida */}
                     <div className="p-4 bg-gray-800 border-t border-gray-700">
                         <button 
                             onClick={handleFinalizarReserva}
-                            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95"
+                            disabled={procesandoSalida}
+                            className={`w-full flex items-center justify-center gap-2 text-white font-bold py-3 rounded-xl transition-all shadow-lg 
+                                ${procesandoSalida 
+                                    ? 'bg-gray-600 cursor-not-allowed' 
+                                    : 'bg-red-600 hover:bg-red-500 active:scale-95'}`}
                         >
                             <FaSignOutAlt />
-                            DAR SALIDA Y LIBERAR
+                            {procesandoSalida ? 'PROCESANDO...' : 'DAR SALIDA Y LIBERAR'}
                         </button>
                     </div>
 
