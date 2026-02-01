@@ -1,8 +1,17 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Modal, Button } from 'react-bootstrap';
-import { FaBars, FaTimes, FaClock } from 'react-icons/fa';
+import { 
+  FaBars, 
+  FaTimes, 
+  FaClock, 
+  FaCar, 
+  FaMoneyBillWave, 
+  FaCalendarCheck, 
+  FaStickyNote,
+  FaSignOutAlt
+} from 'react-icons/fa';
 
 // --- INTERFACES ---
 interface Reserva {
@@ -49,12 +58,31 @@ const Historial = () => {
   // --- ESTADOS CAJA ---
   const [baseCaja, setBaseCaja] = useState<number>(0);
   const [totalVentas, setTotalVentas] = useState<number>(0);
-  const [cuadreId, setCuadreId] = useState<number | null>(null);
+  const [, setCuadreId] = useState<number | null>(null);
   const [colaborador, setColaborador] = useState<string>('');
   const [turno, setTurno] = useState<string>('');
   const [fecha, setFecha] = useState<string>('');
 
-  // --- LÓGICA ---
+  // Control de notificaciones para no repetir alertas
+  const habitacionesNotificadas = useRef<Set<number>>(new Set());
+
+  // --- LÓGICA DE NOTIFICACIONES ---
+  const solicitarPermisoNotificacion = () => {
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  };
+
+  const enviarNotificacion = (habitacion: number, placa: string) => {
+    if (Notification.permission === "granted") {
+      new Notification(`¡TIEMPO AGOTADO!`, {
+        body: `La habitación ${habitacion} (Placa: ${placa}) ha excedido su tiempo.`,
+        icon: '/assets/Logo-PNG.png' // Asegúrate de que esta ruta exista o quítala
+      });
+    }
+  };
+
+  // --- LÓGICA DE DATOS ---
   const fetchDatosCaja = useCallback(async () => {
     try {
       const datosTurno = localStorage.getItem('datosTurno');
@@ -92,10 +120,11 @@ const Historial = () => {
       }
 
       const resReservas = await api.get('/reservas');
-      const total = resReservas.data
-        .filter((r: Reserva) => r.colaborador === nombreUsuario && r.fecha === hoy)
-        .reduce((sum: number, r: Reserva) => sum + r.valor, 0);
       
+      // Filtramos reservas del usuario hoy
+      const misReservasHoy = resReservas.data.filter((r: Reserva) => r.colaborador === nombreUsuario && r.fecha === hoy);
+      
+      const total = misReservasHoy.reduce((sum: number, r: Reserva) => sum + r.valor, 0);
       setTotalVentas(total);
 
     } catch (error) {
@@ -103,74 +132,29 @@ const Historial = () => {
     }
   }, []);
 
-  const cerrarTurno = async () => {
-    // 1. Confirmación visual
-    const confirmar = window.confirm(`¿Seguro deseas cerrar turno?\nTotal Caja: $${(baseCaja + totalVentas).toLocaleString()}`);
-    if (!confirmar) return;
-
-    try {
-      // ---------------------------------------------------------
-      // PASO CLAVE: BÚSQUEDA EN TIEMPO REAL
-      // Ignoramos lo que el navegador "cree" saber. Vamos a buscar el ID real a la BD.
-      // ---------------------------------------------------------
-      const hoy = new Date().toISOString().split('T')[0];
-      
-      // Obtenemos el usuario actual (del estado o del localstorage)
-      const usuarioActual = colaborador || JSON.parse(localStorage.getItem('datosTurno') || '{}').colaborador;
-      
-      if (!usuarioActual) {
-          alert("Error: No se identificó al usuario. Inicia sesión nuevamente.");
-          navigate('/');
-          return;
-      }
-
-      // Hacemos una petición para ver TODOS los cuadres
-      const res = await api.get('/cuadre');
-      
-      // Buscamos cuál es el que está ABIERTO (turnoCerrado === null) para este usuario hoy
-      const turnoReal = res.data.find((c: any) => 
-          c.colaborador === usuarioActual && 
-          !c.turnoCerrado // Importante: Buscamos el que NO tenga fecha de cierre
-      );
-
-      // Si no encontramos ningún turno abierto...
-      if (!turnoReal) {
-         alert("⚠️ No se encontró ningún turno abierto en el sistema. Es posible que ya se haya cerrado.");
-         // Limpiamos todo localmente por si acaso
-         localStorage.removeItem('datosTurno');
-         navigate('/', { state: { turnoCerrado: true } });
-         return;
-      }
-
-      // ---------------------------------------------------------
-      // PASO FINAL: CERRAR EL TURNO ENCONTRADO (turnoReal.id)
-      // ---------------------------------------------------------
-      const horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
-      const token = localStorage.getItem('token');
-
-      // Aquí usamos turnoReal.id (que será el 3) en lugar de la variable vieja
-      await api.patch(`/cuadre/${turnoReal.id}`, {
-        turnoCerrado: horaActual,
-        totalEntregado: totalVentas, 
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // ¡Éxito!
-      alert(`Turno #${turnoReal.id} cerrado correctamente.`);
-      localStorage.removeItem('datosTurno');
-      navigate('/', { state: { turnoCerrado: true } });
-
-    } catch (error) {
-      console.error('Error al cerrar:', error);
-      alert('Error de conexión o de servidor. Por favor recarga la página.');
-    }
-  };
-
   const fetchDatosReservas = async () => {
     try {
       const response = await api.get('/reservas');
-      setReservas(response.data);
+      const reservasData = response.data;
+      setReservas(reservasData);
+      
+      // Revisar notificaciones
+      reservasData.forEach((r: Reserva) => {
+        if (!r.hsalida) { // Solo si sigue activa
+            const estado = calcularEstadoTiempo(r.hentrada);
+            if (estado.excedido) {
+                // Si está excedido y NO ha sido notificada en esta sesión
+                if (!habitacionesNotificadas.current.has(r.habitacion)) {
+                    enviarNotificacion(r.habitacion, r.placa);
+                    habitacionesNotificadas.current.add(r.habitacion);
+                }
+            } else {
+                // Si el tiempo se extendió o arregló, permitimos notificar de nuevo en el futuro
+                habitacionesNotificadas.current.delete(r.habitacion);
+            }
+        }
+      });
+
     } catch (error) {
       console.error('Error fetching reservas:', error);
     }
@@ -182,10 +166,14 @@ const Historial = () => {
     const [h, m] = horaEntrada.split(':').map(Number);
     const fechaEntrada = new Date();
     fechaEntrada.setHours(h, m, 0, 0);
-    if (fechaEntrada > fechaActual) fechaEntrada.setDate(fechaEntrada.getDate() - 1);
+    // Ajuste por si la entrada fue ayer (casos borde)
+    if (fechaEntrada > fechaActual && (fechaEntrada.getTime() - fechaActual.getTime() > 12 * 60 * 60 * 1000)) {
+        fechaEntrada.setDate(fechaEntrada.getDate() - 1);
+    }
+    
     const diferenciaMs = fechaActual.getTime() - fechaEntrada.getTime();
     const minutosPasados = Math.floor(diferenciaMs / 60000);
-    const LIMITE_TIEMPO = 240; 
+    const LIMITE_TIEMPO = 240; // 4 Horas
     const porcentaje = Math.min((minutosPasados / LIMITE_TIEMPO) * 100, 100);
     return { minutosPasados, minutosRestantes: LIMITE_TIEMPO - minutosPasados, porcentaje, excedido: minutosPasados >= LIMITE_TIEMPO };
   };
@@ -197,14 +185,88 @@ const Historial = () => {
     setShowModal(true);
   };
 
+  const cerrarTurno = async () => {
+    const confirmar = window.confirm(`¿Seguro deseas cerrar turno?\nTotal Caja: $${(baseCaja + totalVentas).toLocaleString()}`);
+    if (!confirmar) return;
+
+    try {
+      const hoy = new Date().toISOString().split('T')[0];
+      const usuarioActual = colaborador || JSON.parse(localStorage.getItem('datosTurno') || '{}').colaborador;
+      
+      if (!usuarioActual) {
+          alert("Error: No se identificó al usuario.");
+          return;
+      }
+
+      const res = await api.get('/cuadre');
+      const turnoReal = res.data.find((c: any) => 
+          c.colaborador === usuarioActual && !c.turnoCerrado
+      );
+
+      if (!turnoReal) {
+         alert("⚠️ No se encontró ningún turno abierto.");
+         localStorage.removeItem('datosTurno');
+         navigate('/', { state: { turnoCerrado: true } });
+         return;
+      }
+
+      const horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const token = localStorage.getItem('token');
+
+      await api.patch(`/cuadre/${turnoReal.id}`, {
+        turnoCerrado: horaActual,
+        totalEntregado: totalVentas, 
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      localStorage.removeItem('datosTurno');
+      navigate('/', { state: { turnoCerrado: true } });
+
+    } catch (error) {
+      console.error('Error al cerrar:', error);
+      alert('Error de conexión.');
+    }
+  };
+
+  // --- NUEVA FUNCIÓN: DAR SALIDA DESDE MODAL ---
+  const handleFinalizarReserva = async () => {
+    if (!reservaSeleccionada) return;
+
+    const confirmar = window.confirm(`¿Confirmas la salida de la Habitación ${reservaSeleccionada.habitacion}?\nPlaca: ${reservaSeleccionada.placa}`);
+    if (!confirmar) return;
+
+    try {
+        const horaSalida = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
+        
+        await api.patch(`/reservas/${reservaSeleccionada.id}`, {
+            hsalida: horaSalida
+        });
+
+        // Actualizamos vista
+        await fetchDatosReservas();
+        await fetchDatosCaja();
+        setShowModal(false);
+        setReservaSeleccionada(null);
+        
+        // Removemos de notificaciones si estaba ahí
+        habitacionesNotificadas.current.delete(reservaSeleccionada.habitacion);
+
+    } catch (error) {
+        console.error("Error finalizando reserva:", error);
+        alert("No se pudo finalizar la reserva. Intenta de nuevo.");
+    }
+  };
+
   const formatoTiempoRestante = (minutos: number) => {
-    if (minutos <= 0) return "Fin";
+    if (minutos <= 0) return "0h 0m";
     const h = Math.floor(minutos / 60);
     const m = minutos % 60;
     return `${h}h ${m}m`;
   };
 
   useEffect(() => {
+    solicitarPermisoNotificacion(); // Pedir permisos al cargar
     fetchDatosReservas();
     fetchDatosCaja();
     const interval = setInterval(() => { fetchDatosReservas(); fetchDatosCaja(); }, 10000);
@@ -224,34 +286,20 @@ const Historial = () => {
             background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.4));
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 
-              inset -2px -2px 6px rgba(0,0,0,0.5),
-              inset 2px 2px 6px rgba(255,255,255,0.1),
-              0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: inset -2px -2px 6px rgba(0,0,0,0.5), inset 2px 2px 6px rgba(255,255,255,0.1), 0 4px 10px rgba(0,0,0,0.5);
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;
           }
           .room-sphere:active { transform: scale(0.95); }
           .status-ring-free { box-shadow: 0 0 10px rgba(74, 222, 128, 0.3), inset 0 0 10px rgba(74, 222, 128, 0.1); border: 2px solid rgba(74, 222, 128, 0.5); }
           .status-ring-occupied { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), inset 0 0 10px rgba(59, 130, 246, 0.2); border: 2px solid #3b82f6; }
           .status-ring-critical { box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), inset 0 0 15px rgba(239, 68, 68, 0.3); border: 2px solid #ef4444; animation: pulse-red 1.5s infinite; }
-          @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-          }
+          @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
         `}
       </style>
 
-      {/* --- NAVBAR IGUALADO AL MARKETPLACE (p-4) --- */}
+      {/* --- NAVBAR --- */}
       <div className="bg-gray-800 border-b border-gray-700 p-4 sticky top-0 z-40 shadow-lg flex justify-between items-center">
-        
-        {/* Logo / Título */}
         <div className="flex items-center gap-2">
           <div className="bg-indigo-600 p-2 rounded-lg shadow-lg shadow-indigo-500/20">
             <FaClock className="text-white text-lg" />
@@ -261,18 +309,11 @@ const Historial = () => {
             <span className="text-xs text-gray-400 block mt-1 leading-none">{colaborador || 'Invitado'}</span>
           </div>
         </div>
-
-        {/* Botón Hamburger (Solo Móvil) */}
         <div className="md:hidden">
-          <button 
-            onClick={() => setMenuAbierto(!menuAbierto)} 
-            className="text-gray-300 hover:text-white p-2 focus:outline-none transition-transform active:scale-90"
-          >
+          <button onClick={() => setMenuAbierto(!menuAbierto)} className="text-gray-300 hover:text-white p-2">
             {menuAbierto ? <FaTimes size={24} /> : <FaBars size={24} />}
           </button>
         </div>
-
-        {/* Datos Desktop (Oculto en Móvil) */}
         <div className="hidden md:flex items-center space-x-6 text-sm">
             <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">FECHA</span><span className="leading-none">{fecha}</span></div>
             <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">TURNO</span><span className="leading-none">{turno}</span></div>
@@ -289,12 +330,12 @@ const Historial = () => {
         </div>
       </div>
 
-      {/* Menú Desplegable (Móvil) */}
-      <div className={`md:hidden fixed top-[72px] left-0 w-full bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 shadow-2xl overflow-hidden transition-all duration-300 ease-in-out z-30 ${menuAbierto ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+      {/* Menú Móvil */}
+      <div className={`md:hidden fixed top-[72px] left-0 w-full bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 shadow-2xl overflow-hidden transition-all duration-300 z-30 ${menuAbierto ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="px-4 py-6 space-y-4">
           <div className="grid grid-cols-2 gap-4 text-center">
               <div className="bg-gray-800 p-3 rounded-xl border border-gray-700">
-                <span className="text-gray-400 text-xs block mb-1 font-bold">BASE CAJA</span>
+                <span className="text-gray-400 text-xs block mb-1 font-bold">BASE</span>
                 <span className="text-blue-300 font-mono text-lg">${baseCaja.toLocaleString()}</span>
               </div>
               <div className="bg-gray-800 p-3 rounded-xl border border-gray-700">
@@ -302,20 +343,11 @@ const Historial = () => {
                 <span className="text-green-400 font-mono text-lg">+${totalVentas.toLocaleString()}</span>
               </div>
           </div>
-          <div className="flex justify-between items-center bg-gray-800 p-4 rounded-xl border border-gray-600">
-              <span className="text-gray-300 font-bold text-sm">TOTAL EN CAJA</span>
-              <span className="text-white font-bold text-2xl">${(baseCaja + totalVentas).toLocaleString()}</span>
-          </div>
-          <button 
-            onClick={cerrarTurno} 
-            className="w-full bg-red-600 text-white font-bold py-3.5 rounded-xl shadow-lg active:bg-red-700 transition-colors"
-          >
-            FINALIZAR JORNADA
-          </button>
+          <button onClick={cerrarTurno} className="w-full bg-red-600 text-white font-bold py-3.5 rounded-xl">FINALIZAR JORNADA</button>
         </div>
       </div>
 
-      {/* --- CONTENIDO PRINCIPAL --- */}
+      {/* --- GRID DE HABITACIONES --- */}
       <div className="pt-8 pb-20 px-3 md:px-8 min-h-[calc(100vh-80px)] flex flex-col justify-center">
         <div className="max-w-6xl mx-auto w-full">
           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-6 justify-items-center">
@@ -325,17 +357,15 @@ const Historial = () => {
               const info = r ? calcularEstadoTiempo(r.hentrada) : null;
               const estado = !r ? 'libre' : info?.excedido ? 'critica' : 'ocupada';
 
-              // Clases dinámicas
-              const ringClass = estado === 'libre' ? 'status-ring-free' : estado === 'ocupada' ? 'status-ring-occupied' : 'status-ring-critical';
-              const textClass = estado === 'libre' ? 'text-gray-400' : 'text-white';
-              
               return (
                 <button 
                   key={num}
                   onClick={() => handleClickHabitacion(num)}
-                  className={`room-sphere w-full max-w-[85px] sm:max-w-[100px] ${ringClass}`}
+                  className={`room-sphere w-full max-w-[85px] sm:max-w-[100px] ${
+                    estado === 'libre' ? 'status-ring-free' : estado === 'ocupada' ? 'status-ring-occupied' : 'status-ring-critical'
+                  }`}
                 >
-                  <span className={`text-2xl md:text-3xl font-black z-10 drop-shadow-md ${textClass}`}>
+                  <span className={`text-2xl md:text-3xl font-black z-10 drop-shadow-md ${estado === 'libre' ? 'text-gray-400' : 'text-white'}`}>
                     {num}
                   </span>
                   {r && (
@@ -345,9 +375,7 @@ const Historial = () => {
                              {info.excedido ? '!!!' : formatoTiempoRestante(info.minutosRestantes)}
                           </span>
                         )}
-                        <span className="text-[8px] text-gray-300 font-mono opacity-90 truncate w-full text-center">
-                           {r.placa}
-                        </span>
+                        <span className="text-[8px] text-gray-300 font-mono opacity-90 truncate w-full text-center">{r.placa}</span>
                      </div>
                   )}
                 </button>
@@ -357,52 +385,97 @@ const Historial = () => {
         </div>
       </div>
 
-      {/* --- MODAL CORREGIDO (Fondo Oscuro + Texto Blanco) --- */}
+      {/* --- MODAL DETALLADO --- */}
       <Modal 
         show={showModal} 
         onHide={() => setShowModal(false)} 
         centered 
-        // ¡IMPORTANTE! Las clases con ! forzan el estilo sobre Bootstrap
-        contentClassName="!bg-gray-800 !text-white !border !border-gray-600 !shadow-2xl"
+        contentClassName="!bg-gray-800 !text-white !border !border-gray-600 !shadow-2xl !rounded-2xl"
       >
-        <Modal.Header closeButton closeVariant="white" className="border-b border-gray-700 !bg-gray-800">
-          <Modal.Title className="font-bold">Habitación {habitacionSeleccionada}</Modal.Title>
+        <Modal.Header closeButton closeVariant="white" className="border-b border-gray-700 !bg-gray-800 rounded-t-2xl">
+          <Modal.Title className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold shadow-lg">
+                {habitacionSeleccionada}
+             </div>
+             <span className="font-bold tracking-wide text-sm uppercase">Detalle Habitación</span>
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="p-6 text-center !bg-gray-800">
+        
+        <Modal.Body className="p-0 !bg-gray-900">
              {reservaSeleccionada ? (
-                 <div className="space-y-6">
-                    <div className="bg-gray-700/50 p-4 rounded-2xl border border-gray-600">
-                        <p className="text-gray-400 text-xs font-bold tracking-widest uppercase mb-1">Vehículo en sitio</p>
-                        <p className="text-4xl font-black font-mono text-white tracking-wider">{reservaSeleccionada.placa}</p>
+                 <div className="flex flex-col">
+                    {/* Sección Principal: Tiempo */}
+                    <div className={`p-6 text-center ${estadoModal?.excedido ? 'bg-red-900/30' : 'bg-indigo-900/20'} border-b border-gray-700`}>
+                        <div className="mb-2 text-xs font-bold uppercase tracking-widest text-gray-400">Tiempo Restante</div>
+                        {estadoModal?.excedido ? (
+                            <div className="text-red-500 font-black text-4xl animate-pulse">TIEMPO AGOTADO</div>
+                        ) : (
+                            <div className="text-green-400 font-mono font-bold text-5xl">
+                                {formatoTiempoRestante(estadoModal?.minutosRestantes || 0)}
+                            </div>
+                        )}
                     </div>
+
+                    {/* Grilla de Información */}
+                    <div className="grid grid-cols-2 gap-px bg-gray-700">
+                        {/* Vehículo */}
+                        <div className="bg-gray-800 p-4 flex flex-col items-center justify-center gap-1">
+                            <FaCar className="text-gray-500 mb-1" />
+                            <span className="text-[10px] text-gray-400 uppercase">Vehículo</span>
+                            <span className="font-bold text-lg text-white">{reservaSeleccionada.vehiculo || "N/A"}</span>
+                        </div>
+                        {/* Placa */}
+                        <div className="bg-gray-800 p-4 flex flex-col items-center justify-center gap-1">
+                            <span className="text-[10px] text-gray-400 uppercase border border-gray-600 px-1 rounded">PLACA</span>
+                            <span className="font-black text-xl text-yellow-400 font-mono tracking-wider">{reservaSeleccionada.placa}</span>
+                        </div>
+                        {/* Entrada */}
+                        <div className="bg-gray-800 p-4 flex flex-col items-center justify-center gap-1">
+                            <FaClock className="text-gray-500 mb-1" />
+                            <span className="text-[10px] text-gray-400 uppercase">Hora Entrada</span>
+                            <span className="font-bold text-white">{reservaSeleccionada.hentrada}</span>
+                        </div>
+                        {/* Valor */}
+                        <div className="bg-gray-800 p-4 flex flex-col items-center justify-center gap-1">
+                            <FaMoneyBillWave className="text-green-600 mb-1" />
+                            <span className="text-[10px] text-gray-400 uppercase">Valor Pagado</span>
+                            <span className="font-bold text-green-400 text-lg">${reservaSeleccionada.valor.toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    {/* Observaciones (si existen) */}
+                    {reservaSeleccionada.observaciones && (
+                        <div className="bg-gray-800 p-4 border-t border-gray-700">
+                            <div className="flex items-center gap-2 mb-2">
+                                <FaStickyNote className="text-yellow-600" />
+                                <span className="text-xs font-bold text-gray-400">OBSERVACIONES</span>
+                            </div>
+                            <p className="text-sm text-gray-300 italic bg-black/20 p-2 rounded border border-gray-700/50">
+                                "{reservaSeleccionada.observaciones}"
+                            </p>
+                        </div>
+                    )}
                     
-                    <div>
-                         {estadoModal?.excedido ? (
-                            <div className="inline-block bg-red-500/10 text-red-500 border border-red-500/50 px-6 py-3 rounded-xl animate-pulse">
-                                <span className="block text-xs font-bold uppercase">Estado Crítico</span>
-                                <span className="text-2xl font-bold">TIEMPO EXCEDIDO</span>
-                            </div>
-                         ) : (
-                            <div className="inline-block">
-                                <span className="text-gray-400 text-xs uppercase block mb-1">Tiempo Restante</span>
-                                <span className="text-5xl font-bold text-green-400 font-mono">
-                                  {formatoTiempoRestante(estadoModal?.minutosRestantes || 0)}
-                                </span>
-                            </div>
-                         )}
+                    {/* Botón de Salida */}
+                    <div className="p-4 bg-gray-800 border-t border-gray-700">
+                        <button 
+                            onClick={handleFinalizarReserva}
+                            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95"
+                        >
+                            <FaSignOutAlt />
+                            DAR SALIDA Y LIBERAR
+                        </button>
                     </div>
+
                  </div>
              ) : (
-                 <div className="py-8 opacity-50">
-                    <p className="text-xl">Disponible para asignar</p>
+                 <div className="py-12 flex flex-col items-center justify-center text-gray-500 !bg-gray-800">
+                    <FaCalendarCheck className="text-4xl mb-3 opacity-20" />
+                    <p className="text-sm font-medium">Habitación Disponible</p>
+                    <p className="text-xs opacity-50">Lista para nueva reserva</p>
                  </div>
              )}
         </Modal.Body>
-        <Modal.Footer className="border-t border-gray-700 !bg-gray-800">
-          <Button variant="secondary" onClick={() => setShowModal(false)} className="w-full bg-gray-600 hover:bg-gray-500 border-none">
-            Cerrar
-          </Button>
-        </Modal.Footer>
       </Modal>
 
     </div>
