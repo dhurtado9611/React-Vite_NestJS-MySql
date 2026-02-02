@@ -285,7 +285,7 @@ const Historial = () => {
   const estadoModal = reservaSeleccionada ? calcularEstadoTiempo(reservaSeleccionada.hentrada) : null;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen text-white font-sans selection:bg-indigo-500 selection:text-white md:pl-24 md:pr-24 pb-20 md:pb-0">
       <style>
         {`
           .room-sphere {
