@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { FaCalendarAlt } from "react-icons/fa";
-import Carousel from "../components/Home/Carousel";
-// ❌ ELIMINADO: import fondo1 from "/assets/fondo1.jpg";
+import DiagonalHero from "../components/Home/DiagonalHero";
 import Footer from "../components/Home/Footer";
-// ReservarCliente no se usa en el render, pero si lo necesitas déjalo, si no, bórralo.
-// ❌ ELIMINADO: import Logo from "/assets/Logo-PNG.png";
+// Puedes dejar Logo si lo usas en un header flotante, si no, se puede quitar.
 
 const Home = () => {
   const location = useLocation();
-  
-  // ✅ CORREGIDO: Usamos la ruta como texto directo (string)
-  const [background, setBackground] = useState("/assets/fondo1.jpg");
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
@@ -22,59 +16,47 @@ const Home = () => {
   }, [location]);
 
   const handleScrollToReserva = () => {
+    // Asumimos que el formulario de reserva está más abajo o en otra página.
+    // Si está en esta misma página, asegúrate de tener un <div id="reserva-cliente-section"> abajo.
     const target = document.getElementById("reserva-cliente-section");
     if (target) {
       target.scrollIntoView({ behavior: "smooth" });
+    } else {
+      console.log("Sección de reserva no encontrada o redirigir a /reservar");
     }
   };
 
   return (
-    <>
-      <div
-        className="relative w-screen h-screen text-white bg-cover bg-center flex flex-col items-center justify-center text-center gap-6"
-        style={{ backgroundImage: `url(${background})` }}
-      >
-        <div className="absolute inset-0 bg-black/60 z-0"></div>
-
-        {mensaje && (
-          <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-green-600 px-6 py-3 rounded-lg shadow-lg text-white text-center z-50 text-sm md:text-base">
-            {mensaje}
-          </div>
-        )}
-
-        <div className="z-10">
-          {/* ✅ CORREGIDO: src apunta directo a la carpeta public */}
-          <img
-            src="/assets/Logo-PNG.png"
-            alt="Logo principal"
-            className="w-40 sm:w-56 md:w-64 lg:w-72 xl:w-80 mb-4 drop-shadow-xl"
-          />
+    <div className="bg-neutral-900 min-h-screen flex flex-col">
+      {/* Mensaje Flotante (Toast) */}
+      {mensaje && (
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-600/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-2xl text-white text-center z-50 animate-fade-in-down border border-green-400">
+          <span className="font-semibold">{mensaje}</span>
         </div>
+      )}
 
-        <div className="w-full z-10">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold pt-2 px-2">
-            ¡Bienvenido a nuestra plataforma de reservas!
-          </h1>
-        </div>
+      {/* Header / Logo Flotante (Opcional, para mantener la marca visible) */}
+      <div className="absolute top-0 left-0 w-full p-6 z-50 pointer-events-none flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+        <img
+          src="/assets/Logo-PNG.png"
+          alt="Logo"
+          className="h-12 md:h-16 drop-shadow-lg opacity-90"
+        />
+        {/* Aquí podrías poner un botón de Login pequeño si quisieras */}
+      </div>
 
-        <div className="col">
-          <div className="w-screen max-w-4xl z-10">
-            <Carousel setBackground={setBackground} />
-          </div>
-        </div>
+      {/* NUEVO HERO SECTION TIPO NAIPE */}
+      <section className="relative z-10">
+        <DiagonalHero onReserveClick={handleScrollToReserva} />
+      </section>
 
-        <div className="col">
-          <button
-            onClick={handleScrollToReserva}
-            className="z-10 mt-6 px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-semibold rounded-lg shadow-md transition flex items-center gap-2 animate-bounce"
-          >
-            <FaCalendarAlt className="text-lg" /> Reservar ahora
-          </button>
-        </div>
+      {/* Sección inferior (Donde iría el formulario de reserva si es una Single Page) */}
+      <div id="reserva-cliente-section" className="bg-neutral-900">
+        {/* Aquí puedes renderizar tu componente ReservasCliente o lo que uses */}
       </div>
 
       <Footer />
-    </>
+    </div>
   );
 };
 
