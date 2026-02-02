@@ -22,25 +22,34 @@ const TableCrearReservas = ({ reservas }: Props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
 
-  // Lógica de Filtrado: Obtiene datos del turno actual desde localStorage
+  // --- LÓGICA DE FILTRADO ESTRICTO ---
   const datosTurnoString = localStorage.getItem('datosTurno');
-  let reservasFiltradas = reservas;
-  let filtroInfo = { colaborador: '', fecha: '' };
+  
+  // 1. Por defecto, la lista está VACÍA (seguridad primero)
+  let reservasFiltradas: Reserva[] = []; 
+  let filtroInfo = { colaborador: '', fecha: '', turno: '' };
 
   if (datosTurnoString) {
     try {
-      const { colaborador, fecha } = JSON.parse(datosTurnoString);
-      filtroInfo = { colaborador, fecha };
-      // Filtra por colaborador y fecha exacta
-      reservasFiltradas = reservas.filter(
-        (reserva) => reserva.fecha === fecha && reserva.colaborador === colaborador
-      );
+      // Intentamos leer los datos del turno (incluyendo si guardan "turno": mañana/tarde/noche)
+      const parsedData = JSON.parse(datosTurnoString);
+      const { colaborador, fecha, turno } = parsedData;
+      
+      filtroInfo = { colaborador, fecha, turno };
+
+      // 2. Solo llenamos la lista si coinciden Colaborador Y Fecha
+      if (colaborador && fecha) {
+        reservasFiltradas = reservas.filter(
+          (reserva) => reserva.fecha === fecha && reserva.colaborador === colaborador
+        );
+      }
     } catch (error) {
-      console.error('Error al parsear datosTurno:', error);
+      console.error('Error al leer datos del turno:', error);
+      // Si falla, la lista se mantiene vacía []
     }
   }
 
-  // Lógica de Paginación
+  // --- PAGINACIÓN ---
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = reservasFiltradas.slice(indexOfFirstItem, indexOfLastItem);
@@ -55,15 +64,30 @@ const TableCrearReservas = ({ reservas }: Props) => {
   };
 
   return (
-    // Contenedor Glassmorphism
     <div className="mt-5 p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl text-white">
       
       {/* Encabezado con información del filtro activo */}
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom border-white/10 pb-3">
-        <h2 className="h4 font-bold m-0">Historial de Reservas</h2>
-        {filtroInfo.colaborador && (
-          <span className="badge bg-primary/50 border border-primary/30 text-white px-3 py-2">
-            Turno: {filtroInfo.colaborador} | Fecha: {filtroInfo.fecha}
+        <h2 className="h4 font-bold m-0">Historial del Turno Actual</h2>
+        
+        {/* Badge informativo del turno */}
+        {filtroInfo.colaborador ? (
+          <div className="d-flex gap-2">
+            {filtroInfo.turno && (
+              <span className="badge bg-warning text-dark border border-warning">
+                {filtroInfo.turno}
+              </span>
+            )}
+            <span className="badge bg-primary/50 border border-primary/30 text-white px-3">
+              <i className="bi bi-person-badge me-1"></i> {filtroInfo.colaborador}
+            </span>
+            <span className="badge bg-info/50 border border-info/30 text-white px-3">
+              <i className="bi bi-calendar-event me-1"></i> {filtroInfo.fecha}
+            </span>
+          </div>
+        ) : (
+          <span className="badge bg-danger/50 border border-danger/30 text-white">
+            Sin turno activo
           </span>
         )}
       </div>
@@ -81,7 +105,6 @@ const TableCrearReservas = ({ reservas }: Props) => {
               <th className="bg-transparent text-white fw-semibold">Salida Max</th>
               <th className="bg-transparent text-white fw-semibold">Salida</th>
               <th className="bg-transparent text-white fw-semibold">Obs</th>
-              <th className="bg-transparent text-white fw-semibold">Fecha</th>
             </tr>
           </thead>
           <tbody>
@@ -109,13 +132,14 @@ const TableCrearReservas = ({ reservas }: Props) => {
                   <td className="bg-transparent text-white small text-truncate" style={{ maxWidth: '150px' }}>
                     {reserva.observaciones}
                   </td>
-                  <td className="bg-transparent text-white">{reserva.fecha || '-'}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={10} className="text-center py-5 text-white/50 bg-transparent">
-                  No se encontraron reservas para este turno.
+                <td colSpan={9} className="text-center py-5 text-white/50 bg-transparent">
+                  {filtroInfo.colaborador 
+                    ? "No hay reservas registradas en este turno." 
+                    : "No se detectó un turno activo. Inicie sesión nuevamente."}
                 </td>
               </tr>
             )}
