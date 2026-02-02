@@ -51,7 +51,7 @@ const Reservas = () => {
       localStorage.removeItem('token');
       localStorage.removeItem('username');
       localStorage.removeItem('datosTurno');
-      navigate('/login'); // O la ruta que uses para el login
+      navigate('/');
     }
   };
 
