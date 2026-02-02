@@ -57,6 +57,8 @@ const Reservas = () => {
         selectedId={selectedId}
         setSelectedId={setSelectedId}
         reservas={reservas}
+        disableEditButton={true}
+        disableDeleteButton={true}
       />
 
       <TableReservas
