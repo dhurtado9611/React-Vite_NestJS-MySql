@@ -55,10 +55,11 @@ const Reservas = () => {
   };
 
   return (
-    <div className="relative text-white w-full min-h-screen pt-24 pb-20 pr-4 pl-20 md:pl-28">
+    <div className="relative text-white w-screen min-h-screen pt-24 pb-20 px-4 sm:px-8 lg:pl-24">
       
-      <nav className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-40 px-4 py-3 shadow-lg flex justify-between items-center pl-20 md:pl-28">
-        <div className="text-sm md:text-lg font-bold truncate pr-2">
+      {/* NAVBAR PERSONALIZADO */}
+      <nav className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">
+        <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24">
           Bienvenido,{' '}
           <span className="text-red-600 font-extrabold uppercase tracking-wide">
             {username || 'Invitado'}
