@@ -53,7 +53,7 @@ const TableCrearReservas = ({ reservas }: Props) => {
   const handlePrev = () => { if (currentPage > 1) setCurrentPage(currentPage - 1); };
 
   return (
-    <div className="mt-8 p-4 md:p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl text-white overflow-hidden md:pl-24 md:pr-24">
+    <div className="mt-8 p-4 md:p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl text-white overflow-hidden">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 border-bottom border-white/10 pb-3">
         <h2 className="text-lg md:text-xl font-bold m-0">
           Historial del Turno

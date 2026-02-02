@@ -57,7 +57,7 @@ const Reservas = () => {
 
   return (
     // Agregamos 'pt-24' para dar espacio al Navbar fijo
-    <div className="relative text-white w-screen min-h-screen pt-24 pb-20 px-4 sm:px-8 lg:pl-24">
+    <div className="relative text-white w-screen min-h-screen pt-24 pb-20 px-4 sm:px-8 lg:pl-24 md:pl-24 md:pr-24">
       
       {/* NAVBAR PERSONALIZADO */}
       <nav className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">
