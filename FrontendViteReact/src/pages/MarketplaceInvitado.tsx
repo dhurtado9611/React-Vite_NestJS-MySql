@@ -199,9 +199,9 @@ const MarketplaceCliente = () => {
   return (
     <div className="relative min-h-screen pb-20 md:pl-24">
       
-      {/* Header */}
+      {/* NAVBAR PERSONALIZADO */}
       <div className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">
-        <h2 className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24">Servicio a la habitacion</h2>
+        <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24">Servicio a la habitacion</div>
         <div 
           className="relative cursor-pointer bg-white text-red-700 p-2 rounded-full hover:bg-gray-200 transition" 
           onClick={() => setShowModal(true)}
