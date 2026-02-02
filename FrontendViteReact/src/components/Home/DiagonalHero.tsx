@@ -17,16 +17,16 @@ const panels = [
     title: "HABITACIONES",
     subtitle: "Confort y descanso",
     icon: <FaBed />,
-    image: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=2070&auto=format&fit=crop",
+    image: "/assets/habPremium1.jpg",
     action: "/habitaciones",
     description: "Espacios diseñados para tu máximo confort y privacidad."
   },
   {
     id: 3,
-    title: "BAR & SERVICIOS",
+    title: "CABAÑAS",
     subtitle: "Bebidas y Snacks",
     icon: <FaWineGlass />,
-    image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop",
+    image: "/assets/habSen1.jpg",
     action: "/servicios",
     description: "Disfruta de nuestra selección de licores y bebidas refrescantes."
   },
@@ -35,7 +35,7 @@ const panels = [
     title: "UBICACIÓN",
     subtitle: "Encuéntranos",
     icon: <FaMapMarkerAlt />,
-    image: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=2144&auto=format&fit=crop",
+    image: "/assets/popa.jpg",
     action: "/ubicacion",
     description: "Ubicados estratégicamente para tu fácil acceso."
   }
