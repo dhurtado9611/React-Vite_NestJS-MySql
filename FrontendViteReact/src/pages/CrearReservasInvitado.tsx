@@ -63,9 +63,6 @@ const Reservas = () => {
 
       <TableReservas
         reservas={reservas}
-        fetchReservas={fetchReservas}
-        selectedId={selectedId}
-        setSelectedId={setSelectedId}
       />
     </div>
   );
