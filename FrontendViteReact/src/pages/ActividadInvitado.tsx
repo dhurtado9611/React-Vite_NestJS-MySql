@@ -307,8 +307,8 @@ const Historial = () => {
       </style>
 
       {/* --- NAVBAR --- */}
-      <div className="bg-gray-800 border-b border-gray-700 p-4 sticky top-0 z-40 shadow-lg flex justify-between items-center">
-        <div className="flex items-center gap-2">
+      <div className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">
+        <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24 flex items-center gap-2">
           <div className="bg-indigo-600 p-2 rounded-lg shadow-lg shadow-indigo-500/20">
             <FaClock className="text-white text-lg" />
           </div>
