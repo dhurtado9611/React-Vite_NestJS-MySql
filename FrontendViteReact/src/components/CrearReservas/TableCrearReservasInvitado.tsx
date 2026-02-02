@@ -25,19 +25,16 @@ const TableCrearReservas = ({ reservas }: Props) => {
   // --- LÓGICA DE FILTRADO ESTRICTO ---
   const datosTurnoString = localStorage.getItem('datosTurno');
   
-  // 1. Por defecto, la lista está VACÍA (seguridad primero)
   let reservasFiltradas: Reserva[] = []; 
   let filtroInfo = { colaborador: '', fecha: '', turno: '' };
 
   if (datosTurnoString) {
     try {
-      // Intentamos leer los datos del turno (incluyendo si guardan "turno": mañana/tarde/noche)
       const parsedData = JSON.parse(datosTurnoString);
       const { colaborador, fecha, turno } = parsedData;
       
       filtroInfo = { colaborador, fecha, turno };
 
-      // 2. Solo llenamos la lista si coinciden Colaborador Y Fecha
       if (colaborador && fecha) {
         reservasFiltradas = reservas.filter(
           (reserva) => reserva.fecha === fecha && reserva.colaborador === colaborador
@@ -45,7 +42,6 @@ const TableCrearReservas = ({ reservas }: Props) => {
       }
     } catch (error) {
       console.error('Error al leer datos del turno:', error);
-      // Si falla, la lista se mantiene vacía []
     }
   }
 
@@ -66,11 +62,9 @@ const TableCrearReservas = ({ reservas }: Props) => {
   return (
     <div className="mt-5 p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl text-white">
       
-      {/* Encabezado con información del filtro activo */}
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom border-white/10 pb-3">
         <h2 className="h4 font-bold m-0">Historial del Turno Actual</h2>
         
-        {/* Badge informativo del turno */}
         {filtroInfo.colaborador ? (
           <div className="d-flex gap-2">
             {filtroInfo.turno && (
@@ -93,18 +87,19 @@ const TableCrearReservas = ({ reservas }: Props) => {
       </div>
 
       <div className="table-responsive" style={{ minHeight: '300px' }}>
-        <table className="table table-hover text-center align-middle" style={{ color: 'white' }}>
+        <table className="table table-hover text-center align-middle" style={{ color: 'white', whiteSpace: 'nowrap' }}>
           <thead className="border-bottom border-white/20">
             <tr>
-              <th className="bg-transparent text-white fw-semibold">ID</th>
-              <th className="bg-transparent text-white fw-semibold">Vehículo</th>
-              <th className="bg-transparent text-white fw-semibold">Placa</th>
-              <th className="bg-transparent text-white fw-semibold">Habitación</th>
-              <th className="bg-transparent text-white fw-semibold">Valor</th>
-              <th className="bg-transparent text-white fw-semibold">Entrada</th>
-              <th className="bg-transparent text-white fw-semibold">Salida Max</th>
-              <th className="bg-transparent text-white fw-semibold">Salida</th>
-              <th className="bg-transparent text-white fw-semibold">Obs</th>
+              <th className="bg-transparent text-white fw-semibold px-3">ID</th>
+              <th className="bg-transparent text-white fw-semibold px-3">Vehículo</th>
+              <th className="bg-transparent text-white fw-semibold px-3">Placa</th>
+              <th className="bg-transparent text-white fw-semibold px-3">Habitación</th>
+              <th className="bg-transparent text-white fw-semibold px-3">Valor</th>
+              <th className="bg-transparent text-white fw-semibold px-3">Entrada</th>
+              <th className="bg-transparent text-white fw-semibold px-3">Salida Max</th>
+              <th className="bg-transparent text-white fw-semibold px-3">Salida</th>
+              {/* Alineamos el header a la izquierda para que coincida visualmente con el contenido largo */}
+              <th className="bg-transparent text-white fw-semibold px-3 text-start">Observaciones</th>
             </tr>
           </thead>
           <tbody>
@@ -129,9 +124,21 @@ const TableCrearReservas = ({ reservas }: Props) => {
                       <span className="badge bg-warning text-dark">Pendiente</span>
                     )}
                   </td>
-                  <td className="bg-transparent text-white small text-truncate" style={{ maxWidth: '150px' }}>
-                    {reserva.observaciones}
+                  
+                  {/* AQUÍ ESTÁ EL CAMBIO PRINCIPAL PARA LAS OBSERVACIONES */}
+                  <td className="bg-transparent text-white text-start">
+                    <div 
+                      className="small opacity-90 text-wrap" 
+                      style={{ 
+                        minWidth: '350px', // Fuerza un ancho mínimo para leer bien
+                        fontSize: '0.85rem', 
+                        lineHeight: '1.4' 
+                      }}
+                    >
+                      {reserva.observaciones}
+                    </div>
                   </td>
+
                 </tr>
               ))
             ) : (
@@ -147,7 +154,6 @@ const TableCrearReservas = ({ reservas }: Props) => {
         </table>
       </div>
 
-      {/* Controles de Paginación */}
       {totalPages > 1 && (
         <div className="d-flex justify-content-between align-items-center mt-4 border-top border-white/10 pt-3">
           <span className="text-white/70 text-sm">
