@@ -22,9 +22,8 @@ const TableCrearReservas = ({ reservas }: Props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
 
-  // --- LÓGICA DE FILTRADO ESTRICTO ---
+  // --- LÓGICA DE FILTRADO ---
   const datosTurnoString = localStorage.getItem('datosTurno');
-  
   let reservasFiltradas: Reserva[] = []; 
   let filtroInfo = { colaborador: '', fecha: '', turno: '' };
 
@@ -32,7 +31,6 @@ const TableCrearReservas = ({ reservas }: Props) => {
     try {
       const parsedData = JSON.parse(datosTurnoString);
       const { colaborador, fecha, turno } = parsedData;
-      
       filtroInfo = { colaborador, fecha, turno };
 
       if (colaborador && fecha) {
@@ -51,36 +49,38 @@ const TableCrearReservas = ({ reservas }: Props) => {
   const currentItems = reservasFiltradas.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(reservasFiltradas.length / itemsPerPage);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
+  const handleNext = () => { if (currentPage < totalPages) setCurrentPage(currentPage + 1); };
+  const handlePrev = () => { if (currentPage > 1) setCurrentPage(currentPage - 1); };
 
   return (
-    <div className="mt-5 p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl text-white">
+    <div className="mt-8 p-4 md:p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl text-white overflow-hidden">
       
-      <div className="d-flex justify-content-between align-items-center mb-4 border-bottom border-white/10 pb-3">
-        <h2 className="h4 font-bold m-0">Historial del Turno Actual</h2>
+      {/* CORRECCIÓN MÓVIL AQUÍ:
+         Usamos 'flex-col' para móviles y 'md:flex-row' para pantallas medianas/grandes.
+         Esto hace que los badges bajen si no hay espacio.
+      */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 border-bottom border-white/10 pb-3">
+        <h2 className="text-lg md:text-xl font-bold m-0">
+          Historial del Turno
+        </h2>
         
         {filtroInfo.colaborador ? (
-          <div className="d-flex gap-2">
+          <div className="flex flex-wrap gap-2 text-sm">
             {filtroInfo.turno && (
               <span className="badge bg-warning text-dark border border-warning">
                 {filtroInfo.turno}
               </span>
             )}
-            <span className="badge bg-primary/50 border border-primary/30 text-white px-3">
-              <i className="bi bi-person-badge me-1"></i> {filtroInfo.colaborador}
+            <span className="badge bg-primary/50 border border-primary/30 text-white px-3 py-2 flex items-center">
+              <i className="bi bi-person-badge me-2"></i> 
+              <span className="truncate max-w-[100px] md:max-w-none">{filtroInfo.colaborador}</span>
             </span>
-            <span className="badge bg-info/50 border border-info/30 text-white px-3">
-              <i className="bi bi-calendar-event me-1"></i> {filtroInfo.fecha}
+            <span className="badge bg-info/50 border border-info/30 text-white px-3 py-2">
+              {filtroInfo.fecha}
             </span>
           </div>
         ) : (
-          <span className="badge bg-danger/50 border border-danger/30 text-white">
+          <span className="badge bg-danger/50 border border-danger/30 text-white w-full md:w-auto text-center">
             Sin turno activo
           </span>
         )}
@@ -98,7 +98,6 @@ const TableCrearReservas = ({ reservas }: Props) => {
               <th className="bg-transparent text-white fw-semibold px-3">Entrada</th>
               <th className="bg-transparent text-white fw-semibold px-3">Salida Max</th>
               <th className="bg-transparent text-white fw-semibold px-3">Salida</th>
-              {/* Alineamos el header a la izquierda para que coincida visualmente con el contenido largo */}
               <th className="bg-transparent text-white fw-semibold px-3 text-start">Observaciones</th>
             </tr>
           </thead>
@@ -124,13 +123,11 @@ const TableCrearReservas = ({ reservas }: Props) => {
                       <span className="badge bg-warning text-dark">Pendiente</span>
                     )}
                   </td>
-                  
-                  {/* AQUÍ ESTÁ EL CAMBIO PRINCIPAL PARA LAS OBSERVACIONES */}
                   <td className="bg-transparent text-white text-start">
                     <div 
                       className="small opacity-90 text-wrap" 
                       style={{ 
-                        minWidth: '350px', // Fuerza un ancho mínimo para leer bien
+                        minWidth: '300px', 
                         fontSize: '0.85rem', 
                         lineHeight: '1.4' 
                       }}
@@ -138,7 +135,6 @@ const TableCrearReservas = ({ reservas }: Props) => {
                       {reserva.observaciones}
                     </div>
                   </td>
-
                 </tr>
               ))
             ) : (
@@ -155,9 +151,9 @@ const TableCrearReservas = ({ reservas }: Props) => {
       </div>
 
       {totalPages > 1 && (
-        <div className="d-flex justify-content-between align-items-center mt-4 border-top border-white/10 pt-3">
+        <div className="d-flex justify-content-between align-items-center mt-4 border-top border-white/10 pt-3 flex-wrap gap-2">
           <span className="text-white/70 text-sm">
-            Página {currentPage} de {totalPages}
+            Pag {currentPage} de {totalPages}
           </span>
           <div className="btn-group">
             <button
@@ -165,14 +161,14 @@ const TableCrearReservas = ({ reservas }: Props) => {
               onClick={handlePrev}
               disabled={currentPage === 1}
             >
-              <i className="bi bi-chevron-left me-1"></i> Anterior
+              <i className="bi bi-chevron-left"></i> Ant
             </button>
             <button
               className="btn btn-outline-light btn-sm px-3"
               onClick={handleNext}
               disabled={currentPage === totalPages}
             >
-              Siguiente <i className="bi bi-chevron-right ms-1"></i>
+              Sig <i className="bi bi-chevron-right"></i>
             </button>
           </div>
         </div>
