@@ -37,10 +37,8 @@ const TableCrearReservas = ({ reservas }: Props) => {
 
   return (
     <div className="mt-5">
-      
-
       {/* Lista de Reservas */}
-      <h2 className="mt-5">Lista de Reservas</h2>
+      <h2 className="mt-5">Historial de Reservas</h2>
       <div className="table-responsive overflow-auto" style={{ maxHeight: '400px' }}>
         <table className="table table-striped text-center">
           <thead>
