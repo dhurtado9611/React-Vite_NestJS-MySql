@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importante para redireccionar
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import ReservasForm from '../components/CrearReservas/ReservasForm';
 import TableReservas from '../components/CrearReservas/TableCrearReservasInvitado';
@@ -25,7 +25,7 @@ const Reservas = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   
-  const navigate = useNavigate(); // Hook para navegación
+  const navigate = useNavigate();
 
   useEffect(() => {
       const storedUsername = localStorage.getItem('username');
@@ -45,7 +45,6 @@ const Reservas = () => {
     fetchReservas();
   }, []);
 
-  // Función para cerrar sesión
   const handleLogout = () => {
     if (window.confirm("¿Deseas cerrar sesión?")) {
       localStorage.removeItem('token');
@@ -56,12 +55,10 @@ const Reservas = () => {
   };
 
   return (
-    // Agregamos 'pt-24' para dar espacio al Navbar fijo
-    <div className="relative text-white w-screen min-h-screen pt-24 pb-20 px-4 sm:px-8 lg:pl-24">
+    <div className="relative text-white w-full min-h-screen pt-24 pb-20 pr-4 pl-20 md:pl-28">
       
-      {/* NAVBAR PERSONALIZADO */}
-      <nav className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">
-        <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24">
+      <nav className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-40 px-4 py-3 shadow-lg flex justify-between items-center pl-20 md:pl-28">
+        <div className="text-sm md:text-lg font-bold truncate pr-2">
           Bienvenido,{' '}
           <span className="text-red-600 font-extrabold uppercase tracking-wide">
             {username || 'Invitado'}
