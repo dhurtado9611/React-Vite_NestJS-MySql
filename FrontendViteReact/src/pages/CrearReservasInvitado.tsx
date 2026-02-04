@@ -55,15 +55,10 @@ const Reservas = () => {
   };
 
   return (
-    // CAMBIO 1: Cambié 'w-screen' por 'w-full' para evitar desbordes.
-    // CAMBIO 2: Ajusté 'lg:pl-24' a 'md:pl-24' para que desde pantallas medianas (laptops) deje espacio al sidebar.
     <div className="relative text-white w-full min-h-screen pt-24 pb-20 sm:px-8 md:pl-24 transition-all duration-300">
-      
       {/* NAVBAR PERSONALIZADO */}
-      {/* CAMBIO 3: La Navbar se mantiene fija, pero el contenido interno respeta el margen izquierdo en desktop */}
-      <nav className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-40 py-3 shadow-lg flex justify-between items-center transition-all duration-300">
-        {/* Agregamos md:pl-20 aquí para empujar el texto 'Bienvenido' a la derecha del sidebar */}
-        <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-20">
+      <nav className="md:pl-24 md:pr-24 fixed top-0 left-0 w-full bg-black border-b border-white/10 z-40 py-3 shadow-lg flex justify-between items-center transition-all duration-300">
+        <div className="px-4 text-sm md:text-lg font-bold truncate pr-2 md:pl-20">
           Bienvenido,{' '}
           <span className="text-red-600 font-extrabold uppercase tracking-wide">
             {username || 'Invitado'}
