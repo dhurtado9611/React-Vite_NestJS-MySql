@@ -61,7 +61,7 @@ const Reservas = () => {
       
       {/* NAVBAR PERSONALIZADO */}
       {/* CAMBIO 3: La Navbar se mantiene fija, pero el contenido interno respeta el margen izquierdo en desktop */}
-      <nav className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-40 px-4 py-3 shadow-lg flex justify-between items-center transition-all duration-300">
+      <nav className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-40 py-3 shadow-lg flex justify-between items-center transition-all duration-300">
         {/* Agregamos md:pl-20 aquí para empujar el texto 'Bienvenido' a la derecha del sidebar */}
         <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-20">
           Bienvenido,{' '}
