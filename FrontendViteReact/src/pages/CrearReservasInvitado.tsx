@@ -57,7 +57,7 @@ const Reservas = () => {
   return (
     // CAMBIO 1: Cambié 'w-screen' por 'w-full' para evitar desbordes.
     // CAMBIO 2: Ajusté 'lg:pl-24' a 'md:pl-24' para que desde pantallas medianas (laptops) deje espacio al sidebar.
-    <div className="relative text-white w-full min-h-screen pt-24 pb-20 px-4 sm:px-8 md:pl-24 transition-all duration-300">
+    <div className="relative text-white w-full min-h-screen pt-24 pb-20 sm:px-8 md:pl-24 transition-all duration-300">
       
       {/* NAVBAR PERSONALIZADO */}
       {/* CAMBIO 3: La Navbar se mantiene fija, pero el contenido interno respeta el margen izquierdo en desktop */}
