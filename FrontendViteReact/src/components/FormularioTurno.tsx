@@ -99,7 +99,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   // ESTILOS GLASSMORPHISM
   const glassInputClass = `
     block w-full px-4 py-3 
-    bg-white/50 backdrop-blur-md 
+    bg-white/50
     border border-white/60 
     rounded-xl 
     text-gray-900 placeholder-gray-600 font-semibold
@@ -114,7 +114,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
       {loading && <LogoLoader />}
       <AnimatePresence>
         <motion.div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md" 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-md" 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
           exit={{ opacity: 0 }}
@@ -161,10 +161,10 @@ const FormularioTurno = ({ onSubmit }: Props) => {
                       className={`${glassInputClass} appearance-none cursor-pointer text-gray-900 ${errores.turno ? 'ring-2 ring-red-400 bg-red-50/50' : ''}`}
                       disabled={loading}
                     >
-                      <option value="" className="text-gray-500 bg-white">-- Seleccionar --</option>
-                      <option value="07:00" className="text-gray-900 bg-white font-medium">Mañana (7am - 2pm)</option>
-                      <option value="14:00" className="text-gray-900 bg-white font-medium">Tarde (2pm - 9pm)</option>
-                      <option value="21:00" className="text-gray-900 bg-white font-medium">Noche (9pm - 7am)</option>
+                      <option value="" className="text-gray-500 bg-black">-- Seleccionar --</option>
+                      <option value="07:00" className="text-gray-900 bg-black font-medium">Mañana (7am - 2pm)</option>
+                      <option value="14:00" className="text-gray-900 bg-black font-medium">Tarde (2pm - 9pm)</option>
+                      <option value="21:00" className="text-gray-900 bg-black font-medium">Noche (9pm - 7am)</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-700">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
