@@ -79,7 +79,7 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
       {!mostrarModalTurno ? (
         <div className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl w-[350px] border border-red-600 shadow-xl relative text-white">
           <button
