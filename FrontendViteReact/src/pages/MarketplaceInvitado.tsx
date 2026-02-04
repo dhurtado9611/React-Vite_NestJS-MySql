@@ -197,7 +197,7 @@ const MarketplaceCliente = () => {
   };
 
   return (
-    <div className="relative min-h-screen pb-20 md:pl-24 text-black">
+    <div className="relative min-h-screen pb-20 md:pl-24">
       
       {/* NAVBAR PERSONALIZADO */}
       <div className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">

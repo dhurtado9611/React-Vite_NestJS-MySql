@@ -205,6 +205,7 @@ const Historial = () => {
       const horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
       const token = localStorage.getItem('token');
 
+      // Esta llamada ahora funcionará correctamente con el backend corregido a @Patch
       await api.patch(`/cuadre/${turnoReal.id}`, {
         turnoCerrado: horaActual,
         totalEntregado: totalVentas, 
@@ -217,46 +218,38 @@ const Historial = () => {
 
     } catch (error) {
       console.error('Error al cerrar:', error);
-      alert('Error de conexión.');
+      alert('Error de conexión o al guardar el cierre.');
     }
   };
 
-  // --- FUNCIÓN CORREGIDA: DAR SALIDA DESDE MODAL ---
   const handleFinalizarReserva = async () => {
     if (!reservaSeleccionada) return;
 
     const confirmar = window.confirm(`¿Deseas dar salida a la Habitación ${reservaSeleccionada.habitacion}?\nPlaca: ${reservaSeleccionada.placa}`);
     if (!confirmar) return;
 
-    setProcesandoSalida(true); // Bloqueamos el botón para evitar doble clic
+    setProcesandoSalida(true);
 
     try {
-        // Obtenemos hora en formato HH:mm (formato 24h) compatible con backend
         const now = new Date();
         const horaSalida = now.toLocaleTimeString('es-CO', { 
             hour: '2-digit', 
             minute: '2-digit', 
             hour12: false 
-        }); // Ejemplo: "14:30"
+        });
         
-        // Hacemos el PATCH al ID específico de la reserva
         await api.patch(`/reservas/${reservaSeleccionada.id}`, {
             hsalida: horaSalida
         });
 
-        // IMPORTANTE: Recargamos los datos inmediatamente para actualizar la vista
         await Promise.all([
             fetchDatosReservas(),
             fetchDatosCaja()
         ]);
 
-        // Cerramos modal y limpiamos selección
         setShowModal(false);
         setReservaSeleccionada(null);
         habitacionesNotificadas.current.delete(reservaSeleccionada.habitacion);
-        
-        // Pequeño feedback visual (opcional)
-        // alert("Salida registrada correctamente"); 
 
     } catch (error) {
         console.error("Error finalizando reserva:", error);

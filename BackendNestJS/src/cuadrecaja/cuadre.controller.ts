@@ -1,5 +1,4 @@
-// cuadre.controller.ts
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { CuadreService } from './cuadre.service';
 import { Cuadre } from './cuadre.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -18,7 +17,9 @@ export class CuadreController {
     return this.cuadreService.create(cuadre);
   }
 
-  @Put(':id')
+  // CORREGIDO: Cambiado de @Put a @Patch para coincidir con el frontend
+  // y permitir actualización parcial (solo cerrar turno sin borrar lo demás)
+  @Patch(':id')
   async update(@Param('id') id: number, @Body() cuadre: Cuadre): Promise<Cuadre> {
     return this.cuadreService.update(id, cuadre);
   }
