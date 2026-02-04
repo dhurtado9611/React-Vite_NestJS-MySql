@@ -103,7 +103,7 @@ const TablaCuadre = () => {
     }, []);
 
   return (
-    <div className="container-fluid px-3 py-3">
+    <div className="text-black container-fluid px-3 py-3">
       {/* Filtros y botón de reset */}
       <div className="row g-3 mb-3">
         <div className="col">
