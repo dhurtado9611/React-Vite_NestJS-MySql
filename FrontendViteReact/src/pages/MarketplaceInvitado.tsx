@@ -197,7 +197,7 @@ const MarketplaceCliente = () => {
   };
 
   return (
-    <div className="relative min-h-screen pb-20 md:pl-24">
+    <div className="relative min-h-screen pb-20 md:pl-24 text-black">
       
       {/* NAVBAR PERSONALIZADO */}
       <div className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">
@@ -257,7 +257,7 @@ const MarketplaceCliente = () => {
          <Modal.Header closeButton><Modal.Title>Resumen del Pedido</Modal.Title></Modal.Header>
          <Modal.Body>
             {carrito.length === 0 ? (
-                <p className="text-center text-gray-500">El carrito está vacío</p>
+                <p className="text-center text-black">El carrito está vacío</p>
             ) : (
                 <div className="space-y-3">
                     {/* Lista de Items */}
