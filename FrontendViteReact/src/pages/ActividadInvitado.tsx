@@ -231,6 +231,9 @@ const Historial = () => {
     setProcesandoSalida(true);
 
     try {
+        // 1. OBTENER TOKEN (Esto faltaba)
+        const token = localStorage.getItem('token'); 
+        
         const now = new Date();
         const horaSalida = now.toLocaleTimeString('es-CO', { 
             hour: '2-digit', 
@@ -238,8 +241,14 @@ const Historial = () => {
             hour12: false 
         });
         
+        // Debug: Ver en consola qué ID se está enviando
+        console.log(`Finalizando reserva ID: ${reservaSeleccionada.id} con token: ${token ? 'Sí' : 'No'}`);
+
+        // 2. ENVIAR HEADERS EN LA PETICIÓN
         await api.patch(`/reservas/${reservaSeleccionada.id}`, {
             hsalida: horaSalida
+        }, {
+            headers: { Authorization: `Bearer ${token}` } // <--- AGREGADO AQUÍ
         });
 
         await Promise.all([
@@ -253,7 +262,7 @@ const Historial = () => {
 
     } catch (error) {
         console.error("Error finalizando reserva:", error);
-        alert("Ocurrió un error al intentar dar salida. Por favor revisa la conexión.");
+        alert("Ocurrió un error al intentar dar salida. Revisa la consola (F12) para más detalles.");
     } finally {
         setProcesandoSalida(false);
     }
