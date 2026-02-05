@@ -4,21 +4,19 @@ import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 
 async function bootstrap() {
-  dotenv.config(); // ✅ Cargar variables de entorno
+  dotenv.config(); 
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe());
 
+  // --- CONFIGURACIÓN CORS CORREGIDA ---
   app.enableCors({
-    origin: [
-      'https://react-vite-nest-js-my-ds74mxdem-danielhurtados-projects.vercel.app',
-      'https://react-vite-nest-js-my-sql.vercel.app',
-      'https://elesconditemotel.lat',
-      'https://www.elesconditemotel.lat',
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type,Authorization',
+    // 'origin: true' refleja el origen de la petición, permitiendo la conexión
+    // desde tu frontend sin importar si tiene 'www', slash al final, etc.
+    origin: true, 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type,Authorization,X-Requested-With',
   });
 
   const PORT = process.env.PORT || 3000;
