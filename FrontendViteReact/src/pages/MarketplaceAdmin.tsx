@@ -62,7 +62,7 @@ const InventarioAdmin = () => {
     setError('');
     try {
       // Consumimos la ruta '/productos' que configuramos en el Backend
-      const res = await api.get('/productos');
+      const res = await api.get('/preciosInventario');
       
       // Procesamos para asignar imágenes si vienen nulas
       const dataProcesada = res.data.map((p: Product) => ({
