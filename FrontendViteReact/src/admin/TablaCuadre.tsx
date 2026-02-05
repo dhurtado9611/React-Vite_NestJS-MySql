@@ -1,4 +1,3 @@
-// TablaCuadre.tsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
@@ -103,16 +102,17 @@ const TablaCuadre = () => {
     }, []);
 
   return (
-    // CAMBIO 1: bg-light para dar contraste al fondo general y text-dark para asegurar legibilidad
-    <div className="container-fluid px-3 py-3 bg-light min-vh-100">
+    // CAMBIO 1: Fondo oscuro (bg-dark) y texto blanco (text-white) para todo el contenedor
+    // min-vh-100 asegura que cubra toda la altura de la pantalla
+    <div className="container-fluid px-3 py-3 bg-dark text-white min-vh-100">
       
       {/* Filtros y botón de reset */}
       <div className="row g-3 mb-4">
         <div className="col-12 col-md-4">
-          <label className="form-label text-dark fw-bold">Mes</label>
-          {/* CAMBIO 2: bg-white y text-dark explícitos en inputs */}
+          <label className="form-label fw-bold">Mes</label>
+          {/* CAMBIO 2: Inputs con fondo oscuro y borde gris para que se vean bien */}
           <select 
-            className="form-select bg-white text-dark border-secondary" 
+            className="form-select bg-secondary text-white border-secondary" 
             value={mes} 
             onChange={(e) => setMes(Number(e.target.value))}
           >
@@ -122,33 +122,37 @@ const TablaCuadre = () => {
           </select>
         </div>
         <div className="col-12 col-md-4">
-          <label className="form-label text-dark fw-bold">Año</label>
+          <label className="form-label fw-bold">Año</label>
           <input
             type="number"
-            className="form-control bg-white text-dark border-secondary"
+            className="form-control bg-secondary text-white border-secondary"
             value={anio}
             onChange={(e) => setAnio(Number(e.target.value))}
           />
         </div>
         <div className="col-12 col-md-4 d-flex align-items-end">
-          <button className="btn btn-danger w-100 shadow-sm" onClick={resetearCuadre}>
+          <button className="btn btn-outline-danger w-100 shadow-sm" onClick={resetearCuadre}>
             Resetear Todo
           </button>
         </div>
       </div>
 
       {/* Gráfica total entregado */}
-      {/* CAMBIO 3: Card con bg-white y text-dark forzados */}
-      <div className="card shadow mb-4 bg-white border-0">
+      {/* CAMBIO 3: Card con borde secundario y fondo transparente o muy oscuro */}
+      <div className="card shadow mb-4 bg-black border-secondary">
         <div className="card-body p-3">
-          <h6 className="text-primary fw-bold mb-3">Total entregado por fecha</h6>
+          <h6 className="text-info fw-bold mb-3">Total entregado por fecha</h6>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={datosFiltrados} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
-              <XAxis dataKey="dia" tick={{ fontSize: 12, fill: '#333' }} />
-              <YAxis tick={{ fontSize: 12, fill: '#333' }} />
+              {/* Grid más sutil para fondo negro */}
+              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+              {/* Ejes en color blanco/gris claro */}
+              <XAxis dataKey="dia" tick={{ fontSize: 12, fill: '#ccc' }} />
+              <YAxis tick={{ fontSize: 12, fill: '#ccc' }} />
+              {/* Tooltip con fondo oscuro */}
               <Tooltip 
-                contentStyle={{ backgroundColor: '#fff', color: '#000', borderRadius: '8px', border: '1px solid #ddd' }}
+                contentStyle={{ backgroundColor: '#222', color: '#fff', borderRadius: '8px', border: '1px solid #555' }}
+                itemStyle={{ color: '#fff' }}
               />
               <Line
                 type="monotone"
@@ -164,17 +168,17 @@ const TablaCuadre = () => {
       </div>
 
       {/* Tabla con scroll */}
-      <div className="card shadow bg-white border-0">
+      <div className="card shadow bg-black border-secondary">
         <div className="card-body p-0">
-          <div className="p-3 border-bottom">
-            <h6 className="text-dark fw-bold m-0">Historial de Registros</h6>
+          <div className="p-3 border-bottom border-secondary">
+            <h6 className="text-white fw-bold m-0">Historial de Registros</h6>
           </div>
           <div style={{ overflowX: 'auto' }}>
-            {/* CAMBIO 4: Tabla con clases explícitas para evitar herencia de color blanco */}
-            <table className="table table-striped table-hover align-middle mb-0" style={{ minWidth: '900px' }}>
-              <thead className="bg-dark text-white">
-                <tr>
-                  <th className="py-3 ps-3">ID</th>
+            {/* CAMBIO 4: 'table-dark' hace la magia para que las filas sean negras y el texto blanco */}
+            <table className="table table-dark table-striped table-hover align-middle mb-0" style={{ minWidth: '900px' }}>
+              <thead>
+                <tr className="border-bottom border-secondary">
+                  <th className="py-3 ps-3 text-info">ID</th>
                   <th className="py-3">Colaborador</th>
                   <th className="py-3">Fecha</th>
                   <th className="py-3">Turno</th>
@@ -184,15 +188,16 @@ const TablaCuadre = () => {
                   <th className="py-3 text-center">Acción</th>
                 </tr>
               </thead>
-              <tbody className="text-dark">
+              <tbody>
                 {cuadres.length > 0 ? (
                   cuadres.map((cuadre) => (
                     <tr key={cuadre.id}>
-                      <td className="ps-3 fw-bold">#{cuadre.id}</td>
+                      <td className="ps-3 fw-bold text-info">#{cuadre.id}</td>
                       <td>{cuadre.colaborador}</td>
                       <td>{new Date(cuadre.fecha).toLocaleDateString()}</td>
                       <td>
-                        <span className={`badge ${cuadre.turno === 'Mañana' ? 'bg-info' : 'bg-warning'} text-dark`}>
+                        {/* Badges se mantienen igual para resaltar */}
+                        <span className={`badge ${cuadre.turno === 'Mañana' ? 'bg-info text-dark' : 'bg-warning text-dark'}`}>
                           {cuadre.turno}
                         </span>
                       </td>
@@ -223,26 +228,27 @@ const TablaCuadre = () => {
         </div>
       </div>
 
-      {/* Modal de confirmación */}
+      {/* Modal de confirmación en modo oscuro */}
       <Modal show={mostrarModal} onHide={() => setMostrarModal(false)} centered>
-        {/* Asegurar que el modal tenga fondo blanco y texto oscuro */}
-        <Modal.Header closeButton className="bg-white border-bottom">
-          <Modal.Title className="text-dark">Confirmar eliminación</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="bg-white text-dark">
-          <p>¿Estás seguro de que deseas eliminar el cuadre del día?</p>
-          <div className="alert alert-warning">
-             Fecha: <strong>{cuadreEliminar?.fecha}</strong>
-          </div>
-        </Modal.Body>
-        <Modal.Footer className="bg-white border-top">
-          <Button variant="secondary" onClick={() => setMostrarModal(false)}>
-            Cancelar
-          </Button>
-          <Button variant="danger" onClick={eliminarCuadreConfirmado}>
-            Sí, Eliminar
-          </Button>
-        </Modal.Footer>
+        <div className="bg-dark text-white border border-secondary rounded">
+          <Modal.Header closeButton closeVariant="white" className="border-secondary">
+            <Modal.Title>Confirmar eliminación</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>¿Estás seguro de que deseas eliminar el cuadre del día?</p>
+            <div className="alert alert-danger text-dark">
+               Fecha: <strong>{cuadreEliminar?.fecha}</strong>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="border-secondary">
+            <Button variant="secondary" onClick={() => setMostrarModal(false)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={eliminarCuadreConfirmado}>
+              Sí, Eliminar
+            </Button>
+          </Modal.Footer>
+        </div>
       </Modal>
     </div>
   );
