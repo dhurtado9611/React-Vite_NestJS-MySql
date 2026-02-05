@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { Modal, Button } from 'react-bootstrap';
+import api from '../services/api'; // Asegúrate que tu instancia de axios esté aquí
+import { Modal } from 'react-bootstrap';
 import { 
   FaBars, 
   FaTimes, 
@@ -13,7 +13,7 @@ import {
   FaSignOutAlt
 } from 'react-icons/fa';
 
-// --- INTERFACES ---
+// --- INTERFACES DE DATOS ---
 interface Reserva {
   id: number;
   habitacion: number;
@@ -28,6 +28,7 @@ interface Reserva {
   observaciones?: string;
 }
 
+// Extendemos la interfaz para cálculos internos de tiempo
 type ReservaExtendida = Reserva & {
   hentradaNum?: number;
   hsalidamaxNum?: number;
@@ -42,34 +43,36 @@ interface Cuadre {
   turnoCerrado?: string | null;
 }
 
-const Historial = () => {
+const ActividadAdmin = () => {
   const navigate = useNavigate();
 
-  // --- ESTADOS ---
+  // --- ESTADOS GLOBALES ---
   const [reservas, setReservas] = useState<ReservaExtendida[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [reservaSeleccionada, setReservaSeleccionada] = useState<ReservaExtendida | null>(null);
   const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<number | null>(null);
-  const [, setNow] = useState(new Date());
+  const [, setNow] = useState(new Date()); // Reloj para forzar re-renderizado cada minuto
   
-  // Estado para el botón de carga
+  // Estado de carga para evitar doble clic
   const [procesandoSalida, setProcesandoSalida] = useState(false);
   
   // Estado menú móvil
   const [menuAbierto, setMenuAbierto] = useState(false);
 
-  // --- ESTADOS CAJA ---
+  // --- ESTADOS DE CAJA Y TURNO (SUPERVISOR) ---
   const [baseCaja, setBaseCaja] = useState<number>(0);
   const [totalVentas, setTotalVentas] = useState<number>(0);
-  const [, setCuadreId] = useState<number | null>(null);
-  const [colaborador, setColaborador] = useState<string>('');
+  
+  // 'cuadreId' es vital para saber qué ID cerrar en la base de datos
+  const [cuadreId, setCuadreId] = useState<number | null>(null);
+  const [colaborador, setColaborador] = useState<string>(''); // Nombre del dueño del turno
   const [turno, setTurno] = useState<string>('');
   const [fecha, setFecha] = useState<string>('');
 
-  // Control de notificaciones
+  // Control de notificaciones para no repetir alertas
   const habitacionesNotificadas = useRef<Set<number>>(new Set());
 
-  // --- LÓGICA DE NOTIFICACIONES ---
+  // --- LÓGICA DE NOTIFICACIONES BROWSER ---
   const solicitarPermisoNotificacion = () => {
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
@@ -85,46 +88,46 @@ const Historial = () => {
     }
   };
 
-  // --- LÓGICA DE DATOS ---
+  // --- LÓGICA CORE: OBTENER CAJA Y DETECTAR TURNOS ---
   const fetchDatosCaja = useCallback(async () => {
     try {
-      const datosTurno = localStorage.getItem('datosTurno');
-      const rol = localStorage.getItem('rol');
-      let nombreUsuario = '';
-      let turnoActual = '';
-
-      if (rol === 'invitado' && datosTurno) {
-        const parsed = JSON.parse(datosTurno);
-        nombreUsuario = parsed.colaborador;
-        turnoActual = parsed.turno;
-        setColaborador(nombreUsuario);
-        setTurno(turnoActual);
-      } else if (rol === 'admin') {
-        nombreUsuario = localStorage.getItem('username') || 'Admin';
-        setColaborador(nombreUsuario);
-      }
-
-      if (!nombreUsuario) return;
-
       const hoy = new Date().toISOString().split('T')[0];
       setFecha(hoy);
 
+      // 1. Buscamos SI EXISTE ALGÚN TURNO ABIERTO (De cualquier persona)
       const resCuadre = await api.get('/cuadre');
+      
+      // Filtramos: Fecha de hoy Y que NO tenga fecha de cierre
       const cuadreActivo = resCuadre.data.find((c: Cuadre) => 
-        c.colaborador === nombreUsuario && 
-        c.fecha === hoy && 
-        !c.turnoCerrado
+        c.fecha === hoy && !c.turnoCerrado
       );
 
+      let usuarioDelTurno = '';
+
       if (cuadreActivo) {
+        // ¡SUPERPODER ADMIN! Detectamos el turno de otro empleado
         setBaseCaja(cuadreActivo.basecaja || 0);
         setCuadreId(cuadreActivo.id);
-        if (!turnoActual) setTurno(cuadreActivo.turno);
+        setTurno(cuadreActivo.turno);
+        setColaborador(cuadreActivo.colaborador); // Ej: "Juan Perez"
+        usuarioDelTurno = cuadreActivo.colaborador;
+      } else {
+        // Si nadie tiene turno abierto, mostramos al Admin logueado
+        const adminUser = localStorage.getItem('username') || 'Admin';
+        setColaborador(adminUser);
+        setTurno('Sin turno');
+        setBaseCaja(0);
+        setCuadreId(null);
+        usuarioDelTurno = adminUser;
       }
 
+      // 2. Calcular Ventas basadas en el dueño del turno
       const resReservas = await api.get('/reservas');
       
-      const misReservasHoy = resReservas.data.filter((r: Reserva) => r.colaborador === nombreUsuario && r.fecha === hoy);
+      // Solo sumamos las ventas del usuario que tiene la caja abierta
+      const misReservasHoy = resReservas.data.filter((r: Reserva) => 
+        r.colaborador === usuarioDelTurno && r.fecha === hoy
+      );
       
       const total = misReservasHoy.reduce((sum: number, r: Reserva) => sum + r.valor, 0);
       setTotalVentas(total);
@@ -134,13 +137,14 @@ const Historial = () => {
     }
   }, []);
 
+  // --- LÓGICA CORE: OBTENER ESTADO DE HABITACIONES ---
   const fetchDatosReservas = async () => {
     try {
       const response = await api.get('/reservas');
       const reservasData = response.data;
       setReservas(reservasData);
       
-      // Revisar notificaciones
+      // Revisar alertas de tiempo
       reservasData.forEach((r: Reserva) => {
         if (!r.hsalida) { 
             const estado = calcularEstadoTiempo(r.hentrada);
@@ -160,107 +164,114 @@ const Historial = () => {
     }
   };
 
+  // Cálculo matemático del tiempo restante
   const calcularEstadoTiempo = (horaEntrada: string) => {
     if (!horaEntrada) return { minutosPasados: 0, minutosRestantes: 240, porcentaje: 0, excedido: false };
     const fechaActual = new Date();
     const [h, m] = horaEntrada.split(':').map(Number);
     const fechaEntrada = new Date();
     fechaEntrada.setHours(h, m, 0, 0);
+    
+    // Ajuste por si la entrada fue ayer antes de medianoche
     if (fechaEntrada > fechaActual && (fechaEntrada.getTime() - fechaActual.getTime() > 12 * 60 * 60 * 1000)) {
         fechaEntrada.setDate(fechaEntrada.getDate() - 1);
     }
     
     const diferenciaMs = fechaActual.getTime() - fechaEntrada.getTime();
     const minutosPasados = Math.floor(diferenciaMs / 60000);
-    const LIMITE_TIEMPO = 240; 
+    const LIMITE_TIEMPO = 240; // 4 Horas
     const porcentaje = Math.min((minutosPasados / LIMITE_TIEMPO) * 100, 100);
     return { minutosPasados, minutosRestantes: LIMITE_TIEMPO - minutosPasados, porcentaje, excedido: minutosPasados >= LIMITE_TIEMPO };
   };
 
   const handleClickHabitacion = (habitacion: number) => {
     setHabitacionSeleccionada(habitacion);
+    // Buscar si hay reserva activa (sin hsalida)
     const activa = reservas.find(r => r.habitacion === habitacion && !r.hsalida);
     setReservaSeleccionada(activa || null);
     setShowModal(true);
   };
 
+  // --- ACCIÓN: CERRAR TURNO (PROPIO O AJENO) ---
   const cerrarTurno = async () => {
-    const confirmar = window.confirm(`¿Seguro deseas cerrar turno?\nTotal Caja: $${(baseCaja + totalVentas).toLocaleString()}`);
+    if (!cuadreId) {
+        alert("⚠️ No hay ningún turno abierto registrado en el sistema para hoy.");
+        return;
+    }
+
+    const confirmar = window.confirm(
+        `PANEL DE SUPERVISOR\n\n` +
+        `Vas a cerrar el turno de: ${colaborador}\n` +
+        `Turno: ${turno}\n` +
+        `Base: $${baseCaja.toLocaleString()}\n` +
+        `Ventas: $${totalVentas.toLocaleString()}\n` +
+        `-----------------------------------\n` +
+        `TOTAL A ENTREGAR: $${(baseCaja + totalVentas).toLocaleString()}\n\n` +
+        `¿Confirmar cierre de caja?`
+    );
+
     if (!confirmar) return;
 
     try {
-      const usuarioActual = colaborador || JSON.parse(localStorage.getItem('datosTurno') || '{}').colaborador;
-      if (!usuarioActual) { alert("Error: Usuario no identificado."); return; }
-
-      const res = await api.get('/cuadre');
-      const turnoReal = res.data.find((c: any) => c.colaborador === usuarioActual && !c.turnoCerrado);
-
-      if (!turnoReal) {
-         alert("⚠️ No se encontró ningún turno abierto.");
-         localStorage.removeItem('datosTurno');
-         navigate('/', { state: { turnoCerrado: true } });
-         return;
-      }
-
       const horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
       const token = localStorage.getItem('token');
 
-      await api.patch(`/cuadre/${turnoReal.id}`, {
+      // PATCH al ID específico encontrado en fetchDatosCaja
+      await api.patch(`/cuadre/${cuadreId}`, {
         turnoCerrado: horaActual,
         totalEntregado: totalVentas, 
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      localStorage.removeItem('datosTurno');
-      navigate('/', { state: { turnoCerrado: true } });
+      alert(`✅ Turno de ${colaborador} cerrado exitosamente.`);
+      localStorage.removeItem('datosTurno'); // Limpieza local
+      fetchDatosCaja(); // Recargar para ver el estado "Sin turno"
 
     } catch (error) {
       console.error('Error al cerrar:', error);
-      alert('Error de conexión.');
+      alert('❌ Error al intentar cerrar el turno. Verifica tu conexión.');
     }
   };
 
-  // --- FUNCIÓN CORREGIDA: DAR SALIDA DESDE MODAL ---
+  // --- ACCIÓN: DAR SALIDA (CORREGIDO PUT + HEADERS) ---
   const handleFinalizarReserva = async () => {
     if (!reservaSeleccionada) return;
 
-    const confirmar = window.confirm(`¿Deseas dar salida a la Habitación ${reservaSeleccionada.habitacion}?\nPlaca: ${reservaSeleccionada.placa}`);
+    const confirmar = window.confirm(`¿Liberar Habitación ${reservaSeleccionada.habitacion}?\nPlaca: ${reservaSeleccionada.placa}`);
     if (!confirmar) return;
 
-    setProcesandoSalida(true); // Bloqueamos el botón para evitar doble clic
+    setProcesandoSalida(true);
 
     try {
-        // Obtenemos hora en formato HH:mm (formato 24h) compatible con backend
+        const token = localStorage.getItem('token'); // Necesario para permisos
         const now = new Date();
         const horaSalida = now.toLocaleTimeString('es-CO', { 
             hour: '2-digit', 
             minute: '2-digit', 
             hour12: false 
-        }); // Ejemplo: "14:30"
+        });
         
-        // Hacemos el PATCH al ID específico de la reserva
-        await api.patch(`/reservas/${reservaSeleccionada.id}`, {
+        // CORRECCIÓN: Usamos .put en lugar de .patch para coincidir con la lógica del Admin
+        await api.put(`/reservas/${reservaSeleccionada.id}`, {
             hsalida: horaSalida
+        }, {
+            headers: { Authorization: `Bearer ${token}` }
         });
 
-        // IMPORTANTE: Recargamos los datos inmediatamente para actualizar la vista
+        // Actualizamos datos inmediatamente
         await Promise.all([
             fetchDatosReservas(),
             fetchDatosCaja()
         ]);
 
-        // Cerramos modal y limpiamos selección
         setShowModal(false);
         setReservaSeleccionada(null);
         habitacionesNotificadas.current.delete(reservaSeleccionada.habitacion);
-        
-        // Pequeño feedback visual (opcional)
-        // alert("Salida registrada correctamente"); 
 
     } catch (error) {
         console.error("Error finalizando reserva:", error);
-        alert("Ocurrió un error al intentar dar salida. Por favor revisa la conexión.");
+        alert("Error al finalizar. Verifica consola.");
     } finally {
         setProcesandoSalida(false);
     }
@@ -273,12 +284,17 @@ const Historial = () => {
     return `${h}h ${m}m`;
   };
 
+  // --- EFFECTS ---
   useEffect(() => {
     solicitarPermisoNotificacion();
     fetchDatosReservas();
     fetchDatosCaja();
+    
+    // Polling de datos cada 10 seg
     const interval = setInterval(() => { fetchDatosReservas(); fetchDatosCaja(); }, 10000);
+    // Reloj local cada 1 min
     const clock = setInterval(() => setNow(new Date()), 60000);
+    
     return () => { clearInterval(interval); clearInterval(clock); };
   }, [fetchDatosCaja]);
 
@@ -306,7 +322,7 @@ const Historial = () => {
         `}
       </style>
 
-      {/* --- NAVBAR --- */}
+      {/* --- NAVBAR INTELIGENTE --- */}
       <div className="bg-black border-b border-gray-700 p-4 sticky top-0 z-40 shadow-lg flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div className="bg-indigo-600 p-2 rounded-lg shadow-lg shadow-indigo-500/20">
@@ -314,14 +330,21 @@ const Historial = () => {
           </div>
           <div>
             <span className="font-bold text-lg tracking-wide text-white block leading-none">CONTROL</span>
-            <span className="text-xs text-gray-400 block mt-1 leading-none">{colaborador || 'Invitado'}</span>
+            {/* Aquí se muestra quién tiene el turno abierto */}
+            <span className="text-xs text-gray-400 block mt-1 leading-none uppercase">
+                {colaborador ? colaborador : 'Sin Turno Activo'}
+            </span>
           </div>
         </div>
+        
+        {/* Botón menú móvil */}
         <div className="md:hidden">
           <button onClick={() => setMenuAbierto(!menuAbierto)} className="text-gray-300 hover:text-white p-2">
             {menuAbierto ? <FaTimes size={24} /> : <FaBars size={24} />}
           </button>
         </div>
+
+        {/* Panel de Datos PC */}
         <div className="hidden md:flex items-center space-x-6 text-sm">
             <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">FECHA</span><span className="leading-none">{fecha}</span></div>
             <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">TURNO</span><span className="leading-none">{turno}</span></div>
@@ -329,16 +352,20 @@ const Historial = () => {
             <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">BASE</span><span className="text-blue-300 leading-none">${baseCaja.toLocaleString()}</span></div>
             <div className="flex flex-col items-center"><span className="text-gray-500 text-xs font-bold">VENTAS</span><span className="text-green-400 font-bold leading-none">+${totalVentas.toLocaleString()}</span></div>
             <div className="flex flex-col items-center bg-gray-700/50 px-3 py-1 rounded-lg border border-gray-600">
-                <span className="text-gray-400 text-[10px] font-bold">TOTAL</span>
+                <span className="text-gray-400 text-[10px] font-bold">TOTAL CAJA</span>
                 <span className="text-white font-bold text-base leading-none">${(baseCaja + totalVentas).toLocaleString()}</span>
             </div>
-            <button onClick={cerrarTurno} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-lg shadow-red-900/20 transition-all hover:scale-105">
-              CERRAR TURNO
-            </button>
+            
+            {/* Botón Cerrar Turno: Se activa solo si detectamos un ID de cuadre */}
+            {cuadreId && (
+                <button onClick={cerrarTurno} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-lg shadow-red-900/20 transition-all hover:scale-105 animate-pulse">
+                CERRAR TURNO
+                </button>
+            )}
         </div>
       </div>
 
-      {/* Menú Móvil */}
+      {/* Menú Móvil Desplegable */}
       <div className={`md:hidden fixed top-[72px] left-0 w-full bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 shadow-2xl overflow-hidden transition-all duration-300 z-30 ${menuAbierto ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="px-4 py-6 space-y-4">
           <div className="grid grid-cols-2 gap-4 text-center">
@@ -351,11 +378,15 @@ const Historial = () => {
                 <span className="text-green-400 font-mono text-lg">+${totalVentas.toLocaleString()}</span>
               </div>
           </div>
-          <button onClick={cerrarTurno} className="w-full bg-red-600 text-white font-bold py-3.5 rounded-xl">FINALIZAR JORNADA</button>
+          {cuadreId && (
+            <button onClick={cerrarTurno} className="w-full bg-red-600 text-white font-bold py-3.5 rounded-xl">
+                CERRAR TURNO DE {colaborador.toUpperCase()}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* --- GRID DE HABITACIONES --- */}
+      {/* --- GRID DE HABITACIONES (Visualización) --- */}
       <div className="pt-8 pb-20 px-3 md:px-8 min-h-[calc(100vh-80px)] flex flex-col justify-center">
         <div className="max-w-6xl mx-auto w-full">
           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-6 justify-items-center">
@@ -393,7 +424,7 @@ const Historial = () => {
         </div>
       </div>
 
-      {/* --- MODAL DETALLADO --- */}
+      {/* --- MODAL DETALLE HABITACIÓN --- */}
       <Modal 
         show={showModal} 
         onHide={() => setShowModal(false)} 
@@ -412,6 +443,7 @@ const Historial = () => {
         <Modal.Body className="p-0 !bg-gray-900">
              {reservaSeleccionada ? (
                  <div className="flex flex-col">
+                    {/* Header de Tiempo */}
                     <div className={`p-6 text-center ${estadoModal?.excedido ? 'bg-red-900/30' : 'bg-indigo-900/20'} border-b border-gray-700`}>
                         <div className="mb-2 text-xs font-bold uppercase tracking-widest text-gray-400">Tiempo Restante</div>
                         {estadoModal?.excedido ? (
@@ -423,6 +455,7 @@ const Historial = () => {
                         )}
                     </div>
 
+                    {/* Grilla de Datos */}
                     <div className="grid grid-cols-2 gap-px bg-gray-700">
                         <div className="bg-gray-800 p-4 flex flex-col items-center justify-center gap-1">
                             <FaCar className="text-gray-500 mb-1" />
@@ -445,6 +478,7 @@ const Historial = () => {
                         </div>
                     </div>
 
+                    {/* Observaciones */}
                     {reservaSeleccionada.observaciones && (
                         <div className="bg-gray-800 p-4 border-t border-gray-700">
                             <div className="flex items-center gap-2 mb-2">
@@ -457,6 +491,7 @@ const Historial = () => {
                         </div>
                     )}
                     
+                    {/* Botón de Acción */}
                     <div className="p-4 bg-gray-800 border-t border-gray-700">
                         <button 
                             onClick={handleFinalizarReserva}
@@ -486,4 +521,4 @@ const Historial = () => {
   );
 };
 
-export default Historial;
+export default ActividadAdmin;
