@@ -496,4 +496,4 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ showModal, setShowModal
   );
 };
 
-export default InventoryModal;arket A Inv
+export default InventoryModal;
