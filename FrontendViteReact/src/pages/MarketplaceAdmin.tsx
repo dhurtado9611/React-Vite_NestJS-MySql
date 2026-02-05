@@ -108,7 +108,7 @@ const InventarioAdmin = () => {
     try {
         // --- AQUÍ ESTÁ LA CORRECCIÓN CLAVE ---
         // Usamos PUT hacia /productos/:id
-        await api.put(`/productos/${editingProduct.id}`, {
+        await api.put(`/preciosInventario/${editingProduct.id}`, {
             precio: Number(newPrice),
             // Si tu backend requiere nombre también, descomenta la siguiente línea:
             // nombre: editingProduct.nombre 

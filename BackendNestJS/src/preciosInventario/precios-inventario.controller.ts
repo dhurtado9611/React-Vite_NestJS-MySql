@@ -5,7 +5,7 @@ import { UpdatePrecioInventarioDto } from './dto/update-precio-inventario.dto';
 import { CreatePrecioInventarioDto } from './dto/create-precio-inventario.dto'; // Asegúrate de importar esto
 
 // @UseGuards(JwtAuthGuard) // <--- Si el frontend no envía token en el GET inicial, esto bloqueará la carga de productos (Error 403)
-@Controller('productos') // CAMBIO IMPORTANTE: De 'preciosInventario' a 'productos'
+@Controller('preciosInventario') // CAMBIO IMPORTANTE: De 'preciosInventario'
 export class PreciosInventarioController {
   constructor(private readonly preciosService: PreciosInventarioService) {}
 
