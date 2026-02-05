@@ -3,31 +3,38 @@ import axios from 'axios';
 import { FaShoppingCart, FaTrash, FaPlus, FaMinus, FaSync } from 'react-icons/fa';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-// ✅ RUTAS DE IMÁGENES (Carpeta public)
-const catalogoBase = [
-  { nombre: 'AGUARDIENTE', imagen: '/assets/Aguardiente.jpg', precio: 7000 },
-  { nombre: 'RON', imagen: '/assets/ron.jpg', precio: 7500 },
-  { nombre: 'POKER', imagen: '/assets/poker.jpg', precio: 3500 },
-  { nombre: 'ENERGIZANTE', imagen: '/assets/energizante.jpg', precio: 4000 },
-  { nombre: 'JUGOS_HIT', imagen: '/assets/jugohit.jpg', precio: 2000 },
-  { nombre: 'AGUA', imagen: '/assets/agua.jpg', precio: 1500 },
-  { nombre: 'GASEOSA', imagen: '/assets/gaseosa.jpg', precio: 2500 },
-  { nombre: 'PAPEL_HIGIENICO', imagen: '/assets/papelh.jpg', precio: 2000 },
-  { nombre: 'ALKA_SELTZER', imagen: '/assets/alka.jpg', precio: 3000 },
-  { nombre: 'SHAMPOO', imagen: '/assets/shampoo.jpg', precio: 3000 },
-  { nombre: 'TOALLA_HIGIENICA', imagen: '/assets/toallah.jpg', precio: 2500 },
-  { nombre: 'CONDONES', imagen: '/assets/condones.jpg', precio: 2000 },
-  { nombre: 'BONOS', imagen: '/assets/bono.jpg', precio: 5000 },
-];
+// ✅ 1. DICCIONARIO DE IMÁGENES LOCALES
+// Como en la BD la imagen es NULL, usamos este mapa para asignarlas según el nombre.
+// Las claves están en MAYÚSCULAS para facilitar la búsqueda sin importar cómo venga de la BD.
+const imagenesLocales: Record<string, string> = {
+  'AGUARDIENTE': '/assets/Aguardiente.jpg',
+  'RON': '/assets/ron.jpg',
+  'POKER': '/assets/poker.jpg',
+  'ENERGIZANTE': '/assets/energizante.jpg',
+  'JUGOS_HIT': '/assets/jugohit.jpg',
+  'JUGOS HIT': '/assets/jugohit.jpg', // Variación por si acaso
+  'AGUA': '/assets/agua.jpg',
+  'GASEOSA': '/assets/gaseosa.jpg',
+  'PAPEL_HIGIENICO': '/assets/papelh.jpg',
+  'PAPEL HIGIENICO': '/assets/papelh.jpg',
+  'ALKA_SELTZER': '/assets/alka.jpg',
+  'ALKA SELTZER': '/assets/alka.jpg',
+  'SHAMPOO': '/assets/shampoo.jpg',
+  'TOALLA_HIGIENICA': '/assets/toallah.jpg',
+  'TOALLA HIGIENICA': '/assets/toallah.jpg',
+  'CONDONES': '/assets/condones.jpg',
+  'BONOS': '/assets/bono.jpg',
+};
 
-// Interface para manejar la lista desplegable de forma segura
+// Interface auxiliar
 interface ReservaActiva {
   id: number;
   habitacion: number;
 }
 
 const MarketplaceCliente = () => {
-  const [productos, setProductos] = useState(catalogoBase.map(p => ({ ...p, stock: 0 }))); 
+  // Estado inicial vacío, se llenará con la BD
+  const [productos, setProductos] = useState<any[]>([]); 
   const [carrito, setCarrito] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   
@@ -62,37 +69,62 @@ const MarketplaceCliente = () => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  const fetchInventario = () => {
-    // El inventario suele ser público, pero si requiere auth, agrega los headers aquí también
-    axios.get(`${import.meta.env.VITE_API_URL}/inventario`)
-      .then(res => {
-        const data = res.data;
-        if (data && data.length > 0) {
-          const ultimoInventario = data[data.length - 1];
-          const productosActualizados = catalogoBase.map(prod => ({
-            ...prod,
-            stock: Number(ultimoInventario[prod.nombre] || 0)
-          }));
-          setProductos(productosActualizados);
-        }
-      })
-      .catch(err => console.error("Error cargando inventario", err));
+  // ✅ 2. FUNCIÓN ACTUALIZADA: Carga desde BD y mezcla con imágenes locales
+  const fetchInventario = async () => {
+    try {
+      // A. Obtenemos los precios y nombres de la BD (Tu tabla 'preciosInventario')
+      const resPrecios = await axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`);
+      const productosBD = resPrecios.data; // Array de { id, nombre, precio, imagen ... }
+
+      // B. Obtenemos el stock (Si usas el endpoint antiguo de inventario para cantidades)
+      let stockMap: any = {};
+      try {
+          const resStock = await axios.get(`${import.meta.env.VITE_API_URL}/inventario`);
+          if (resStock.data && resStock.data.length > 0) {
+              // Asumimos que el último registro tiene los stocks actuales
+              stockMap = resStock.data[resStock.data.length - 1];
+          }
+      } catch (e) {
+          console.warn("No se pudo cargar stock, asumiendo 0", e);
+      }
+
+      // C. Mezclamos todo (Precio BD + Imagen Local + Stock)
+      const productosProcesados = productosBD.map((item: any) => {
+          // Normalizamos nombre a mayúsculas para buscar la imagen
+          const nombreMayus = item.nombre ? item.nombre.toUpperCase() : '';
+          
+          // Buscamos la imagen: BD > Local > Placeholder
+          const imagenFinal = item.imagen || imagenesLocales[nombreMayus] || imagenesLocales[item.nombre] || 'https://via.placeholder.com/150?text=Sin+Imagen';
+
+          return {
+              id: item.id,
+              nombre: item.nombre,
+              precio: Number(item.precio),
+              imagen: imagenFinal,
+              // Buscamos el stock por el nombre exacto
+              stock: Number(stockMap[item.nombre] || 0) 
+          };
+      });
+
+      setProductos(productosProcesados);
+
+    } catch (err) {
+      console.error("Error cargando inventario desde BD", err);
+    }
   };
 
   // 🔒 LÓGICA SEGURA: Buscar habitaciones ocupadas y guardar sus IDs
   const fetchReservasActivas = async () => {
     try {
-      // 🟢 CORRECCIÓN: Agregamos el token a la petición
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas`, {
         headers: getAuthHeaders()
       });
       
-      // Filtramos solo las que NO tienen hora de salida (Ocupadas)
       const activas: ReservaActiva[] = (res.data as any[])
-        .filter((r: any) => r.habitacion && !r.hsalida) // Si no tiene hsalida, está ocupada
+        .filter((r: any) => r.habitacion && !r.hsalida) 
         .map((r: any) => ({
-          id: r.id,            // Guardamos el ID real de la base de datos
-          habitacion: Number(r.habitacion) // Y el número para mostrarlo
+          id: r.id,            
+          habitacion: Number(r.habitacion)
         }))
         .sort((a, b) => a.habitacion - b.habitacion);
 
@@ -106,13 +138,14 @@ const MarketplaceCliente = () => {
   // Funciones del Carrito
   const agregarAlCarrito = (producto: any) => {
     setCarrito(prev => {
-      const existe = prev.find((i: any) => i.nombre === producto.nombre);
+      // Usamos ID si existe, sino nombre para compatibilidad
+      const existe = prev.find((i: any) => i.id === producto.id);
       if (existe) {
         if (existe.cantidad + 1 > producto.stock) {
           alert(`Solo quedan ${producto.stock} unidades de ${producto.nombre}`);
           return prev;
         }
-        return prev.map((i: any) => i.nombre === producto.nombre ? { ...i, cantidad: i.cantidad + 1 } : i);
+        return prev.map((i: any) => i.id === producto.id ? { ...i, cantidad: i.cantidad + 1 } : i);
       }
       return [...prev, { ...producto, cantidad: 1 }];
     });
@@ -120,14 +153,14 @@ const MarketplaceCliente = () => {
 
   const reducirDelCarrito = (producto: any) => {
     if (producto.cantidad === 1) {
-      setCarrito(prev => prev.filter((i: any) => i.nombre !== producto.nombre));
+      setCarrito(prev => prev.filter((i: any) => i.id !== producto.id));
     } else {
-      setCarrito(prev => prev.map((i: any) => i.nombre === producto.nombre ? { ...i, cantidad: i.cantidad - 1 } : i));
+      setCarrito(prev => prev.map((i: any) => i.id === producto.id ? { ...i, cantidad: i.cantidad - 1 } : i));
     }
   };
 
-  const removerDelCarrito = (nombre: string) => {
-    setCarrito(prev => prev.filter((i: any) => i.nombre !== nombre));
+  const removerDelCarrito = (id: number) => {
+    setCarrito(prev => prev.filter((i: any) => i.id !== id));
   };
 
   // 🔒 CONFIRMAR PEDIDO
@@ -201,7 +234,7 @@ const MarketplaceCliente = () => {
       
       {/* NAVBAR PERSONALIZADO */}
       <div className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">
-        <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24">Servicio a la habitacion</div>
+        <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24 text-white">Servicio a la habitacion</div>
         <div 
           className="relative cursor-pointer bg-white text-red-700 p-2 rounded-full hover:bg-gray-200 transition" 
           onClick={() => setShowModal(true)}
@@ -216,40 +249,44 @@ const MarketplaceCliente = () => {
       </div>
 
       {/* Grid Productos */}
-      <div className="container mx-auto p-4 pt-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {productos.map(prod => (
-            <div key={prod.nombre} className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition">
-              <div className="h-40 bg-gray-200 relative">
-                <img 
-                  src={prod.imagen} 
-                  alt={prod.nombre} 
-                  className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Sin+Imagen'; }}
-                />
-                {prod.stock <= 0 && (
-                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold">AGOTADO</div>
-                )}
-              </div>
-              <div className="p-3 flex flex-col flex-grow">
-                <h3 className="font-bold text-gray-800 text-sm">{prod.nombre}</h3>
-                <p className={`text-xs mb-2 ${prod.stock < 5 ? 'text-red-500 font-bold' : 'text-green-600'}`}>
-                  Disponible: {prod.stock}
-                </p>
-                <div className="mt-auto flex justify-between items-center pt-2">
-                  <span className="font-bold text-gray-900">${prod.precio.toLocaleString()}</span>
-                  <button
-                    disabled={prod.stock <= 0}
-                    onClick={() => agregarAlCarrito(prod)}
-                    className="bg-red-600 text-white p-2 rounded-full hover:bg-red-800 disabled:opacity-50 transition"
-                  >
-                    <FaPlus size={12} />
-                  </button>
+      <div className="container mx-auto p-4 pt-20"> {/* Ajusté el padding-top por el navbar fijo */}
+        {productos.length === 0 ? (
+            <div className="text-center py-10 text-gray-500">Cargando productos...</div>
+        ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {productos.map(prod => (
+                <div key={prod.id || prod.nombre} className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition">
+                <div className="h-40 bg-gray-200 relative">
+                    <img 
+                    src={prod.imagen} 
+                    alt={prod.nombre} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Sin+Imagen'; }}
+                    />
+                    {prod.stock !== undefined && prod.stock <= 0 && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold">AGOTADO</div>
+                    )}
                 </div>
-              </div>
+                <div className="p-3 flex flex-col flex-grow">
+                    <h3 className="font-bold text-gray-800 text-sm">{prod.nombre}</h3>
+                    <p className={`text-xs mb-2 ${prod.stock < 5 ? 'text-red-500 font-bold' : 'text-green-600'}`}>
+                    Disponible: {prod.stock}
+                    </p>
+                    <div className="mt-auto flex justify-between items-center pt-2">
+                    <span className="font-bold text-gray-900">${prod.precio.toLocaleString()}</span>
+                    <button
+                        disabled={prod.stock <= 0}
+                        onClick={() => agregarAlCarrito(prod)}
+                        className="bg-red-600 text-white p-2 rounded-full hover:bg-red-800 disabled:opacity-50 transition"
+                    >
+                        <FaPlus size={12} />
+                    </button>
+                    </div>
+                </div>
+                </div>
+            ))}
             </div>
-          ))}
-        </div>
+        )}
       </div>
       
       {/* Modal Carrito */}
@@ -265,13 +302,13 @@ const MarketplaceCliente = () => {
                         <div key={i} className="flex justify-between items-center border-b pb-2">
                             <div>
                                 <p className="font-bold m-0">{item.nombre}</p>
-                                <p className="text-xs text-gray-500 m-0">${item.precio} x {item.cantidad}</p>
+                                <p className="text-xs text-gray-500 m-0">${item.precio.toLocaleString()} x {item.cantidad}</p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button onClick={() => reducirDelCarrito(item)} className="bg-gray-200 px-2 rounded hover:bg-gray-300">-</button>
                                 <span className="font-bold">{item.cantidad}</span>
                                 <button onClick={() => agregarAlCarrito(item)} className="bg-gray-200 px-2 rounded hover:bg-gray-300">+</button>
-                                <button onClick={() => removerDelCarrito(item.nombre)} className="text-red-500 ml-2"><FaTrash/></button>
+                                <button onClick={() => removerDelCarrito(item.id)} className="text-red-500 ml-2"><FaTrash/></button>
                             </div>
                         </div>
                     ))}
