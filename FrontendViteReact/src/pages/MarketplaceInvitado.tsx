@@ -206,7 +206,7 @@ const MarketplaceCliente = () => {
     <div className="relative min-h-screen pb-20 md:pl-24 bg-gray-900">
       
       {/* NAVBAR */}
-      <div className="fixed top-0 left-0 w-full bg-black/90 backdrop-blur-md border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">
+      <div className="fixed top-0 left-0 w-full bg-black/90 backdrop-blur-md border-b border-white/10 z-50 px-4 shadow-lg flex justify-between items-center md:h-[90px] py-3 md:py-0">
         <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24 text-white">Servicio a la habitación</div>
         <div 
           className="relative cursor-pointer bg-white/10 text-red-500 p-2 rounded-full hover:bg-white/20 transition border border-white/20" 
