@@ -304,8 +304,7 @@ const Historial = () => {
       </style>
 
       {/* --- NAVBAR --- */}
-      <div className="fixed top-0 left-0 w-full bg-black border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">
-        <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24 flex items-center gap-2">
+      <div className="fixed top-0 left-0 w-full bg-black/90 backdrop-blur-md border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">        <div className="text-sm md:text-lg font-bold truncate pr-2 md:pl-24 flex items-center gap-2">
           Control de Habitaciones
         </div>
         <div className="md:hidden">

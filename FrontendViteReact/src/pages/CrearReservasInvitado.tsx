@@ -59,8 +59,7 @@ const Reservas = () => {
   return (
     <div className="relative text-white w-full min-h-screen pt-24 pb-20 sm:px-8 md:pl-24 transition-all duration-300">
       {/* NAVBAR PERSONALIZADO */}
-      <nav className="md:pl-24 md:pr-24 fixed top-0 left-0 w-full bg-black border-b border-white/10 z-40 py-3 shadow-lg flex justify-between items-center transition-all duration-300">
-        <div className="px-4 text-sm md:text-lg font-bold truncate pr-2 md:pl-20">
+      <div className="fixed top-0 left-0 w-full bg-black/90 backdrop-blur-md border-b border-white/10 z-50 px-4 py-3 shadow-lg flex justify-between items-center">        <div className="px-4 text-sm md:text-lg font-bold truncate pr-2 md:pl-20">
           Bienvenido,{' '}
           <span className="text-red-600 font-extrabold uppercase tracking-wide">
             {username || 'Invitado'}
@@ -75,7 +74,7 @@ const Reservas = () => {
         >
           <i className="bi bi-box-arrow-right"></i> Cerrar sesión
         </button>
-      </nav>
+      </div>
 
       {/* Título de la sección */}
       <h2 className="mb-4 text-xl font-semibold border-l-4 border-red-600 pl-3">

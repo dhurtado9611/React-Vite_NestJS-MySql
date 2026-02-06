@@ -222,7 +222,7 @@ const MarketplaceCliente = () => {
       </div>
 
       {/* Grid Productos */}
-      <div className="container mx-auto p-4 pt-24"> 
+      <div className="container mx-auto pb-4 pt-24"> 
         {productos.length === 0 ? (
             <div className="text-center py-10 text-white/50">Cargando productos...</div>
         ) : (
