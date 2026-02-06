@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaShoppingCart, FaTrash, FaPlus, FaSync } from 'react-icons/fa'; // Quite FaMinus que no se usaba
+import { FaShoppingCart, FaTrash, FaPlus, FaSync } from 'react-icons/fa';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-// ✅ 1. DICCIONARIO DE IMÁGENES LOCALES
+// ✅ 1. DICCIONARIO DE IMÁGENES
 const imagenesLocales: Record<string, string> = {
   'AGUARDIENTE': '/assets/Aguardiente.jpg',
   'RON': '/assets/ron.jpg',
@@ -61,7 +61,6 @@ const MarketplaceCliente = () => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  // ✅ 2. FUNCIÓN ACTUALIZADA: Usa placehold.co para evitar el error de red
   const fetchInventario = async () => {
     try {
       const resPrecios = await axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`);
@@ -79,7 +78,6 @@ const MarketplaceCliente = () => {
 
       const productosProcesados = productosBD.map((item: any) => {
           const nombreMayus = item.nombre ? item.nombre.toUpperCase() : '';
-          // 🛠️ AQUÍ ESTÁ EL CAMBIO: placehold.co
           const imagenFinal = item.imagen || imagenesLocales[nombreMayus] || imagenesLocales[item.nombre] || 'https://placehold.co/150?text=Sin+Imagen';
 
           return {
@@ -229,50 +227,59 @@ const MarketplaceCliente = () => {
             <div className="text-center py-10 text-white/50">Cargando productos...</div>
         ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {productos.map(prod => (
-                <div key={prod.id || prod.nombre} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl shadow-xl overflow-hidden flex flex-col hover:border-red-600/50 transition duration-300">
-                <div className="h-40 bg-black/20 relative">
-                    {/* 🛠️ CORRECCIÓN EN ONERROR TAMBIÉN */}
-                    <img 
-                    src={prod.imagen} 
-                    alt={prod.nombre} 
-                    className="w-full h-full object-cover opacity-90 hover:opacity-100 transition"
-                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/150?text=Sin+Imagen'; }}
-                    />
-                    {prod.stock !== undefined && prod.stock <= 0 && (
-                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white font-bold backdrop-blur-sm">AGOTADO</div>
-                    )}
-                </div>
-                <div className="p-3 flex flex-col flex-grow">
-                    <h3 className="font-bold text-gray-100 text-sm">{prod.nombre}</h3>
-                    <p className={`text-xs mb-2 ${prod.stock < 5 ? 'text-red-400 font-bold' : 'text-green-400'}`}>
-                    Disponible: {prod.stock}
-                    </p>
-                    <div className="mt-auto flex justify-between items-center pt-2">
-                    <span className="font-bold text-white text-lg">${prod.precio.toLocaleString()}</span>
-                    <button
-                        disabled={prod.stock <= 0}
-                        onClick={() => agregarAlCarrito(prod)}
-                        className="bg-red-600 text-white p-2 rounded-full hover:bg-red-700 disabled:opacity-50 transition shadow-lg shadow-red-900/20"
-                    >
-                        <FaPlus size={12} />
-                    </button>
-                    </div>
-                </div>
-                </div>
-            ))}
+            {productos.map(prod => {
+                const itemEnCarrito = carrito.find(item => item.id === prod.id);
+                const cantidadLlevada = itemEnCarrito ? itemEnCarrito.cantidad : 0;
+                const stockVisual = prod.stock - cantidadLlevada;
+
+                return (
+                  <div key={prod.id || prod.nombre} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl shadow-xl overflow-hidden flex flex-col hover:border-red-600/50 transition duration-300">
+                  <div className="h-40 bg-black/20 relative">
+                      <img 
+                      src={prod.imagen} 
+                      alt={prod.nombre} 
+                      className="w-full h-full object-cover opacity-90 hover:opacity-100 transition"
+                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/150?text=Sin+Imagen'; }}
+                      />
+                      {stockVisual <= 0 && (
+                      <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white font-bold backdrop-blur-sm">
+                        {prod.stock <= 0 ? 'AGOTADO' : 'MÁXIMO ALCANZADO'}
+                      </div>
+                      )}
+                  </div>
+                  <div className="p-3 flex flex-col flex-grow">
+                      <h3 className="font-bold text-gray-100 text-sm">{prod.nombre}</h3>
+                      <p className={`text-xs mb-2 ${stockVisual < 5 ? 'text-red-400 font-bold' : 'text-green-400'}`}>
+                      Disponible: {stockVisual}
+                      </p>
+                      <div className="mt-auto flex justify-between items-center pt-2">
+                      <span className="font-bold text-white text-lg">${prod.precio.toLocaleString()}</span>
+                      <button
+                          disabled={stockVisual <= 0}
+                          onClick={() => agregarAlCarrito(prod)}
+                          className="bg-red-600 text-white p-2 rounded-full hover:bg-red-700 disabled:opacity-50 disabled:bg-gray-600 transition shadow-lg shadow-red-900/20"
+                      >
+                          <FaPlus size={12} />
+                      </button>
+                      </div>
+                  </div>
+                  </div>
+                );
+            })}
             </div>
         )}
       </div>
       
-      {/* 💎 MODAL GLASSMORPHISM 💎 */}
+      {/* 💎 MODAL CORREGIDO - FUERZA EL FONDO OSCURO 💎 
+        Usamos !bg-... para sobreescribir el estilo de Bootstrap
+      */}
       <Modal 
         show={showModal} 
         onHide={() => setShowModal(false)} 
         centered
-        contentClassName="bg-black/80 backdrop-blur-xl border border-white/20 text-white shadow-2xl rounded-2xl"
+        contentClassName="!bg-black/90 backdrop-blur-xl !border-white/20 !text-white shadow-2xl rounded-2xl"
       >
-         <Modal.Header closeButton closeVariant="white" className="border-white/10">
+         <Modal.Header closeButton closeVariant="white" className="!border-white/10 !bg-transparent">
             <Modal.Title className="font-bold text-lg">🛍️ Resumen del Pedido</Modal.Title>
          </Modal.Header>
          
@@ -317,7 +324,8 @@ const MarketplaceCliente = () => {
                             <Form.Select 
                               value={reservaSeleccionadaId} 
                               onChange={e => setReservaSeleccionadaId(Number(e.target.value))}
-                              className="font-bold text-white bg-black/40 border-white/20 focus:bg-black/60 focus:border-blue-500 focus:shadow-none placeholder-gray-500"
+                              // Aquí también usamos !bg- para asegurar que los inputs sean oscuros
+                              className="font-bold !text-white !bg-gray-800 !border-white/20 focus:!bg-gray-700 focus:!border-blue-500 focus:shadow-none placeholder-gray-500"
                               style={{ colorScheme: 'dark' }} 
                             >
                               <option value="" className="text-gray-500 bg-gray-900">-- Seleccione --</option>
@@ -337,7 +345,7 @@ const MarketplaceCliente = () => {
             )}
          </Modal.Body>
          
-         <Modal.Footer className="border-white/10">
+         <Modal.Footer className="!border-white/10 !bg-transparent">
              <Button variant="outline-light" className="border-white/20 hover:bg-white/10" onClick={() => setShowModal(false)}>
                 Cerrar
              </Button>
