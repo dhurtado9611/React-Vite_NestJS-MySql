@@ -45,8 +45,10 @@ const Reservas = () => {
     fetchReservas();
   }, []);
 
+  // La lógica de limpieza ya estaba correcta, se mantiene igual.
   const handleLogout = () => {
     if (window.confirm("¿Deseas cerrar sesión?")) {
+      // Limpieza de credenciales críticas
       localStorage.removeItem('token');
       localStorage.removeItem('username');
       localStorage.removeItem('datosTurno');
@@ -65,11 +67,13 @@ const Reservas = () => {
           </span>
         </div>
         
+        {/* BOTÓN ACTUALIZADO */}
         <button 
           onClick={handleLogout}
-          className="bg-white/10 hover:bg-red-600 text-white text-xs md:text-sm px-3 py-2 rounded transition-colors border border-white/20 flex items-center gap-2 whitespace-nowrap"
+          // Se agregó 'md:hidden' para ocultarlo en escritorio
+          className="md:hidden bg-white/10 hover:bg-red-600 text-white text-xs px-3 py-2 rounded transition-colors border border-white/20 flex items-center gap-2 whitespace-nowrap"
         >
-          <i className="bi bi-box-arrow-right"></i> Salir
+          <i className="bi bi-box-arrow-right"></i> Cerrar sesión
         </button>
       </nav>
 
