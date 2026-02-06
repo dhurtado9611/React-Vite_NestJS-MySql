@@ -123,7 +123,7 @@ const Sidebar = () => {
               h-14 w-14 rounded-full
               /* Tamaños Desktop */
               md:h-14 md:w-full md:rounded-none
-              ${isActive ? 'md:bg-white/5' : 'hover:md:bg-white/5'}
+              ${isActive ? 'md:bg-black' : 'hover:md:bg-red-600'}
             `}
           >
              {/* INDICADOR BURBUJA (Móvil) */}
