@@ -3,8 +3,6 @@ import { Modal, Button, Form, Table, Badge } from 'react-bootstrap';
 import { FaBoxOpen, FaEdit, FaSync, FaSave, FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 
-// --- DICCIONARIO DE IMÁGENES (Respaldo local) ---
-// Útil porque en tu base de datos la columna 'imagen' está como NULL.
 const imagenesLocales: Record<string, string> = {
   'AGUARDIENTE': '/assets/Aguardiente.jpg',
   'RON': '/assets/ron.jpg',
@@ -32,7 +30,7 @@ interface Product {
 
 // Configuración de Axios
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000', // Ajusta si es necesario
+  baseURL: import.meta.env.VITE_API_URL
 });
 
 // Interceptor para inyectar el Token automáticamente
@@ -106,7 +104,6 @@ const InventarioAdmin = () => {
 
     setSaving(true);
     try {
-        // --- AQUÍ ESTÁ LA CORRECCIÓN CLAVE ---
         // Usamos PUT hacia /productos/:id
         await api.put(`/preciosInventario/${editingProduct.id}`, {
             precio: Number(newPrice),
@@ -130,7 +127,7 @@ const InventarioAdmin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark text-white p-4 md:p-8">
+    <div className="min-h-screen text-white font-sans selection:bg-indigo-500 selection:text-white md:pl-24 md:pr-24 pb-20 md:pb-0">
       
       {/* HEADER */}
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-3">
