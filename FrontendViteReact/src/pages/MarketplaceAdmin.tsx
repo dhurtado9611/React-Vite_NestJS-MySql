@@ -130,7 +130,7 @@ const InventarioAdmin = () => {
     <div className="min-h-screen text-white font-sans selection:bg-indigo-500 selection:text-white md:pl-24 md:pr-24 pb-20 md:pb-0">
       
       {/* HEADER */}
-      <div className="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-3">
+      <div className="bg-black border-b border-gray-700 p-4 sticky top-0 z-40 shadow-lg flex justify-between items-center">
         <div>
             <h2 className="d-flex align-items-center gap-3 mb-0">
                 <FaBoxOpen className="text-warning" />
