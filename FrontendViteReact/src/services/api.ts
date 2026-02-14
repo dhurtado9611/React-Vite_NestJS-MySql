@@ -42,7 +42,7 @@ export const logout = () => {
   localStorage.removeItem('token'); // Borra el token
   localStorage.removeItem('user');  // Si guardas datos del usuario, bórralos también
   // Redirige al login y recarga para limpiar estados de memoria (Redux/Context)
-  window.location.href = '/login'; 
+  window.location.href = '/'; 
 };
 
 export default api;
