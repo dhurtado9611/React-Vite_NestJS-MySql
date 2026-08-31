@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaShoppingCart, FaTrash, FaPlus, FaSync } from 'react-icons/fa';
 import { Modal, Button, Form } from 'react-bootstrap';
