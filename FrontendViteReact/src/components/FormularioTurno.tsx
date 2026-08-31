@@ -12,8 +12,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   const [colaborador, setColaborador] = useState('');
   const [turno, setTurno] = useState('');
   const [baseCaja, setBaseCaja] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [userId, setUserId] = useState<number | null>(null);
+  const [, setUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
   // INVENTARIO MANUAL (Fijo en código)

@@ -16,7 +16,7 @@ const ReservarCliente = () => {
   const [notas, setNotas] = useState('');
   const [correoCliente, setCorreoCliente] = useState('');
   const [nombreCliente, setNombreCliente] = useState('');
-  const [clienteId, setClienteId] = useState('cliente-uid-ejemplo');
+  const [clienteId] = useState('cliente-uid-ejemplo');
 
   useEffect(() => {
     const fetchDisponibles = async () => {

@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../services/api'; // Asegúrate que tu instancia de axios esté aquí
 import { Modal } from 'react-bootstrap';
 import { 
@@ -44,8 +43,6 @@ interface Cuadre {
 }
 
 const ActividadAdmin = () => {
-  const navigate = useNavigate();
-
   // --- ESTADOS GLOBALES ---
   const [reservas, setReservas] = useState<ReservaExtendida[]>([]);
   const [showModal, setShowModal] = useState(false);

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FaBed, FaWineGlass, FaCalendarCheck, FaMapMarkerAlt } from 'react-icons/fa';
 
 const panels = [
@@ -47,7 +46,6 @@ interface Props {
 
 const DiagonalHero = ({ onReserveClick }: Props) => {
   const [activeId, setActiveId] = useState<number | null>(null);
-  const navigate = useNavigate();
 
   const handleCardClick = (panel: typeof panels[0]) => {
     if (panel.action === 'scroll-to-reserva') {
