@@ -2,7 +2,10 @@ import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, HttpExcep
 import { CuadreService } from './cuadre.service';
 import { Cuadre } from './cuadre.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
+@UseGuards(JwtAuthGuard)
 @Controller('cuadre')
 export class CuadreController {
   constructor(private readonly cuadreService: CuadreService) {}
@@ -26,7 +29,8 @@ export class CuadreController {
 
   // ✅ Esta ruta debe ir antes que ':id' y no debe repetirse
   @Delete('admin/reset/cuadre')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(RolesGuard)
+  @Roles('admin')
   async resetearCuadre(): Promise<{ message: string }> {
     console.log('✅ Entrando a resetearCuadre()');
 

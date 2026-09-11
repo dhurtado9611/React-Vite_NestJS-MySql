@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 import { Reserva } from './reservas/reserva.entity';
 import { User } from './auth/user.entity';
 import { Cuadre } from './cuadrecaja/cuadre.entity';
 import { Inventario } from './inventario/inventario.entity';
 import { PreciosInventario } from './preciosInventario/precios-inventario.entity';
-
-import { ReservaService } from './reservas/reserva.service';
-import { ReservaController } from './reservas/reserva.controller';
 
 import { AuthModule } from './auth/auth.module';
 import { CuadreModule } from './cuadrecaja/cuadre.module';
@@ -32,12 +31,16 @@ import { ReservasModule } from './reservas/reservas.module';
       entities: [Reserva, User, Cuadre, Inventario, PreciosInventario],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Reserva]),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
     CuadreModule,
     ReservasModule,
     AuthModule,
   ],
-  controllers: [ReservaController],
-  providers: [ReservaService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

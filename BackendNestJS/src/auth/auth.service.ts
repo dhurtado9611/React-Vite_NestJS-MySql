@@ -23,7 +23,7 @@ export class AuthService {
     const payload = {
       username: user.username,
       sub: user.id,
-      role: user.rol, // ✅ Usamos 'rol' de la BD, pero lo mapeamos como 'role'
+      rol: user.rol,
     };
     
     return {

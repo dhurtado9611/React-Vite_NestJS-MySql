@@ -3,6 +3,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reserva } from './reserva.entity';
+import { CreateReservaDto } from './dto/create-reserva.dto';
+import { UpdateReservaDto } from './dto/update-reserva.dto';
 
 @Injectable()
 export class ReservaService {
@@ -15,11 +17,11 @@ export class ReservaService {
     return this.reservaRepository.find();
   }
 
-  async create(reserva: Reserva): Promise<Reserva> {
+  async create(reserva: CreateReservaDto): Promise<Reserva> {
     return this.reservaRepository.save(reserva);
   }
 
-  async update(id: number, reserva: Reserva): Promise<Reserva> {
+  async update(id: number, reserva: UpdateReservaDto): Promise<Reserva> {
     await this.reservaRepository.update(id, reserva);
     const updated = await this.reservaRepository.findOne({ where: { id } });
     if (!updated) throw new NotFoundException('Reserva no encontrada');

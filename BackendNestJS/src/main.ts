@@ -2,18 +2,33 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
+import helmet from 'helmet';
+
+const DEFAULT_CORS_ORIGINS = [
+  'https://elesconditemotel.lat',
+  'https://www.elesconditemotel.lat',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
 
 async function bootstrap() {
-  dotenv.config(); 
+  dotenv.config();
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.use(helmet());
 
-  // --- CONFIGURACIÓN CORS CORREGIDA ---
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
+
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
+    : DEFAULT_CORS_ORIGINS;
+
   app.enableCors({
-    // 'origin: true' refleja el origen de la petición, permitiendo la conexión
-    // desde tu frontend sin importar si tiene 'www', slash al final, etc.
-    origin: true, 
+    origin: corsOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type,Authorization,X-Requested-With',
