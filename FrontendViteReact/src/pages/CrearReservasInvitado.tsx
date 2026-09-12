@@ -45,13 +45,17 @@ const Reservas = () => {
     fetchReservas();
   }, []);
 
-  // La lógica de limpieza ya estaba correcta, se mantiene igual.
   const handleLogout = () => {
+    if (localStorage.getItem('datosTurno')) {
+      alert('Debes cerrar tu turno antes de salir.');
+      navigate('/ActividadInvitado');
+      return;
+    }
     if (window.confirm("¿Deseas cerrar sesión?")) {
       // Limpieza de credenciales críticas
       localStorage.removeItem('token');
       localStorage.removeItem('username');
-      localStorage.removeItem('datosTurno');
+      localStorage.removeItem('rol');
       navigate('/');
     }
   };

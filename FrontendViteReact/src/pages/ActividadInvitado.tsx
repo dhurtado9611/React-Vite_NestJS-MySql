@@ -165,6 +165,9 @@ const Historial = () => {
       if (!turnoReal) {
          alert("⚠️ No se encontró ningún turno abierto.");
          localStorage.removeItem('datosTurno');
+         localStorage.removeItem('token');
+         localStorage.removeItem('username');
+         localStorage.removeItem('rol');
          navigate('/', { state: { turnoCerrado: true } });
          return;
       }
@@ -175,12 +178,16 @@ const Historial = () => {
       // Esta llamada ahora funcionará correctamente con el backend corregido a @Patch
       await api.patch(`/cuadre/${turnoReal.id}`, {
         turnoCerrado: horaActual,
-        totalEntregado: totalVentas, 
+        totalEntregado: totalVentas,
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      // Cerrar turno equivale a terminar la jornada: se cierra sesión también.
       localStorage.removeItem('datosTurno');
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('rol');
       navigate('/', { state: { turnoCerrado: true } });
 
     } catch (error) {

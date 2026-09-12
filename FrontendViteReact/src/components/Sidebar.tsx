@@ -111,6 +111,11 @@ const Sidebar = () => {
   }, [rol, navigate]);
 
   const handleLogout = () => {
+    if (rol === "invitado" && localStorage.getItem("datosTurno")) {
+      alert("Debes cerrar tu turno antes de salir.");
+      navigate("/ActividadInvitado");
+      return;
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("rol");

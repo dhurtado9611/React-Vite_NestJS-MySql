@@ -34,6 +34,46 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
             headers: { Authorization: `Bearer ${token}` }
           });
 
+          // Turno de otro colaborador que quedó abierto (ej. cerró el navegador sin dar cierre)
+          // y ya superó la duración normal de un turno (7 horas).
+          const ahora = new Date();
+          const turnoVencidoAjeno = cuadreResponse.data.find((item: any) => {
+            if (item.turnoCerrado || item.colaborador === nombreUsuario) return false;
+            const inicio = new Date(`${item.fecha}T${item.turno}:00`);
+            if (isNaN(inicio.getTime())) return false;
+            const finEsperado = new Date(inicio.getTime() + 7 * 60 * 60 * 1000);
+            return ahora > finEsperado;
+          });
+
+          if (turnoVencidoAjeno) {
+            const cerrarlo = window.confirm(
+              `El turno de "${turnoVencidoAjeno.colaborador}" quedó abierto y ya venció.\n¿Deseas cerrarlo ahora antes de continuar?`
+            );
+            if (cerrarlo) {
+              try {
+                const resReservas = await api.get('/reservas', {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                const totalVentas = resReservas.data
+                  .filter((r: any) => r.colaborador === turnoVencidoAjeno.colaborador && r.fecha === turnoVencidoAjeno.fecha)
+                  .reduce((sum: number, r: any) => sum + r.valor, 0);
+                const horaCierre = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                await api.patch(`/cuadre/${turnoVencidoAjeno.id}`, {
+                  turnoCerrado: horaCierre,
+                  totalEntregado: totalVentas,
+                }, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+
+                alert(`Turno de "${turnoVencidoAjeno.colaborador}" cerrado correctamente.`);
+              } catch (errCierre) {
+                console.error('Error cerrando turno vencido ajeno:', errCierre);
+                alert('No se pudo cerrar el turno anterior. Puedes intentarlo luego desde Actividad.');
+              }
+            }
+          }
+
           const turnoAbierto = cuadreResponse.data.find(
             (item: any) =>
               item.colaborador === nombreUsuario &&
