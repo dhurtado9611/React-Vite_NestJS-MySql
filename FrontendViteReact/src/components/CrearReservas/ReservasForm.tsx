@@ -87,8 +87,11 @@ const ReservasForm = ({
       }
       const fechaActual = new Date().toISOString().split('T')[0];
       const datosTurno = JSON.parse(localStorage.getItem('datosTurno') || '{}');
+      // "id" viene de handleEdit (setFormData(reserva)) cuando se está editando; el
+      // backend rechaza cualquier propiedad que no sea parte del DTO (whitelist).
+      const { id: _id, ...formDataSinId } = formData;
       const dataToSend = {
-        ...formData,
+        ...formDataSinId,
         habitacion: Number(formData.habitacion),
         // El input de Valor acepta formato "$50,000.00" (ver pattern del input); se limpia antes de convertir.
         valor: Number(String(formData.valor).replace(/[^0-9.]/g, '')),

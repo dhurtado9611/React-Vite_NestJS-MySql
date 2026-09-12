@@ -171,8 +171,11 @@ const MarketplaceCliente = () => {
       const nuevasObservaciones = (reservaActual.observaciones || '') + detalleCompra;
       const nuevoValor = parseFloat(reservaActual.valor) + precioFinal;
 
+      // Se excluye "id": el DTO del backend rechaza cualquier propiedad que no
+      // sea parte de la reserva (whitelist), y "id" no lo es.
+      const { id: _id, ...reservaSinId } = reservaActual;
       await axios.put(`${import.meta.env.VITE_API_URL}/reservas/${reservaSeleccionadaId}`, {
-        ...reservaActual, 
+        ...reservaSinId,
         valor: nuevoValor,
         observaciones: nuevasObservaciones
       }, { headers });

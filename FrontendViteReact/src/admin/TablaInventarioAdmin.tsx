@@ -70,7 +70,10 @@ const TablaInventarioAdmin = () => {
   const guardarCambios = async (id: number) => {
     try {
       const token = localStorage.getItem('token');
-      await api.put(`/inventario/${id}`, editFormData, {
+      // "id" viene de iniciarEdicion (setEditFormData(inv)); el backend rechaza
+      // cualquier propiedad que no sea parte del DTO (whitelist).
+      const { id: _id, ...datosSinId } = editFormData;
+      await api.put(`/inventario/${id}`, datosSinId, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Registro actualizado correctamente');
