@@ -1,7 +1,4 @@
-// update-precio-inventario.dto.ts
-export class UpdatePrecioInventarioDto {
-  producto?: string;
-  precio?: number;
-  imagen?: string;
-  cantidad?: number;
-}
+import { PartialType } from '@nestjs/mapped-types';
+import { CreatePrecioInventarioDto } from './create-precio-inventario.dto';
+
+export class UpdatePrecioInventarioDto extends PartialType(CreatePrecioInventarioDto) {}

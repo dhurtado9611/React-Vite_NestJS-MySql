@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { CuadreService } from './cuadre.service';
 import { Cuadre } from './cuadre.entity';
+import { CreateCuadreDto } from './dto/create-cuadre.dto';
+import { UpdateCuadreDto } from './dto/update-cuadre.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -16,14 +18,14 @@ export class CuadreController {
   }
 
   @Post()
-  async create(@Body() cuadre: Cuadre): Promise<Cuadre> {
+  async create(@Body() cuadre: CreateCuadreDto): Promise<Cuadre> {
     return this.cuadreService.create(cuadre);
   }
 
   // CORREGIDO: Cambiado de @Put a @Patch para coincidir con el frontend
   // y permitir actualización parcial (solo cerrar turno sin borrar lo demás)
   @Patch(':id')
-  async update(@Param('id') id: number, @Body() cuadre: Cuadre): Promise<Cuadre> {
+  async update(@Param('id') id: number, @Body() cuadre: UpdateCuadreDto): Promise<Cuadre> {
     return this.cuadreService.update(id, cuadre);
   }
 

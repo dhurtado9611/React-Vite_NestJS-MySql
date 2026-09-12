@@ -1,19 +1,29 @@
-import { IsString, IsNumber, IsOptional, IsDateString } from 'class-validator'
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateCuadreDto {
   @IsString()
-  colaborador: string
+  @IsNotEmpty()
+  colaborador: string;
 
   @IsDateString()
-  fecha: string
-
-  @IsString()
-  turno: string
+  fecha: string;
 
   @IsNumber()
-  basecaja: number
+  basecaja: number;
+
+  @IsString()
+  @IsNotEmpty()
+  turno: string;
+
+  @IsOptional()
+  @IsNumber()
+  totalEntregado?: number;
+
+  @IsOptional()
+  @IsNumber()
+  totalActual?: number;
 
   @IsOptional()
   @IsString()
-  turnoCerrado?: string | null
+  turnoCerrado?: string | null;
 }

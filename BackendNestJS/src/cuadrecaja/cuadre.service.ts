@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cuadre } from './cuadre.entity';
+import { CreateCuadreDto } from './dto/create-cuadre.dto';
+import { UpdateCuadreDto } from './dto/update-cuadre.dto';
 
 @Injectable()
 export class CuadreService {
@@ -15,11 +17,11 @@ export class CuadreService {
     return this.cuadreRepository.find();
   }
 
-  async create(cuadre: Cuadre): Promise<Cuadre> {
+  async create(cuadre: CreateCuadreDto): Promise<Cuadre> {
     return this.cuadreRepository.save(cuadre);
   }
 
-  async update(id: number, cuadre: Cuadre): Promise<Cuadre> {
+  async update(id: number, cuadre: UpdateCuadreDto): Promise<Cuadre> {
     await this.cuadreRepository.update(id, cuadre);
     const updatedCuadre = await this.cuadreRepository.findOneBy({ id });
     if (!updatedCuadre) {

@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inventario } from './inventario.entity';
+import { CreateInventarioDto } from './dto/create-inventario.dto';
+import { UpdateInventarioDto } from './dto/update-inventario.dto';
 
 @Injectable()
 export class InventarioService {
@@ -15,11 +17,11 @@ export class InventarioService {
     return this.inventarioRepository.find();
   }
 
-  async create(inventario: Inventario): Promise<Inventario> {
+  async create(inventario: CreateInventarioDto): Promise<Inventario> {
     return this.inventarioRepository.save(inventario);
   }
 
-  async update(id: number, inventario: Inventario): Promise<Inventario> {
+  async update(id: number, inventario: UpdateInventarioDto): Promise<Inventario> {
     await this.inventarioRepository.update(id, inventario);
     const updated = await this.inventarioRepository.findOneBy({ id });
     if (!updated) {

@@ -2,6 +2,8 @@
 import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { InventarioService } from './inventario.service';
 import { Inventario } from './inventario.entity';
+import { CreateInventarioDto } from './dto/create-inventario.dto';
+import { UpdateInventarioDto } from './dto/update-inventario.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('inventario')
@@ -14,7 +16,7 @@ export class InventarioController {
   }
 
   @Post()
-  async create(@Body() inventario: Inventario): Promise<Inventario> {
+  async create(@Body() inventario: CreateInventarioDto): Promise<Inventario> {
     return this.inventarioService.create(inventario);
   }
 
@@ -30,7 +32,7 @@ export class InventarioController {
 
   // ✅ CORRECCIÓN: Eliminé ": Promise<Inventario>" para evitar el error de tipos con null
   @Put(':id')
-  async update(@Param('id') id: number, @Body() inventario: Inventario) {
+  async update(@Param('id') id: number, @Body() inventario: UpdateInventarioDto) {
     return this.inventarioService.update(id, inventario);
   }
 
