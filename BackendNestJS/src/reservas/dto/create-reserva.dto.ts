@@ -1,4 +1,5 @@
 import { IsString, IsNotEmpty, IsNumber, IsPositive, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateReservaDto {
   @IsOptional()
@@ -9,10 +10,12 @@ export class CreateReservaDto {
   @IsString()
   placa?: string;
 
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   habitacion: number;
 
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   valor: number;

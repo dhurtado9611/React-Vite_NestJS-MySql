@@ -89,6 +89,9 @@ const ReservasForm = ({
       const datosTurno = JSON.parse(localStorage.getItem('datosTurno') || '{}');
       const dataToSend = {
         ...formData,
+        habitacion: Number(formData.habitacion),
+        // El input de Valor acepta formato "$50,000.00" (ver pattern del input); se limpia antes de convertir.
+        valor: Number(String(formData.valor).replace(/[^0-9.]/g, '')),
         fecha: fechaActual,
         colaborador: datosTurno.colaborador || 'Invitado',
       };
