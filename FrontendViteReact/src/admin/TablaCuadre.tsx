@@ -18,9 +18,9 @@ interface Cuadre {
   colaborador: string;
   fecha: string;
   turno: string;
-  turnoCerrado: string;
-  basecaja: number;
-  totalEntregado: number;
+  turnoCerrado: string | null;
+  basecaja: number | null;
+  totalEntregado: number | null;
 }
 
 const TablaCuadre = () => {
@@ -94,9 +94,9 @@ const TablaCuadre = () => {
       const dia = new Date(c.fecha).toISOString().split('T')[0];
       const existente = acc.find((d) => d.dia === dia);
       if (existente) {
-        existente.total += c.totalEntregado;
+        existente.total += c.totalEntregado ?? 0;
       } else {
-        acc.push({ dia, total: c.totalEntregado });
+        acc.push({ dia, total: c.totalEntregado ?? 0 });
       }
       return acc;
     }, []);
@@ -202,8 +202,12 @@ const TablaCuadre = () => {
                         </span>
                       </td>
                       <td>{cuadre.turnoCerrado || <span className="text-muted fst-italic">--</span>}</td>
-                      <td className="text-success">${cuadre.basecaja.toLocaleString()}</td>
-                      <td className="fw-bold text-success">${cuadre.totalEntregado.toLocaleString()}</td>
+                      <td className="text-success">${(cuadre.basecaja ?? 0).toLocaleString()}</td>
+                      <td className="fw-bold text-success">
+                        {cuadre.totalEntregado != null
+                          ? `$${cuadre.totalEntregado.toLocaleString()}`
+                          : <span className="text-muted fst-italic">Turno abierto</span>}
+                      </td>
                       <td className="text-center">
                         <button
                           className="btn btn-sm btn-outline-danger border-0"
