@@ -42,14 +42,14 @@ const AdminDashboard = () => {
 
           {/* 3. NAVEGACIÓN FLOTANTE (SIN BORDES) */}
           {/* Usamos un fondo muy sutil y sombras internas */}
-          <div className="flex bg-slate-900/50 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl ring-1 ring-white/5">
+          <div className="flex w-full md:w-auto overflow-x-auto md:overflow-visible bg-slate-900/50 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl ring-1 ring-white/5">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setSelectedTable(tab.id as any)}
                 className={`
-                  relative px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-500 ease-out
-                  ${selectedTable === tab.id 
+                  relative flex-shrink-0 whitespace-nowrap px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-500 ease-out
+                  ${selectedTable === tab.id
                     ? 'text-white bg-indigo-600 shadow-[0_0_20px_rgba(79,70,229,0.4)]' // Glow azul en lugar de borde
                     : 'text-slate-400 hover:text-white hover:bg-white/5'}
                 `}

@@ -156,10 +156,10 @@ const InventarioAdmin = () => {
           <Table striped hover variant="dark" className="mb-0 align-middle">
             <thead className="bg-secondary text-uppercase text-xs">
               <tr>
-                <th className="py-3 ps-4">Producto</th>
+                <th className="py-3 ps-2 ps-md-4">Producto</th>
                 <th className="py-3 text-center">Precio Actual</th>
-                <th className="py-3 text-center">Última Actualización</th>
-                <th className="py-3 text-end pe-4">Acción</th>
+                <th className="py-3 text-center d-none d-md-table-cell">Última Actualización</th>
+                <th className="py-3 text-end pe-2 pe-md-4">Acción</th>
               </tr>
             </thead>
             <tbody>
@@ -174,9 +174,9 @@ const InventarioAdmin = () => {
               ) : (
                   products.map((p) => (
                     <tr key={p.id}>
-                      <td className="ps-4">
-                        <div className="d-flex align-items-center gap-3">
-                            <div className="bg-white rounded p-1" style={{width: '45px', height: '45px'}}>
+                      <td className="ps-2 ps-md-4">
+                        <div className="d-flex align-items-center gap-2 gap-md-3">
+                            <div className="bg-white rounded p-1 flex-shrink-0" style={{width: '36px', height: '36px'}}>
                                 <img 
                                     src={p.imagen || 'https://via.placeholder.com/45'} 
                                     alt={p.nombre} 
@@ -192,19 +192,19 @@ const InventarioAdmin = () => {
                               ${p.precio.toLocaleString()}
                           </Badge>
                       </td>
-                      <td className="text-center text-muted small">
-                          {p.fecha_actualizacion 
-                            ? new Date(p.fecha_actualizacion).toLocaleDateString() 
+                      <td className="text-center text-muted small d-none d-md-table-cell">
+                          {p.fecha_actualizacion
+                            ? new Date(p.fecha_actualizacion).toLocaleDateString()
                             : '---'}
                       </td>
-                      <td className="text-end pe-4">
-                        <Button 
-                            variant="warning" 
-                            size="sm" 
-                            className="fw-bold d-inline-flex align-items-center gap-2"
+                      <td className="text-end pe-2 pe-md-4">
+                        <Button
+                            variant="warning"
+                            size="sm"
+                            className="fw-bold d-inline-flex align-items-center gap-2 text-nowrap"
                             onClick={() => handleEditClick(p)}
                         >
-                            <FaEdit /> Editar Precio
+                            <FaEdit /> <span className="d-none d-sm-inline">Editar Precio</span><span className="d-sm-none">Editar</span>
                         </Button>
                       </td>
                     </tr>

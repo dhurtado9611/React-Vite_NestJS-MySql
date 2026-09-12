@@ -134,9 +134,9 @@ const TableCrearReservas = ({ reservas }: Props) => {
               ))
             ) : (
               <tr>
-                <td colSpan={9} className="text-center py-5 text-white/50 bg-transparent">
-                  {filtroInfo.colaborador 
-                    ? "No hay reservas registradas en este turno." 
+                <td colSpan={9} className="text-start ps-3 py-5 text-white/50 bg-transparent" style={{ whiteSpace: 'normal' }}>
+                  {filtroInfo.colaborador
+                    ? "No hay reservas registradas en este turno."
                     : "No se detectó un turno activo. Inicie sesión nuevamente."}
                 </td>
               </tr>

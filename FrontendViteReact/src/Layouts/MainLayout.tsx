@@ -9,7 +9,7 @@ const MainLayout = () => {
       <Sidebar />
       {/* Área de contenido principal */}
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 overflow-y-auto relative">
+        <main className="flex-1 overflow-y-auto relative pb-28 md:pb-0">
            <Outlet />
         </main>
       </div>

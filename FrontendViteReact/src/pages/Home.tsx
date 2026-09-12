@@ -46,7 +46,7 @@ const Home = () => {
       </div>
 
       {/* NUEVO HERO SECTION TIPO NAIPE */}
-      <section className="relative z-10">
+      <section className="relative z-10 pt-20 md:pt-0">
         <DiagonalHero onReserveClick={handleScrollToReserva} />
       </section>
 
