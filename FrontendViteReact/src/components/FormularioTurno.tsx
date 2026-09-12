@@ -97,16 +97,16 @@ const FormularioTurno = ({ onSubmit }: Props) => {
 
   // ESTILOS GLASSMORPHISM
   const glassInputClass = `
-    block w-full px-4 py-3 
+    block w-full px-3 py-2 sm:px-4 sm:py-3
     bg-white/50
-    border border-white/60 
-    rounded-xl 
-    text-gray-900 placeholder-gray-600 font-semibold
-    focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/70 
+    border border-white/60
+    rounded-xl
+    text-sm sm:text-base text-gray-900 placeholder-gray-600 font-semibold
+    focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/70
     transition-all duration-300 shadow-sm
   `;
 
-  const labelClass = "block text-sm font-semibold text-gray-800 mb-1 ml-1 drop-shadow-sm";
+  const labelClass = "block text-xs sm:text-sm font-semibold text-gray-800 mb-1 ml-1 drop-shadow-sm";
 
   return (
     <>
@@ -118,29 +118,29 @@ const FormularioTurno = ({ onSubmit }: Props) => {
           animate={{ opacity: 1 }} 
           exit={{ opacity: 0 }}
         >
-          <motion.div 
-            initial={{ scale: 0.9, y: 20, opacity: 0 }} 
-            animate={{ scale: 1, y: 0, opacity: 1 }} 
-            exit={{ scale: 0.95, opacity: 0 }} 
-            transition={{ type: "spring", duration: 0.5 }} 
+          <motion.div
+            initial={{ scale: 0.9, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ type: "spring", duration: 0.5 }}
             className="
-              relative w-full max-w-4xl max-h-[90vh] overflow-y-auto 
-              bg-white/30 backdrop-blur-2xl 
-              border border-white/50 
-              rounded-3xl shadow-2xl 
-              p-8 scrollbar-hide
+              relative w-full max-w-4xl max-h-[90vh] overflow-y-auto
+              bg-white/30 backdrop-blur-2xl
+              border border-white/50
+              rounded-2xl sm:rounded-3xl shadow-2xl
+              p-4 sm:p-8 scrollbar-hide
             "
             style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)' }}
           >
             <form onSubmit={handleSubmit}>
-              <div className="text-center mb-10 relative">
-                <h3 className="text-3xl font-extrabold text-gray-900 tracking-tight drop-shadow-sm">
+              <div className="text-center mb-5 sm:mb-10 relative">
+                <h3 className="text-xl sm:text-3xl font-extrabold text-gray-900 tracking-tight drop-shadow-sm">
                   Inicio de Turno
                 </h3>
-                <p className="text-gray-700 font-medium text-sm mt-1">Registro de caja e inventario</p>
+                <p className="text-gray-700 font-medium text-xs sm:text-sm mt-1">Registro de caja e inventario</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 mb-5 sm:mb-8">
                 <div>
                   <label className={labelClass}>Colaborador</label>
                   <input type="text" value={colaborador} disabled className={`${glassInputClass} opacity-80 cursor-not-allowed`} />
@@ -186,17 +186,17 @@ const FormularioTurno = ({ onSubmit }: Props) => {
                 </div>
               </div>
 
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-500/30 to-transparent my-8"></div>
+              <div className="h-px bg-gradient-to-r from-transparent via-gray-500/30 to-transparent my-5 sm:my-8"></div>
 
-              <h4 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                <span className="bg-blue-600 w-2 h-6 rounded-full mr-3 shadow-md"></span>
+              <h4 className="text-base sm:text-xl font-bold text-gray-900 mb-3 sm:mb-6 flex items-center">
+                <span className="bg-blue-600 w-2 h-5 sm:h-6 rounded-full mr-3 shadow-md"></span>
                 Inventario Inicial
               </h4>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
                 {Object.entries(inventario).map(([key, value]) => (
                   <div key={key} className="group">
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1 ml-1 tracking-wide truncate">
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase mb-1 ml-1 tracking-wide truncate">
                       {key.replace(/_/g, ' ')}
                     </label>
                     <input
@@ -206,8 +206,8 @@ const FormularioTurno = ({ onSubmit }: Props) => {
                       onChange={handleInventarioChange}
                       min={0}
                       className={`
-                        ${glassInputClass} 
-                        py-2 text-center font-bold text-blue-900
+                        ${glassInputClass}
+                        py-1.5 sm:py-2 text-center font-bold text-blue-900
                         group-hover:bg-white/70 focus:bg-white/90
                       `}
                       disabled={loading}
@@ -216,15 +216,15 @@ const FormularioTurno = ({ onSubmit }: Props) => {
                 ))}
               </div>
 
-              <motion.button 
+              <motion.button
                 whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.4)" }}
                 whileTap={{ scale: 0.98 }}
-                type="submit" 
-                disabled={loading} 
+                type="submit"
+                disabled={loading}
                 className="
-                  mt-12 w-full py-4 
-                  bg-gradient-to-r from-blue-600 to-indigo-700 
-                  text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/30
+                  mt-6 sm:mt-12 w-full py-3 sm:py-4
+                  bg-gradient-to-r from-blue-600 to-indigo-700
+                  text-white rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-xl shadow-blue-500/30
                   border border-white/20 backdrop-blur-sm
                   disabled:opacity-70 disabled:cursor-not-allowed
                   transition-all
