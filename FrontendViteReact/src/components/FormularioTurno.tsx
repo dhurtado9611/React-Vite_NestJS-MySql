@@ -141,17 +141,17 @@ const FormularioTurno = ({ onSubmit }: Props) => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 mb-5 sm:mb-8">
-                <div>
+                <div className="min-w-0">
                   <label className={labelClass}>Colaborador</label>
                   <input type="text" value={colaborador} disabled className={`${glassInputClass} opacity-80 cursor-not-allowed`} />
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <label className={labelClass}>Fecha</label>
-                  <input type="date" value={fechaActual} disabled className={`${glassInputClass} opacity-80 cursor-not-allowed`} />
+                  <input type="date" value={fechaActual} disabled className={`${glassInputClass} opacity-80 cursor-not-allowed max-w-full box-border`} />
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <label className={labelClass}>Turno</label>
                   <div className="relative">
                     <select
@@ -172,7 +172,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
                   {errores.turno && <p className="text-red-600 font-bold text-xs mt-1 ml-1">{errores.turno}</p>}
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <label className={labelClass}>Base de Caja ($)</label>
                   <input
                     type="number"
@@ -216,22 +216,31 @@ const FormularioTurno = ({ onSubmit }: Props) => {
                 ))}
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.4)" }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                disabled={loading}
+              <div
                 className="
-                  mt-6 sm:mt-12 w-full py-3 sm:py-4
-                  bg-gradient-to-r from-blue-600 to-indigo-700
-                  text-white rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-xl shadow-blue-500/30
-                  border border-white/20 backdrop-blur-sm
-                  disabled:opacity-70 disabled:cursor-not-allowed
-                  transition-all
+                  mt-6 sm:mt-12 -mx-4 sm:-mx-8 -mb-4 sm:-mb-8
+                  px-4 sm:px-8 pt-4 sm:pt-6 pb-4 sm:pb-8
+                  bg-black/10 border-t border-white/30
+                  rounded-b-2xl sm:rounded-b-3xl
                 "
               >
-                {loading ? 'Procesando...' : 'Registrar Turno'}
-              </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.4)" }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  disabled={loading}
+                  className="
+                    w-full py-3 sm:py-4
+                    bg-gradient-to-r from-blue-600 to-indigo-700
+                    text-white rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-xl shadow-blue-500/30
+                    border border-white/20 backdrop-blur-sm
+                    disabled:opacity-70 disabled:cursor-not-allowed
+                    transition-all
+                  "
+                >
+                  {loading ? 'Procesando...' : 'Registrar Turno'}
+                </motion.button>
+              </div>
             </form>
           </motion.div>
         </motion.div>
