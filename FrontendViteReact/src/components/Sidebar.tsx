@@ -159,6 +159,17 @@ const Sidebar = () => {
              </div>
           </NavLink>
         )})}
+
+        {/* LOGOUT (Solo Móvil, dentro de la cápsula) */}
+        <button
+          onClick={handleLogout}
+          className="md:hidden group relative flex items-center justify-center h-14 w-14 rounded-full transition-all duration-500"
+        >
+          <div className="relative flex flex-col items-center z-10">
+            <LogOut className="w-6 h-6 text-gray-400" strokeWidth={1.5} />
+            <span className="text-[9px] font-bold uppercase mt-1 text-gray-400">Salir</span>
+          </div>
+        </button>
       </div>
 
       {/* 3. SECCIÓN INFERIOR (Solo Desktop) */}
