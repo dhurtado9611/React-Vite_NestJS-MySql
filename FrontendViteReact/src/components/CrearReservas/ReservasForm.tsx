@@ -247,14 +247,14 @@ const ReservasForm = ({
         </div>
 
         {/* Sección de Botones: Separación entre acciones de gestión y acción principal */}
-        <div className="col-12 d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-white/10">
-          
+        <div className="col-12 d-flex flex-column flex-sm-row justify-content-sm-between align-items-stretch align-items-sm-center gap-2 mt-4 pt-3 border-top border-white/10">
+
           {/* Grupo Izquierdo: Acciones de Gestión (Editar/Eliminar) */}
           <div className="d-flex gap-2">
             {!disableEditButton && (
               <button
                 type="button"
-                className="btn btn-outline-warning text-white border-warning fw-bold px-4"
+                className="btn btn-outline-warning text-white border-warning fw-bold px-4 flex-fill"
                 onClick={handleEdit}
                 disabled={!selectedId}
                 style={{ backdropFilter: 'blur(4px)' }}
@@ -265,7 +265,7 @@ const ReservasForm = ({
             {!disableDeleteButton && (
               <button
                 type="button"
-                className="btn btn-outline-danger text-white border-danger fw-bold px-4"
+                className="btn btn-outline-danger text-white border-danger fw-bold px-4 flex-fill"
                 onClick={handleDelete}
                 disabled={!selectedId}
                 style={{ backdropFilter: 'blur(4px)' }}
@@ -276,9 +276,9 @@ const ReservasForm = ({
           </div>
 
           {/* Grupo Derecho: Acción Principal (Guardar/Actualizar) */}
-          <button 
-            type="submit" 
-            className="btn btn-success fw-bold px-5 shadow-lg"
+          <button
+            type="submit"
+            className="btn btn-success fw-bold px-5 shadow-lg w-full sm:w-auto"
           >
             {editingId ? 'Actualizar Reserva' : 'Guardar Reserva'}
           </button>
