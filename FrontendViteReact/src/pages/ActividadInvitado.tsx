@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Modal } from 'react-bootstrap';
@@ -66,26 +66,8 @@ const Historial = () => {
   const [turno, setTurno] = useState<string>('');
   const [fecha, setFecha] = useState<string>('');
 
-  // Control de notificaciones
-  const habitacionesNotificadas = useRef<Set<number>>(new Set());
-
-  // --- LÓGICA DE NOTIFICACIONES ---
-  const solicitarPermisoNotificacion = () => {
-    if ("Notification" in window && Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-  };
-
-  const enviarNotificacion = (habitacion: number, placa: string) => {
-    if (Notification.permission === "granted") {
-      new Notification(`¡TIEMPO AGOTADO!`, {
-        body: `La habitación ${habitacion} (Placa: ${placa}) ha excedido su tiempo.`,
-        icon: '/assets/Logo-PNG.png'
-      });
-    }
-  };
-
   // --- LÓGICA DE DATOS ---
+  // Las notificaciones de tiempo agotado ahora las vigila Sidebar.tsx en toda la app.
   const fetchDatosCaja = useCallback(async () => {
     try {
       const datosTurno = localStorage.getItem('datosTurno');
@@ -139,21 +121,6 @@ const Historial = () => {
       const response = await api.get('/reservas');
       const reservasData = response.data;
       setReservas(reservasData);
-      
-      // Revisar notificaciones
-      reservasData.forEach((r: Reserva) => {
-        if (!r.hsalida) { 
-            const estado = calcularEstadoTiempo(r.hentrada);
-            if (estado.excedido) {
-                if (!habitacionesNotificadas.current.has(r.habitacion)) {
-                    enviarNotificacion(r.habitacion, r.placa);
-                    habitacionesNotificadas.current.add(r.habitacion);
-                }
-            } else {
-                habitacionesNotificadas.current.delete(r.habitacion);
-            }
-        }
-      });
 
     } catch (error) {
       console.error('Error fetching reservas:', error);
@@ -253,7 +220,6 @@ const Historial = () => {
 
         setShowModal(false);
         setReservaSeleccionada(null);
-        habitacionesNotificadas.current.delete(reservaSeleccionada.habitacion);
 
     } catch (error) {
         console.error("Error finalizando reserva:", error);
@@ -271,7 +237,6 @@ const Historial = () => {
   };
 
   useEffect(() => {
-    solicitarPermisoNotificacion();
     fetchDatosReservas();
     fetchDatosCaja();
     const interval = setInterval(() => { fetchDatosReservas(); fetchDatosCaja(); }, 10000);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   CalendarPlus,
@@ -9,6 +9,29 @@ import {
   LogOut,
 } from "lucide-react";
 import LoginModal from "./LoginModal";
+import api from "../services/api";
+
+const LIMITE_TIEMPO_MINUTOS = 240;
+
+interface ReservaActividad {
+  habitacion: number;
+  placa: string;
+  hentrada: string;
+  hsalida?: string;
+}
+
+const minutosExcedidos = (horaEntrada: string) => {
+  if (!horaEntrada) return false;
+  const ahora = new Date();
+  const [h, m] = horaEntrada.split(':').map(Number);
+  const entrada = new Date();
+  entrada.setHours(h, m, 0, 0);
+  if (entrada > ahora && entrada.getTime() - ahora.getTime() > 12 * 60 * 60 * 1000) {
+    entrada.setDate(entrada.getDate() - 1);
+  }
+  const minutosPasados = Math.floor((ahora.getTime() - entrada.getTime()) / 60000);
+  return minutosPasados >= LIMITE_TIEMPO_MINUTOS;
+};
 
 const Sidebar = () => {
   const [username, setUsername] = useState<string | null>(null);
@@ -17,14 +40,15 @@ const Sidebar = () => {
   const [vencidas, setVencidas] = useState<number>(0);
   const navigate = useNavigate();
   const location = useLocation();
+  const habitacionesNotificadas = useRef<Set<number>>(new Set());
 
-  // --- LÓGICA DE SESIÓN Y ALERTAS ---
+  // --- LÓGICA DE SESIÓN ---
   useEffect(() => {
     const checkSession = () => {
       const storedUser = localStorage.getItem("username");
       const storedRol = localStorage.getItem("rol");
       const token = localStorage.getItem("token");
-      
+
       if (!token && storedUser) {
         handleLogout();
       } else {
@@ -33,20 +57,65 @@ const Sidebar = () => {
       }
     };
     checkSession();
-    const leerAlertas = () => {
-      const cantidad = localStorage.getItem("alertasHabitaciones");
-      setVencidas(cantidad ? parseInt(cantidad) : 0);
-    };
-    leerAlertas();
-    const interval = setInterval(leerAlertas, 5000);
-    return () => clearInterval(interval);
   }, []);
+
+  // --- VIGILANTE DE ALERTAS DE TIEMPO (corre en toda la app mientras haya sesión) ---
+  useEffect(() => {
+    if (rol !== "admin" && rol !== "invitado") return;
+
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    const irAActividad = () => navigate(rol === "admin" ? "/ActividadAdmin" : "/ActividadInvitado");
+
+    const notificar = (habitacion: number, placa: string) => {
+      if (Notification.permission !== "granted") return;
+      const noti = new Notification("¡TIEMPO AGOTADO!", {
+        body: `La habitación ${habitacion} (Placa: ${placa}) ha excedido su tiempo.`,
+        icon: "/assets/Logo-PNG.png",
+        tag: `habitacion-${habitacion}`,
+      });
+      noti.onclick = () => {
+        window.focus();
+        irAActividad();
+        noti.close();
+      };
+    };
+
+    const revisarHabitaciones = async () => {
+      try {
+        const { data } = await api.get<ReservaActividad[]>('/reservas');
+        let excedidas = 0;
+        data.forEach((r) => {
+          if (r.hsalida) return;
+          if (minutosExcedidos(r.hentrada)) {
+            excedidas += 1;
+            if (!habitacionesNotificadas.current.has(r.habitacion)) {
+              habitacionesNotificadas.current.add(r.habitacion);
+              notificar(r.habitacion, r.placa);
+            }
+          } else {
+            habitacionesNotificadas.current.delete(r.habitacion);
+          }
+        });
+        setVencidas(excedidas);
+      } catch (error) {
+        console.error('Error revisando alertas de habitaciones:', error);
+      }
+    };
+
+    revisarHabitaciones();
+    const interval = setInterval(revisarHabitaciones, 15000);
+    return () => clearInterval(interval);
+  }, [rol, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("rol");
-    localStorage.removeItem("alertasHabitaciones");
+    habitacionesNotificadas.current.clear();
+    setVencidas(0);
     setUsername(null);
     setRol(null);
     window.location.href = "/";

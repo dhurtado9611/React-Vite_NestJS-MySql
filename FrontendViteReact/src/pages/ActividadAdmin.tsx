@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import api from '../services/api'; // Asegúrate que tu instancia de axios esté aquí
 import { Modal } from 'react-bootstrap';
 import { 
@@ -66,26 +66,8 @@ const ActividadAdmin = () => {
   const [turno, setTurno] = useState<string>('');
   const [fecha, setFecha] = useState<string>('');
 
-  // Control de notificaciones para no repetir alertas
-  const habitacionesNotificadas = useRef<Set<number>>(new Set());
-
-  // --- LÓGICA DE NOTIFICACIONES BROWSER ---
-  const solicitarPermisoNotificacion = () => {
-    if ("Notification" in window && Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-  };
-
-  const enviarNotificacion = (habitacion: number, placa: string) => {
-    if (Notification.permission === "granted") {
-      new Notification(`¡TIEMPO AGOTADO!`, {
-        body: `La habitación ${habitacion} (Placa: ${placa}) ha excedido su tiempo.`,
-        icon: '/assets/Logo-PNG.png'
-      });
-    }
-  };
-
   // --- LÓGICA CORE: OBTENER CAJA Y DETECTAR TURNOS ---
+  // Las notificaciones de tiempo agotado ahora las vigila Sidebar.tsx en toda la app.
   const fetchDatosCaja = useCallback(async () => {
     try {
       const hoy = new Date().toISOString().split('T')[0];
@@ -140,21 +122,6 @@ const ActividadAdmin = () => {
       const response = await api.get('/reservas');
       const reservasData = response.data;
       setReservas(reservasData);
-      
-      // Revisar alertas de tiempo
-      reservasData.forEach((r: Reserva) => {
-        if (!r.hsalida) { 
-            const estado = calcularEstadoTiempo(r.hentrada);
-            if (estado.excedido) {
-                if (!habitacionesNotificadas.current.has(r.habitacion)) {
-                    enviarNotificacion(r.habitacion, r.placa);
-                    habitacionesNotificadas.current.add(r.habitacion);
-                }
-            } else {
-                habitacionesNotificadas.current.delete(r.habitacion);
-            }
-        }
-      });
 
     } catch (error) {
       console.error('Error fetching reservas:', error);
@@ -264,7 +231,6 @@ const ActividadAdmin = () => {
 
         setShowModal(false);
         setReservaSeleccionada(null);
-        habitacionesNotificadas.current.delete(reservaSeleccionada.habitacion);
 
     } catch (error) {
         console.error("Error finalizando reserva:", error);
@@ -283,7 +249,6 @@ const ActividadAdmin = () => {
 
   // --- EFFECTS ---
   useEffect(() => {
-    solicitarPermisoNotificacion();
     fetchDatosReservas();
     fetchDatosCaja();
     
