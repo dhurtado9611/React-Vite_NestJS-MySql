@@ -38,8 +38,12 @@ const MarketplaceCliente = () => {
   const [reservaSeleccionadaId, setReservaSeleccionadaId] = useState<number | ''>('');
   const [listaReservasActivas, setListaReservasActivas] = useState<ReservaActiva[]>([]);
 
-  const [precioFinal, setPrecioFinal] = useState<number>(0); 
+  const [precioFinal, setPrecioFinal] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+
+  const [metodoPagoCarrito, setMetodoPagoCarrito] = useState('');
+  const [bancoTransferenciaCarrito, setBancoTransferenciaCarrito] = useState('');
+  const [referenciaTransferenciaCarrito, setReferenciaTransferenciaCarrito] = useState('');
 
   useEffect(() => {
     fetchInventario();
@@ -148,6 +152,14 @@ const MarketplaceCliente = () => {
       alert("Por favor seleccione una habitación de la lista.");
       return;
     }
+    if (!metodoPagoCarrito) {
+      alert("Por favor seleccione el método de pago.");
+      return;
+    }
+    if (metodoPagoCarrito === 'transferencia' && (!bancoTransferenciaCarrito || !referenciaTransferenciaCarrito)) {
+      alert("Selecciona el banco/app y escribe la referencia de la transferencia.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -169,6 +181,9 @@ const MarketplaceCliente = () => {
         detalleCompra += ` | 🛒 ${item.nombre} (x${item.cantidad})`;
       });
       detalleCompra += ` | Total Venta: $${precioFinal.toLocaleString()}`;
+      detalleCompra += metodoPagoCarrito === 'transferencia'
+        ? ` | 💳 Pago: Transferencia ${bancoTransferenciaCarrito} Ref: ${referenciaTransferenciaCarrito}`
+        : ` | 💳 Pago: Efectivo`;
 
       const nuevasObservaciones = (reservaActual.observaciones || '') + detalleCompra;
       const nuevoValor = parseFloat(reservaActual.valor) + precioFinal;
@@ -196,7 +211,10 @@ const MarketplaceCliente = () => {
       setShowModal(false);
       setReservaSeleccionadaId('');
       setPrecioFinal(0);
-      fetchInventario(); 
+      setMetodoPagoCarrito('');
+      setBancoTransferenciaCarrito('');
+      setReferenciaTransferenciaCarrito('');
+      fetchInventario();
 
     } catch (error: any) {
       console.error(error);
@@ -278,9 +296,14 @@ const MarketplaceCliente = () => {
       {/* 💎 MODAL CORREGIDO - FUERZA EL FONDO OSCURO 💎 
         Usamos !bg-... para sobreescribir el estilo de Bootstrap
       */}
-      <Modal 
-        show={showModal} 
-        onHide={() => setShowModal(false)} 
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          setMetodoPagoCarrito('');
+          setBancoTransferenciaCarrito('');
+          setReferenciaTransferenciaCarrito('');
+        }}
         centered
         contentClassName="!bg-black/90 backdrop-blur-xl !border-white/20 !text-white shadow-2xl rounded-2xl"
       >
@@ -345,21 +368,87 @@ const MarketplaceCliente = () => {
                               )}
                             </Form.Select>
                         </div>
+
+                        <div className="mt-4">
+                            <Form.Label className="font-bold text-gray-300 text-sm mb-2">Método de Pago:</Form.Label>
+                            <Form.Select
+                              value={metodoPagoCarrito}
+                              onChange={e => {
+                                const value = e.target.value;
+                                setMetodoPagoCarrito(value);
+                                if (value === 'efectivo') {
+                                  setBancoTransferenciaCarrito('');
+                                  setReferenciaTransferenciaCarrito('');
+                                }
+                              }}
+                              className="font-bold !text-white !bg-gray-800 !border-white/20 focus:!bg-gray-700 focus:!border-blue-500 focus:shadow-none"
+                              style={{ colorScheme: 'dark' }}
+                            >
+                              <option value="" className="bg-gray-900">-- Seleccione --</option>
+                              <option value="efectivo" className="bg-gray-900">Efectivo</option>
+                              <option value="transferencia" className="bg-gray-900">Transferencia</option>
+                            </Form.Select>
+                        </div>
+
+                        {metodoPagoCarrito === 'transferencia' && (
+                          <div className="mt-3 space-y-3">
+                            <div>
+                              <Form.Label className="font-bold text-gray-300 text-sm mb-2">Banco / App:</Form.Label>
+                              <Form.Select
+                                value={bancoTransferenciaCarrito}
+                                onChange={e => setBancoTransferenciaCarrito(e.target.value)}
+                                className="font-bold !text-white !bg-gray-800 !border-white/20 focus:!bg-gray-700 focus:!border-blue-500 focus:shadow-none"
+                                style={{ colorScheme: 'dark' }}
+                              >
+                                <option value="" className="bg-gray-900">-- Seleccione --</option>
+                                <option value="Nequi" className="bg-gray-900">Nequi</option>
+                                <option value="Daviplata" className="bg-gray-900">Daviplata</option>
+                                <option value="Bancolombia" className="bg-gray-900">Bancolombia</option>
+                                <option value="Bre-B" className="bg-gray-900">Bre-B</option>
+                              </Form.Select>
+                            </div>
+                            <div>
+                              <Form.Label className="font-bold text-gray-300 text-sm mb-2">Referencia de la Transferencia:</Form.Label>
+                              <Form.Control
+                                type="text"
+                                placeholder="Número de comprobante"
+                                value={referenciaTransferenciaCarrito}
+                                onChange={e => setReferenciaTransferenciaCarrito(e.target.value)}
+                                className="font-bold !text-white !bg-gray-800 !border-white/20 focus:!bg-gray-700 focus:!border-blue-500 focus:shadow-none"
+                                style={{ colorScheme: 'dark' }}
+                              />
+                            </div>
+                          </div>
+                        )}
                     </div>
                 </div>
             )}
          </Modal.Body>
          
          <Modal.Footer className="!border-white/10 !bg-transparent">
-             <Button variant="outline-light" className="border-white/20 hover:bg-white/10" onClick={() => setShowModal(false)}>
+             <Button
+                variant="outline-light"
+                className="border-white/20 hover:bg-white/10"
+                onClick={() => {
+                  setShowModal(false);
+                  setMetodoPagoCarrito('');
+                  setBancoTransferenciaCarrito('');
+                  setReferenciaTransferenciaCarrito('');
+                }}
+             >
                 Cerrar
              </Button>
              {carrito.length > 0 && (
                 <Button 
                     variant="danger" 
                     className="font-bold px-6 shadow-lg shadow-red-900/30"
-                    onClick={confirmarPedido} 
-                    disabled={loading || !reservaSeleccionadaId}
+                    onClick={confirmarPedido}
+                    disabled={
+                      loading ||
+                      !reservaSeleccionadaId ||
+                      !metodoPagoCarrito ||
+                      (metodoPagoCarrito === 'transferencia' && (!bancoTransferenciaCarrito || !referenciaTransferenciaCarrito))
+                    }
                 >
                     {loading ? 'Procesando...' : 'Confirmar Cargo'}
                 </Button>
