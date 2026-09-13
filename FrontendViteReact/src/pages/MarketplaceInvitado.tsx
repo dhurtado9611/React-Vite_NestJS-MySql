@@ -152,8 +152,10 @@ const MarketplaceCliente = () => {
     setLoading(true);
     try {
       const headers = getAuthHeaders();
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas/${reservaSeleccionadaId}`, { headers });
-      const reservaActual = res.data;
+      // No existe GET /reservas/:id en el backend; se piden todas y se filtra en el cliente
+      // (mismo patrón que fetchReservasActivas y el resto de la app).
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas`, { headers });
+      const reservaActual = (res.data as any[]).find((r) => r.id === reservaSeleccionadaId);
 
       if (!reservaActual || reservaActual.hsalida) {
         alert("⚠️ Error: Esta reserva ya fue cerrada o no existe.");
