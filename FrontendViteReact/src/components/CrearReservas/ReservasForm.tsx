@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import api from '../../services/api';
 
 interface Reserva {
@@ -28,6 +29,12 @@ interface Props {
   reservas: Reserva[];
   disableEditButton?: boolean;
   disableDeleteButton?: boolean;
+  esAdmin?: boolean;
+}
+
+interface UsuarioInvitado {
+  id: number;
+  username: string;
 }
 
 /**
@@ -45,11 +52,28 @@ const ReservasForm = ({
   reservas,
   disableEditButton = false,
   disableDeleteButton = false,
+  esAdmin = false,
 }: Props) => {
   // Filtra las habitaciones que actualmente tienen un estado activo o pendiente
   const habitacionesOcupadas = reservas
     .filter((r) => !r.hsalida || r.hsalida.toLowerCase() === 'pendiente')
     .map((r) => r.habitacion);
+
+  const [usuariosInvitados, setUsuariosInvitados] = useState<UsuarioInvitado[]>([]);
+
+  // Solo el admin puede reasignar el colaborador de una reserva; se listan los
+  // usuarios con rol "invitado" para elegir a quién se le atribuye.
+  useEffect(() => {
+    if (!esAdmin) return;
+    api.get('/users')
+      .then((res) => {
+        const invitados = (res.data as any[])
+          .filter((u) => u.rol === 'invitado')
+          .map((u) => ({ id: u.id, username: u.username }));
+        setUsuariosInvitados(invitados);
+      })
+      .catch((error) => console.error('Error cargando usuarios invitados:', error));
+  }, [esAdmin]);
 
   /**
    * Maneja los cambios en los inputs del formulario.
@@ -103,6 +127,7 @@ const ReservasForm = ({
       }
       const fechaActual = new Date().toISOString().split('T')[0];
       const datosTurno = JSON.parse(localStorage.getItem('datosTurno') || '{}');
+      const adminUsername = localStorage.getItem('username') || 'admin';
       // "id" viene de handleEdit (setFormData(reserva)) cuando se está editando; el
       // backend rechaza cualquier propiedad que no sea parte del DTO (whitelist).
       const { id: _id, ...formDataSinId } = formData;
@@ -112,7 +137,10 @@ const ReservasForm = ({
         // El input de Valor acepta formato "$50,000.00" (ver pattern del input); se limpia antes de convertir.
         valor: Number(String(formData.valor).replace(/[^0-9.]/g, '')),
         fecha: fechaActual,
-        colaborador: datosTurno.colaborador || 'Invitado',
+        // Si ya venía un colaborador (reserva existente, o seleccionado en el
+        // combo de admin) se respeta; si no, se usa el colaborador del turno
+        // activo (invitado) o el admin logueado, sin pisar nunca un valor ya asignado.
+        colaborador: formData.colaborador || datosTurno.colaborador || adminUsername,
       };
       if (editingId !== null) {
         await api.put(`/reservas/${editingId}`, dataToSend);
@@ -271,6 +299,29 @@ const ReservasForm = ({
             <option value="transferencia">Transferencia</option>
           </select>
         </div>
+
+        {esAdmin && (
+          <div className="col">
+            <label className="form-label text-white fw-semibold">Colaborador</label>
+            <select
+              name="colaborador"
+              value={formData.colaborador || ''}
+              onChange={handleInputChange}
+              className="form-control bg-light border-0 shadow-sm"
+            >
+              <option value="">-- Admin (sin cambios) --</option>
+              {formData.colaborador &&
+                !usuariosInvitados.some((u) => u.username === formData.colaborador) && (
+                  <option value={formData.colaborador}>{formData.colaborador} (actual)</option>
+                )}
+              {usuariosInvitados.map((u) => (
+                <option key={u.id} value={u.username}>
+                  {u.username}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {formData.metodoPago === 'transferencia' && (
           <>

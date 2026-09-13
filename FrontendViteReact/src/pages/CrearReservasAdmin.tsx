@@ -60,6 +60,7 @@ const Reservas = () => {
         selectedId={selectedId}
         setSelectedId={setSelectedId}
         reservas={reservas}
+        esAdmin
       />
 
       <TableReservas
