@@ -15,6 +15,9 @@ interface Reserva {
   observaciones: string;
   fecha: string;
   colaborador?: string;
+  metodoPago?: string;
+  bancoTransferencia?: string;
+  referenciaTransferencia?: string;
 }
 
 interface Props {
@@ -39,7 +42,7 @@ const TableReservas = ({ reservas, fetchReservas, selectedId, setSelectedId }: P
     }
 
     const worksheet = XLSX.utils.json_to_sheet(
-      filteredData.map(({ id, vehiculo, placa, habitacion, valor, hentrada, hsalidamax, hsalida, observaciones, fecha, colaborador }) => ({
+      filteredData.map(({ id, vehiculo, placa, habitacion, valor, hentrada, hsalidamax, hsalida, observaciones, fecha, colaborador, metodoPago, bancoTransferencia, referenciaTransferencia }) => ({
         ID: id,
         Vehículo: vehiculo,
         Placa: placa,
@@ -50,7 +53,10 @@ const TableReservas = ({ reservas, fetchReservas, selectedId, setSelectedId }: P
         'Hora Salida': hsalida || 'Pendiente',
         Observaciones: observaciones,
         Fecha: fecha || 'Sin fecha',
-        Colaborador: colaborador || 'Sin colaborador'
+        Colaborador: colaborador || 'Sin colaborador',
+        'Método de Pago': metodoPago === 'transferencia' ? 'Transferencia' : 'Efectivo',
+        'Banco/App': bancoTransferencia || '',
+        'Referencia': referenciaTransferencia || ''
       }))
     );
 
@@ -157,6 +163,7 @@ const TableReservas = ({ reservas, fetchReservas, selectedId, setSelectedId }: P
               <th>Observaciones</th>
               <th>Fecha</th>
               <th>Colaborador</th>
+              <th>Pago</th>
             </tr>
           </thead>
           <tbody>
@@ -176,6 +183,15 @@ const TableReservas = ({ reservas, fetchReservas, selectedId, setSelectedId }: P
                 <td>{reserva.observaciones}</td>
                 <td>{reserva.fecha || 'Sin fecha'}</td>
                 <td>{reserva.colaborador || 'N/A'}</td>
+                <td>
+                  {reserva.metodoPago === 'transferencia' ? (
+                    <span className="badge bg-primary" title={reserva.referenciaTransferencia}>
+                      {reserva.bancoTransferencia || 'Transferencia'}
+                    </span>
+                  ) : (
+                    <span className="badge bg-success">Efectivo</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

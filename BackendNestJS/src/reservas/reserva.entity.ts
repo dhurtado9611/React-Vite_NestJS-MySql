@@ -34,4 +34,13 @@ export class Reserva {
 
   @Column()
   colaborador: string;
+
+  @Column({ nullable: true })
+  metodoPago: string;
+
+  @Column({ nullable: true })
+  bancoTransferencia: string;
+
+  @Column({ nullable: true })
+  referenciaTransferencia: string;
 }

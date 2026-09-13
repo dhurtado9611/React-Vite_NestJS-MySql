@@ -15,6 +15,9 @@ interface Reserva {
   observaciones: string;
   fecha: string;
   colaborador: string;
+  metodoPago: string;
+  bancoTransferencia: string;
+  referenciaTransferencia: string;
 }
 
 const Reservas = () => {

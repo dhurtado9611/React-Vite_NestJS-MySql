@@ -12,6 +12,9 @@ interface Reserva {
   observaciones: string;
   fecha: string;
   colaborador?: string;
+  metodoPago?: string;
+  bancoTransferencia?: string;
+  referenciaTransferencia?: string;
 }
 
 interface Props {
@@ -93,6 +96,7 @@ const TableCrearReservas = ({ reservas }: Props) => {
               <th className="bg-transparent text-white fw-semibold px-3">Entrada</th>
               <th className="bg-transparent text-white fw-semibold px-3">Salida Max</th>
               <th className="bg-transparent text-white fw-semibold px-3">Salida</th>
+              <th className="bg-transparent text-white fw-semibold px-3">Pago</th>
               <th className="bg-transparent text-white fw-semibold px-3 text-start">Observaciones</th>
             </tr>
           </thead>
@@ -118,8 +122,17 @@ const TableCrearReservas = ({ reservas }: Props) => {
                       <span className="badge bg-warning text-dark">Pendiente</span>
                     )}
                   </td>
+                  <td className="bg-transparent text-white">
+                    {reserva.metodoPago === 'transferencia' ? (
+                      <span className="badge bg-primary" title={reserva.referenciaTransferencia}>
+                        {reserva.bancoTransferencia || 'Transferencia'}
+                      </span>
+                    ) : (
+                      <span className="badge bg-success">Efectivo</span>
+                    )}
+                  </td>
                   <td className="bg-transparent text-white text-start">
-                    <div 
+                    <div
                       className="small opacity-90 text-wrap" 
                       style={{ 
                         minWidth: '300px', 
@@ -134,7 +147,7 @@ const TableCrearReservas = ({ reservas }: Props) => {
               ))
             ) : (
               <tr>
-                <td colSpan={9} className="text-start ps-3 py-5 text-white/50 bg-transparent" style={{ whiteSpace: 'normal' }}>
+                <td colSpan={10} className="text-start ps-3 py-5 text-white/50 bg-transparent" style={{ whiteSpace: 'normal' }}>
                   {filtroInfo.colaborador
                     ? "No hay reservas registradas en este turno."
                     : "No se detectó un turno activo. Inicie sesión nuevamente."}

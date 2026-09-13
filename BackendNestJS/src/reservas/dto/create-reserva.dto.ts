@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsPositive, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsPositive, IsOptional, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateReservaDto {
@@ -43,4 +43,16 @@ export class CreateReservaDto {
   @IsString()
   @IsNotEmpty()
   colaborador: string;
+
+  @IsOptional()
+  @IsIn(['efectivo', 'transferencia'])
+  metodoPago?: string;
+
+  @IsOptional()
+  @IsIn(['Nequi', 'Daviplata', 'Bancolombia', 'Bre-B'])
+  bancoTransferencia?: string;
+
+  @IsOptional()
+  @IsString()
+  referenciaTransferencia?: string;
 }

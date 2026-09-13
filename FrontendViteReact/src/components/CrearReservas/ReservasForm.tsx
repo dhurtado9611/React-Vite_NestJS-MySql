@@ -12,6 +12,9 @@ interface Reserva {
   observaciones: string;
   fecha: string;
   colaborador: string;
+  metodoPago: string;
+  bancoTransferencia: string;
+  referenciaTransferencia: string;
 }
 
 interface Props {
@@ -65,6 +68,11 @@ const ReservasForm = ({
           .toString()
           .padStart(2, '0')}`;
       }
+      // Al volver a "efectivo" se limpian los datos de transferencia para no enviar información obsoleta.
+      if (name === 'metodoPago' && value === 'efectivo') {
+        newFormData.bancoTransferencia = '';
+        newFormData.referenciaTransferencia = '';
+      }
       return newFormData;
     });
   };
@@ -80,9 +88,17 @@ const ReservasForm = ({
         !formData.placa ||
         !formData.habitacion ||
         !formData.valor ||
-        !formData.hentrada
+        !formData.hentrada ||
+        !formData.metodoPago
       ) {
         alert('Por favor completa todos los campos requeridos.');
+        return;
+      }
+      if (
+        formData.metodoPago === 'transferencia' &&
+        (!formData.bancoTransferencia || !formData.referenciaTransferencia)
+      ) {
+        alert('Selecciona el banco/app y escribe la referencia de la transferencia.');
         return;
       }
       const fechaActual = new Date().toISOString().split('T')[0];
@@ -240,6 +256,55 @@ const ReservasForm = ({
             disabled
           />
         </div>
+
+        <div className="col">
+          <label className="form-label text-white fw-semibold">Método de Pago</label>
+          <select
+            name="metodoPago"
+            value={formData.metodoPago || ''}
+            onChange={handleInputChange}
+            className="form-control bg-light border-0 shadow-sm"
+            required
+          >
+            <option value="">Seleccione</option>
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+          </select>
+        </div>
+
+        {formData.metodoPago === 'transferencia' && (
+          <>
+            <div className="col">
+              <label className="form-label text-white fw-semibold">Banco / App</label>
+              <select
+                name="bancoTransferencia"
+                value={formData.bancoTransferencia || ''}
+                onChange={handleInputChange}
+                className="form-control bg-light border-0 shadow-sm"
+                required
+              >
+                <option value="">Seleccione</option>
+                <option value="Nequi">Nequi</option>
+                <option value="Daviplata">Daviplata</option>
+                <option value="Bancolombia">Bancolombia</option>
+                <option value="Bre-B">Bre-B</option>
+              </select>
+            </div>
+
+            <div className="col">
+              <label className="form-label text-white fw-semibold">Referencia de la Transferencia</label>
+              <input
+                type="text"
+                name="referenciaTransferencia"
+                value={formData.referenciaTransferencia || ''}
+                onChange={handleInputChange}
+                className="form-control bg-light border-0 shadow-sm"
+                placeholder="Número de comprobante"
+                required
+              />
+            </div>
+          </>
+        )}
 
         <div className="col-12">
           <label className="form-label text-white fw-semibold">Observaciones</label>
