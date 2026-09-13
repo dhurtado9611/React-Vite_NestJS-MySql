@@ -127,16 +127,25 @@ const Historial = () => {
     }
   };
 
-  const calcularEstadoTiempo = (horaEntrada: string) => {
+  const calcularEstadoTiempo = (horaEntrada: string, fecha?: string) => {
     if (!horaEntrada) return { minutosPasados: 0, minutosRestantes: 240, porcentaje: 0, excedido: false };
     const fechaActual = new Date();
-    const [h, m] = horaEntrada.split(':').map(Number);
-    const fechaEntrada = new Date();
-    fechaEntrada.setHours(h, m, 0, 0);
-    if (fechaEntrada > fechaActual && (fechaEntrada.getTime() - fechaActual.getTime() > 12 * 60 * 60 * 1000)) {
+    // Se usa la fecha real de la reserva (no una heurística de "menos de 12h")
+    // para que el cálculo no se rompa al cruzar la medianoche o con turnos
+    // muy vencidos (más de 12h). Si no hay fecha (dato viejo), se cae al
+    // comportamiento anterior como respaldo.
+    let fechaEntrada: Date;
+    if (fecha) {
+      fechaEntrada = new Date(`${fecha}T${horaEntrada}:00`);
+    } else {
+      const [h, m] = horaEntrada.split(':').map(Number);
+      fechaEntrada = new Date();
+      fechaEntrada.setHours(h, m, 0, 0);
+      if (fechaEntrada > fechaActual && (fechaEntrada.getTime() - fechaActual.getTime() > 12 * 60 * 60 * 1000)) {
         fechaEntrada.setDate(fechaEntrada.getDate() - 1);
+      }
     }
-    
+
     const diferenciaMs = fechaActual.getTime() - fechaEntrada.getTime();
     const minutosPasados = Math.floor(diferenciaMs / 60000);
     const LIMITE_TIEMPO = 240; 
@@ -251,7 +260,7 @@ const Historial = () => {
     return () => { clearInterval(interval); clearInterval(clock); };
   }, [fetchDatosCaja]);
 
-  const estadoModal = reservaSeleccionada ? calcularEstadoTiempo(reservaSeleccionada.hentrada) : null;
+  const estadoModal = reservaSeleccionada ? calcularEstadoTiempo(reservaSeleccionada.hentrada, reservaSeleccionada.fecha) : null;
 
   return (
     <div className="min-h-screen text-white font-sans selection:bg-indigo-500 selection:text-white md:pl-24 md:pr-24 pb-20 md:pb-0">
@@ -325,7 +334,7 @@ const Historial = () => {
             {[...Array(16)].map((_, i) => {
               const num = i + 1;
               const r = reservas.find(res => res.habitacion === num && !res.hsalida);
-              const info = r ? calcularEstadoTiempo(r.hentrada) : null;
+              const info = r ? calcularEstadoTiempo(r.hentrada, r.fecha) : null;
               const estado = !r ? 'libre' : info?.excedido ? 'critica' : 'ocupada';
 
               return (

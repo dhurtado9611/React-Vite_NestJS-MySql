@@ -18,16 +18,25 @@ interface ReservaActividad {
   placa: string;
   hentrada: string;
   hsalida?: string;
+  fecha?: string;
 }
 
-const minutosExcedidos = (horaEntrada: string) => {
+const minutosExcedidos = (horaEntrada: string, fecha?: string) => {
   if (!horaEntrada) return false;
   const ahora = new Date();
-  const [h, m] = horaEntrada.split(':').map(Number);
-  const entrada = new Date();
-  entrada.setHours(h, m, 0, 0);
-  if (entrada > ahora && entrada.getTime() - ahora.getTime() > 12 * 60 * 60 * 1000) {
-    entrada.setDate(entrada.getDate() - 1);
+  // Se usa la fecha real de la reserva en vez de adivinar "hoy o ayer" por
+  // diferencia horaria: esa heurística fallaba con turnos vencidos por más
+  // de 12h, mostrando la alerta como si acabara de empezar.
+  let entrada: Date;
+  if (fecha) {
+    entrada = new Date(`${fecha}T${horaEntrada}:00`);
+  } else {
+    const [h, m] = horaEntrada.split(':').map(Number);
+    entrada = new Date();
+    entrada.setHours(h, m, 0, 0);
+    if (entrada > ahora && entrada.getTime() - ahora.getTime() > 12 * 60 * 60 * 1000) {
+      entrada.setDate(entrada.getDate() - 1);
+    }
   }
   const minutosPasados = Math.floor((ahora.getTime() - entrada.getTime()) / 60000);
   return minutosPasados >= LIMITE_TIEMPO_MINUTOS;
@@ -89,7 +98,7 @@ const Sidebar = () => {
         let excedidas = 0;
         data.forEach((r) => {
           if (r.hsalida) return;
-          if (minutosExcedidos(r.hentrada)) {
+          if (minutosExcedidos(r.hentrada, r.fecha)) {
             excedidas += 1;
             if (!habitacionesNotificadas.current.has(r.habitacion)) {
               habitacionesNotificadas.current.add(r.habitacion);
