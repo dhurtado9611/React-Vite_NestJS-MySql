@@ -1,5 +1,5 @@
 // inventario.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inventario } from './inventario.entity';
@@ -8,6 +8,8 @@ import { UpdateInventarioDto } from './dto/update-inventario.dto';
 
 @Injectable()
 export class InventarioService {
+  private readonly logger = new Logger(InventarioService.name);
+
   constructor(
     @InjectRepository(Inventario)
     private readonly inventarioRepository: Repository<Inventario>,
@@ -36,46 +38,44 @@ export class InventarioService {
 
   async resetearTodo(): Promise<void> {
     try {
-      console.log('📌 Ejecutando resetearTodo() inventario');
-      await this.inventarioRepository.clear();
-      await this.inventarioRepository.query('ALTER TABLE inventario AUTO_INCREMENT = 1');
-      console.log('✅ Inventario eliminado y reiniciado');
+      this.logger.log('Ejecutando resetearTodo() inventario');
+      await this.inventarioRepository.manager.transaction(async (manager) => {
+        await manager.clear(Inventario);
+        await manager.query('ALTER TABLE inventario AUTO_INCREMENT = 1');
+      });
+      this.logger.log('Inventario eliminado y reiniciado');
     } catch (error) {
-      console.error('Error en resetearTodo() inventario:', error);
+      this.logger.error('Error en resetearTodo() inventario:', error);
       throw new Error('Falló el reseteo de inventario');
     }
   }
 
-  // ✅ ESTA ES LA FUNCIÓN NUEVA QUE CORRIGE EL ERROR
+  // Descuenta stock dentro de una transacción con bloqueo pesimista para
+  // evitar "lost updates" cuando dos ventas concurrentes leen el mismo
+  // registro de inventario y sobreescriben el resultado de la otra.
   async descontarStock(items: { nombre: string; cantidad: number }[]): Promise<Inventario> {
-    // 1. Buscamos el último inventario registrado (asumiendo que es el turno actual)
-    const inventarios = await this.inventarioRepository.find({
-      order: { id: 'DESC' },
-      take: 1,
-    });
+    return this.inventarioRepository.manager.transaction(async (manager) => {
+      const inventarioActual = await manager
+        .createQueryBuilder(Inventario, 'inventario')
+        .orderBy('inventario.id', 'DESC')
+        .setLock('pessimistic_write')
+        .getOne();
 
-    if (!inventarios || inventarios.length === 0) {
-      throw new Error('No hay inventario activo para descontar. Crea uno primero.');
-    }
-
-    const inventarioActual = inventarios[0];
-
-    // 2. Iterar sobre los productos vendidos y restar
-    items.forEach(item => {
-      const nombreProducto = item.nombre; 
-      
-      // Verificamos si la columna existe en la entidad (ej: "AGUARDIENTE")
-      // TypeScript podría quejarse si no es indexable, por eso validamos undefined
-      if ((inventarioActual as any)[nombreProducto] !== undefined) {
-        const stockActual = Number((inventarioActual as any)[nombreProducto]);
-        const cantidadARestar = Number(item.cantidad);
-
-        // Restamos el stock
-        (inventarioActual as any)[nombreProducto] = stockActual - cantidadARestar;
+      if (!inventarioActual) {
+        throw new Error('No hay inventario activo para descontar. Crea uno primero.');
       }
-    });
 
-    // 3. Guardar los cambios en la base de datos
-    return this.inventarioRepository.save(inventarioActual);
+      for (const item of items) {
+        const nombreProducto = item.nombre;
+
+        if ((inventarioActual as any)[nombreProducto] !== undefined) {
+          const stockActual = Number((inventarioActual as any)[nombreProducto]);
+          const cantidadARestar = Number(item.cantidad);
+          (inventarioActual as any)[nombreProducto] = stockActual - cantidadARestar;
+        }
+      }
+
+      return manager.save(inventarioActual);
+    });
   }
 }

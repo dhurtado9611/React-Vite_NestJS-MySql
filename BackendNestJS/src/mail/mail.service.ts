@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailService {
+  private readonly logger = new Logger(MailService.name);
   private transporter;
 
   constructor(private configService: ConfigService) {
@@ -35,10 +36,10 @@ export class MailService {
 
     try {
       const info = await this.transporter.sendMail(mailOptions);
-      console.log('Correo enviado correctamente:', info.messageId);
+      this.logger.log(`Correo enviado correctamente: ${info.messageId}`);
       return { message: 'Correo enviado', id: info.messageId };
     } catch (error) {
-      console.error('Error al enviar el correo:', error);
+      this.logger.error('Error al enviar el correo:', error);
       throw error;
     }
   }

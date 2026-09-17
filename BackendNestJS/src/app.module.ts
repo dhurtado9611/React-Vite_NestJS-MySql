@@ -29,7 +29,9 @@ import { ReservasModule } from './reservas/reservas.module';
       type: 'mysql',
       url: process.env.MYSQL_URL,
       entities: [Reserva, User, Cuadre, Inventario, PreciosInventario],
-      synchronize: true,
+      // Nunca sincronizar el esquema automáticamente en producción: podría
+      // alterar/borrar columnas por drift entre las entidades y la BD real.
+      synchronize: process.env.NODE_ENV !== 'production',
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
     CuadreModule,

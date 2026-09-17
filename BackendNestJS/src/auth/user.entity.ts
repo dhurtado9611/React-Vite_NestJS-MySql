@@ -1,11 +1,12 @@
 // src/auth/user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 
 @Entity('users') // nombre exacto de tu tabla
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @Column()
   username: string;
 

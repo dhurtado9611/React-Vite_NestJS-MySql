@@ -1,25 +1,27 @@
 import { Controller, Get, Put, Post, Param, Body, UseGuards } from '@nestjs/common';
-// import { JwtAuthGuard } from '../auth/jwt-auth.guard'; // ⚠️ OJO: Comenta esto temporalmente si quieres probar sin token primero
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PreciosInventarioService } from './precios-inventario.service';
 import { UpdatePrecioInventarioDto } from './dto/update-precio-inventario.dto';
-import { CreatePrecioInventarioDto } from './dto/create-precio-inventario.dto'; // Asegúrate de importar esto
+import { CreatePrecioInventarioDto } from './dto/create-precio-inventario.dto';
 
-// @UseGuards(JwtAuthGuard) // <--- Si el frontend no envía token en el GET inicial, esto bloqueará la carga de productos (Error 403)
-@Controller('preciosInventario') // CAMBIO IMPORTANTE: De 'preciosInventario'
+@Controller('preciosInventario')
 export class PreciosInventarioController {
   constructor(private readonly preciosService: PreciosInventarioService) {}
 
+  // Lectura pública a propósito: el marketplace de invitados carga el
+  // catálogo antes de tener garantizado un token en memoria.
   @Get()
   findAll() {
     return this.preciosService.findAll();
   }
 
-  // Agregamos el POST para poder crear productos desde Postman o Frontend si fuera necesario
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() dto: CreatePrecioInventarioDto) {
     return this.preciosService.create(dto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   async update(@Param('id') id: number, @Body() dto: UpdatePrecioInventarioDto) {
     return this.preciosService.update(id, dto);
