@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 
 @Entity('reservas')
 export class Reserva {
@@ -29,6 +29,7 @@ export class Reserva {
   @Column({ nullable: true })
   observaciones: string;
 
+  @Index()
   @Column({ nullable: true })
   fecha: string;
 

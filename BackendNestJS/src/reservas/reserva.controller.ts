@@ -1,5 +1,5 @@
 // reserva.controller.ts
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ReservaService } from './reserva.service';
 import { Reserva } from './reserva.entity';
 import { CreateReservaDto } from './dto/create-reserva.dto';
@@ -11,6 +11,8 @@ import { Roles } from '../auth/roles.decorator';
 @UseGuards(JwtAuthGuard)
 @Controller('reservas')
 export class ReservaController {
+  private readonly logger = new Logger(ReservaController.name);
+
   constructor(private readonly reservaService: ReservaService) {}
 
   @Get()
@@ -36,7 +38,7 @@ export class ReservaController {
       await this.reservaService.resetearTodas();
       return { message: 'Reservas eliminadas correctamente' };
     } catch (error) {
-      console.error('Error en resetearReservas:', error);
+      this.logger.error('Error en resetearReservas:', error);
       throw new HttpException('Error al eliminar reservas', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

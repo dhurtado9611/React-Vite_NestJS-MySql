@@ -1,10 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
 
 @Entity('reservas_cliente')
 export class ReservasCliente {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @Column()
   cliente_id: string;
 
@@ -23,6 +24,7 @@ export class ReservasCliente {
   @Column()
   tipo_habitacion: string;
 
+  @Index()
   @Column({ type: 'date' })
   fecha: string;
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { CuadreService } from './cuadre.service';
 import { Cuadre } from './cuadre.entity';
 import { CreateCuadreDto } from './dto/create-cuadre.dto';
@@ -10,6 +10,8 @@ import { Roles } from '../auth/roles.decorator';
 @UseGuards(JwtAuthGuard)
 @Controller('cuadre')
 export class CuadreController {
+  private readonly logger = new Logger(CuadreController.name);
+
   constructor(private readonly cuadreService: CuadreService) {}
 
   @Get()
@@ -34,13 +36,13 @@ export class CuadreController {
   @UseGuards(RolesGuard)
   @Roles('admin')
   async resetearCuadre(): Promise<{ message: string }> {
-    console.log('✅ Entrando a resetearCuadre()');
+    this.logger.log('Entrando a resetearCuadre()');
 
     try {
       await this.cuadreService.resetearTodo();
       return { message: 'Cuadre eliminado correctamente' };
     } catch (error) {
-      console.error('❌ Error en resetearCuadre():', error);
+      this.logger.error('Error en resetearCuadre():', error);
       throw new HttpException('Error al eliminar cuadre', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

@@ -1,5 +1,5 @@
 // cuadre.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cuadre } from './cuadre.entity';
@@ -8,6 +8,8 @@ import { UpdateCuadreDto } from './dto/update-cuadre.dto';
 
 @Injectable()
 export class CuadreService {
+  private readonly logger = new Logger(CuadreService.name);
+
   constructor(
     @InjectRepository(Cuadre)
     private readonly cuadreRepository: Repository<Cuadre>,
@@ -36,13 +38,14 @@ export class CuadreService {
 
   async resetearTodo(): Promise<void> {
     try {
-      console.log('📌 Ejecutando resetearTodo()');
-      await this.cuadreRepository.clear();
-      console.log('✅ Registros eliminados');
-      await this.cuadreRepository.query('ALTER TABLE cuadre AUTO_INCREMENT = 1');
-      console.log('🔄 AUTO_INCREMENT reiniciado');
+      this.logger.log('Ejecutando resetearTodo()');
+      await this.cuadreRepository.manager.transaction(async (manager) => {
+        await manager.clear(Cuadre);
+        await manager.query('ALTER TABLE cuadre AUTO_INCREMENT = 1');
+      });
+      this.logger.log('Registros eliminados y AUTO_INCREMENT reiniciado');
     } catch (error) {
-      console.error('❌ Error en resetearTodo():', error.message);
+      this.logger.error('Error en resetearTodo():', error.message);
       throw new Error('Falló el reseteo de cuadre');
     }
   }

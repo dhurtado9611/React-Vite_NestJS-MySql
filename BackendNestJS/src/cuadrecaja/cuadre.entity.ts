@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Index } from 'typeorm';
 
 @Entity()
 export class Cuadre {
@@ -8,6 +8,7 @@ export class Cuadre {
   @Column()
   colaborador: string;
 
+  @Index()
   @Column()
   fecha: string;
 
