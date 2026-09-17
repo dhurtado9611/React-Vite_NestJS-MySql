@@ -29,6 +29,7 @@ interface Cuadre {
   basecaja: number;
   totalActual?: number;
   fecha: string;
+  colaborador: string;
 }
 
 const MESES = [
@@ -217,8 +218,22 @@ const TablaReservas = () => {
     [reservasDelMes]
   );
 
-  const ultimoCuadre = cuadres.find((c) => !c.turnoCerrado);
-  const totalTurnoActivo = ultimoCuadre?.totalActual || 0;
+  const hoy = useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  // El turno activo no persiste sus ventas en la BD (totalActual nunca se
+  // escribe durante el turno), así que se calculan en vivo igual que en
+  // ActividadAdmin.tsx: sumando las reservas del colaborador con caja abierta.
+  const cuadreActivo = useMemo(
+    () => cuadres.find((c) => c.fecha === hoy && !c.turnoCerrado),
+    [cuadres, hoy]
+  );
+
+  const totalTurnoActivo = useMemo(() => {
+    if (!cuadreActivo) return 0;
+    return reservas
+      .filter((r) => r.colaborador === cuadreActivo.colaborador && r.fecha === hoy)
+      .reduce((acc, r) => acc + (Number(r.valor) || 0), 0);
+  }, [reservas, cuadreActivo, hoy]);
 
   return (
     <div className="space-y-6">
