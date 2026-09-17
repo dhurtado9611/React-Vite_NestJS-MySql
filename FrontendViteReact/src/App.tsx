@@ -1,21 +1,30 @@
 // App.tsx
+import { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MainLayout from './Layouts/MainLayout'
 import Home from './pages/Home'
 import ReservarCliente from './pages/ReservarCliente'
 import LoginModal from './components/LoginModal'
 
-import AdminDashboard from './admin/AdminDashboard'
-import CrearReservasAdmin from './pages/CrearReservasAdmin'
-import ActividadAdmin from './pages/ActividadAdmin'
-import CrearReservasInvitado from './pages/CrearReservasInvitado'
-import ActividadInvitado from './pages/ActividadInvitado'
-import Marketplace from './pages/MarketplaceAdmin'
-import MarketplaceInvitado from './pages/MarketplaceInvitado'
-
+// Rutas de admin/invitado cargadas de forma perezosa: sacan del bundle
+// inicial recharts, xlsx y el código de los paneles, que un visitante
+// anónimo de la Home pública nunca necesita descargar.
+const AdminDashboard = lazy(() => import('./admin/AdminDashboard'))
+const CrearReservasAdmin = lazy(() => import('./pages/CrearReservasAdmin'))
+const ActividadAdmin = lazy(() => import('./pages/ActividadAdmin'))
+const CrearReservasInvitado = lazy(() => import('./pages/CrearReservasInvitado'))
+const ActividadInvitado = lazy(() => import('./pages/ActividadInvitado'))
+const Marketplace = lazy(() => import('./pages/MarketplaceAdmin'))
+const MarketplaceInvitado = lazy(() => import('./pages/MarketplaceInvitado'))
 
 import RutaProtegidaInvitado from './components/RutaProtegidaInvitado'
 import RutaProtegidaAdmin from './components/RutaProtegidaAdmin'
+
+const RouteFallback = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+    Cargando...
+  </div>
+)
 
 function App() {
   const handleCloseModal = () => {
@@ -25,6 +34,7 @@ function App() {
   return (
     <>
       <Router>
+        <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
@@ -46,7 +56,7 @@ function App() {
               }
             />
 
-            <Route 
+            <Route
               path="/CrearReservasAdmin"
               element={
                 <RutaProtegidaAdmin>
@@ -55,8 +65,8 @@ function App() {
               }
             />
 
-            <Route 
-              path="/ActividadAdmin" 
+            <Route
+              path="/ActividadAdmin"
               element={
                 <RutaProtegidaAdmin>
                   <ActividadAdmin />
@@ -64,8 +74,8 @@ function App() {
               }
             />
 
-            <Route 
-              path="/Marketplace" 
+            <Route
+              path="/Marketplace"
               element={
                 <RutaProtegidaAdmin>
                   <Marketplace />
@@ -82,7 +92,7 @@ function App() {
               }
             />
 
-            <Route 
+            <Route
               path="/ActividadInvitado"
               element={
                 <RutaProtegidaInvitado>
@@ -91,8 +101,8 @@ function App() {
               }
             />
 
-            <Route 
-              path="/MarketplaceInvitado" 
+            <Route
+              path="/MarketplaceInvitado"
               element={
                 <RutaProtegidaInvitado>
                   <MarketplaceInvitado />
@@ -102,6 +112,7 @@ function App() {
 
           </Route>
         </Routes>
+        </Suspense>
       </Router>
     </>
   )

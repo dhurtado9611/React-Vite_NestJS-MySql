@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import axios from "axios";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   CalendarPlus,
@@ -51,6 +52,22 @@ const Sidebar = () => {
   const location = useLocation();
   const habitacionesNotificadas = useRef<Set<number>>(new Set());
 
+  const handleLogout = useCallback(() => {
+    if (rol === "invitado" && localStorage.getItem("datosTurno")) {
+      alert("Debes cerrar tu turno antes de salir.");
+      navigate("/ActividadInvitado");
+      return;
+    }
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("rol");
+    habitacionesNotificadas.current.clear();
+    setVencidas(0);
+    setUsername(null);
+    setRol(null);
+    window.location.href = "/";
+  }, [rol, navigate]);
+
   // --- LÓGICA DE SESIÓN ---
   useEffect(() => {
     const checkSession = () => {
@@ -66,7 +83,7 @@ const Sidebar = () => {
       }
     };
     checkSession();
-  }, []);
+  }, [handleLogout]);
 
   // --- VIGILANTE DE ALERTAS DE TIEMPO (corre en toda la app mientras haya sesión) ---
   useEffect(() => {
@@ -92,9 +109,9 @@ const Sidebar = () => {
       };
     };
 
-    const revisarHabitaciones = async () => {
+    const revisarHabitaciones = async (signal: AbortSignal) => {
       try {
-        const { data } = await api.get<ReservaActividad[]>('/reservas');
+        const { data } = await api.get<ReservaActividad[]>('/reservas', { signal });
         let excedidas = 0;
         data.forEach((r) => {
           if (r.hsalida) return;
@@ -110,30 +127,19 @@ const Sidebar = () => {
         });
         setVencidas(excedidas);
       } catch (error) {
+        if (axios.isCancel(error)) return;
         console.error('Error revisando alertas de habitaciones:', error);
       }
     };
 
-    revisarHabitaciones();
-    const interval = setInterval(revisarHabitaciones, 15000);
-    return () => clearInterval(interval);
+    const controller = new AbortController();
+    revisarHabitaciones(controller.signal);
+    const interval = setInterval(() => revisarHabitaciones(controller.signal), 15000);
+    return () => {
+      clearInterval(interval);
+      controller.abort();
+    };
   }, [rol, navigate]);
-
-  const handleLogout = () => {
-    if (rol === "invitado" && localStorage.getItem("datosTurno")) {
-      alert("Debes cerrar tu turno antes de salir.");
-      navigate("/ActividadInvitado");
-      return;
-    }
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("rol");
-    habitacionesNotificadas.current.clear();
-    setVencidas(0);
-    setUsername(null);
-    setRol(null);
-    window.location.href = "/";
-  };
 
   const getLinks = () => {
     if (rol === "admin") {

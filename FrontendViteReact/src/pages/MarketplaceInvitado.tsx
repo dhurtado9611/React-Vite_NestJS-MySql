@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaShoppingCart, FaTrash, FaPlus, FaSync } from 'react-icons/fa';
 import { Modal, Button, Form } from 'react-bootstrap';
@@ -45,38 +45,24 @@ const MarketplaceCliente = () => {
   const [bancoTransferenciaCarrito, setBancoTransferenciaCarrito] = useState('');
   const [referenciaTransferenciaCarrito, setReferenciaTransferenciaCarrito] = useState('');
 
-  useEffect(() => {
-    fetchInventario();
-  }, []);
-
-  useEffect(() => {
-    const totalCalculado = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
-    setPrecioFinal(totalCalculado);
-  }, [carrito]);
-
-  useEffect(() => {
-    if (showModal) {
-      fetchReservasActivas();
-    }
-  }, [showModal]);
-
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  const fetchInventario = async () => {
+  const fetchInventario = useCallback(async (signal?: AbortSignal) => {
     try {
-      const resPrecios = await axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`);
-      const productosBD = resPrecios.data; 
+      const resPrecios = await axios.get(`${import.meta.env.VITE_API_URL}/preciosInventario`, { signal });
+      const productosBD = resPrecios.data;
 
       let stockMap: any = {};
       try {
-          const resStock = await axios.get(`${import.meta.env.VITE_API_URL}/inventario`);
+          const resStock = await axios.get(`${import.meta.env.VITE_API_URL}/inventario`, { signal });
           if (resStock.data && resStock.data.length > 0) {
               stockMap = resStock.data[resStock.data.length - 1];
           }
       } catch (e) {
+          if (axios.isCancel(e)) throw e;
           console.warn("No se pudo cargar stock, asumiendo 0", e);
       }
 
@@ -96,30 +82,51 @@ const MarketplaceCliente = () => {
       setProductos(productosProcesados);
 
     } catch (err) {
+      if (axios.isCancel(err)) return;
       console.error("Error cargando inventario desde BD", err);
     }
-  };
+  }, []);
 
-  const fetchReservasActivas = async () => {
+  const fetchReservasActivas = useCallback(async (signal?: AbortSignal) => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas`, {
-        headers: getAuthHeaders()
+        headers: getAuthHeaders(),
+        signal,
       });
-      
+
       const activas: ReservaActiva[] = (res.data as any[])
-        .filter((r: any) => r.habitacion && !r.hsalida) 
+        .filter((r: any) => r.habitacion && !r.hsalida)
         .map((r: any) => ({
-          id: r.id,            
+          id: r.id,
           habitacion: Number(r.habitacion)
         }))
         .sort((a, b) => a.habitacion - b.habitacion);
 
       setListaReservasActivas(activas);
-      
+
     } catch (error) {
+      if (axios.isCancel(error)) return;
       console.error("Error buscando reservas activas", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchInventario(controller.signal);
+    return () => controller.abort();
+  }, [fetchInventario]);
+
+  useEffect(() => {
+    const totalCalculado = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+    setPrecioFinal(totalCalculado);
+  }, [carrito]);
+
+  useEffect(() => {
+    if (!showModal) return;
+    const controller = new AbortController();
+    fetchReservasActivas(controller.signal);
+    return () => controller.abort();
+  }, [showModal, fetchReservasActivas]);
 
   const agregarAlCarrito = (producto: any) => {
     setCarrito(prev => {
@@ -317,8 +324,8 @@ const MarketplaceCliente = () => {
             ) : (
                 <div className="space-y-4">
                     <div className="max-h-[300px] overflow-y-auto pr-2 space-y-3">
-                        {carrito.map((item, i) => (
-                            <div key={i} className="flex justify-between items-center border-b border-white/10 pb-3">
+                        {carrito.map((item) => (
+                            <div key={item.id} className="flex justify-between items-center border-b border-white/10 pb-3">
                                 <div>
                                     <p className="font-bold m-0 text-gray-200">{item.nombre}</p>
                                     <p className="text-xs text-gray-400 m-0">${item.precio.toLocaleString()} x {item.cantidad}</p>
@@ -344,7 +351,7 @@ const MarketplaceCliente = () => {
                         <div>
                             <div className="flex justify-between items-center mb-2">
                               <Form.Label className="font-bold text-gray-300 text-sm mb-0">Habitación Activa:</Form.Label>
-                              <button onClick={fetchReservasActivas} title="Actualizar lista" className="text-blue-400 text-xs flex items-center gap-1 hover:text-blue-300 transition">
+                              <button onClick={() => fetchReservasActivas()} title="Actualizar lista" className="text-blue-400 text-xs flex items-center gap-1 hover:text-blue-300 transition">
                                 <FaSync size={10} /> Refrescar
                               </button>
                             </div>

@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
+import api from '../services/api';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 interface Usuario {
   id: number;
   username: string;
-  password: string;
   rol: string;
 }
 
@@ -14,28 +14,21 @@ const TablaUsuarios = () => {
   const [error, setError] = useState<string | null>(null);
   const [nuevoUsuario, setNuevoUsuario] = useState({ username: '', password: '', rol: 'invitado' });
 
-  const cargarUsuarios = async () => {
+  const cargarUsuarios = useCallback(async (signal?: AbortSignal) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return setError('No hay token disponible.');
-
-      const response = await axios.get('https://react-vitenestjs-mysql-production.up.railway.app/users', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/users', { signal });
       setUsuarios(response.data);
       setError(null);
     } catch (error: any) {
+      if (axios.isCancel(error)) return;
       console.error('Error al cargar usuarios:', error);
       setError(error.response?.data?.message || 'Error desconocido');
     }
-  };
+  }, []);
 
   const crearUsuario = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('https://react-vitenestjs-mysql-production.up.railway.app/users', nuevoUsuario, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post('/users', nuevoUsuario);
       setNuevoUsuario({ username: '', password: '', rol: 'invitado' });
       cargarUsuarios();
     } catch (error) {
@@ -47,10 +40,7 @@ const TablaUsuarios = () => {
   const eliminarUsuario = async (id: number) => {
     if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`https://react-vitenestjs-mysql-production.up.railway.app/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/users/${id}`);
       cargarUsuarios();
     } catch (error) {
       alert('Error al eliminar usuario');
@@ -59,8 +49,10 @@ const TablaUsuarios = () => {
   };
 
   useEffect(() => {
-    cargarUsuarios();
-  }, []);
+    const controller = new AbortController();
+    cargarUsuarios(controller.signal);
+    return () => controller.abort();
+  }, [cargarUsuarios]);
 
   return (
     <div className="text-white">

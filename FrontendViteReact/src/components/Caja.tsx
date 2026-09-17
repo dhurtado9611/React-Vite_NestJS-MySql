@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import api from '../services/api';
 
 // Interfaces mantenidas del original
@@ -10,6 +11,7 @@ interface Cuadre {
   fecha: string;
   turno: string;
   turnoCerrado?: string | null;
+  totalActual?: number;
 }
 
 interface Reserva {
@@ -35,14 +37,14 @@ const Caja = () => {
   const navigate = useNavigate();
 
   // useCallback evita que la función se recree innecesariamente
-  const cargarDatosCaja = useCallback(async (nombreColaborador: string, fechaActual: string) => {
+  const cargarDatosCaja = useCallback(async (nombreColaborador: string, fechaActual: string, signal: AbortSignal) => {
     try {
       // 1. Obtener base de caja (solo si no la tenemos)
-      const resCuadre = await api.get('/cuadre');
+      const resCuadre = await api.get('/cuadre', { signal });
       const registros: Cuadre[] = resCuadre.data;
-      const registro = registros.find(r => 
-        r.colaborador === nombreColaborador && 
-        r.fecha === fechaActual && 
+      const registro = registros.find(r =>
+        r.colaborador === nombreColaborador &&
+        r.fecha === fechaActual &&
         !r.turnoCerrado
       );
 
@@ -52,21 +54,26 @@ const Caja = () => {
       }
 
       // 2. Obtener reservas y actualizar total
-      const resReservas = await api.get('/reservas');
+      const resReservas = await api.get('/reservas', { signal });
       const reservas: Reserva[] = resReservas.data;
       const total = reservas
         .filter(r => r.colaborador === nombreColaborador && r.fecha === fechaActual)
         .reduce((sum, r) => sum + r.valor, 0);
-      
+
       setTotalReservas(total);
 
-      // Actualización automática en BD (opcional según tu lógica de backend)
+      // Solo escribimos en BD si el total realmente cambió: evita un PATCH
+      // cada 10s por cada pestaña abierta cuando nada se movió.
       if (registro) {
-        await api.patch(`/cuadre/${registro.id}`, {
-          totalActual: total + (registro.basecaja || 0)
-        });
+        const nuevoTotalActual = total + (registro.basecaja || 0);
+        if (registro.totalActual !== nuevoTotalActual) {
+          await api.patch(`/cuadre/${registro.id}`, {
+            totalActual: nuevoTotalActual
+          }, { signal });
+        }
       }
     } catch (error) {
+      if (axios.isCancel(error)) return;
       console.error('Error en sincronización de caja:', error);
     } finally {
       setCargando(false);
@@ -89,20 +96,23 @@ const Caja = () => {
       setColaborador(usuarioActual);
     }
 
+    const controller = new AbortController();
+
     if (usuarioActual) {
-      cargarDatosCaja(usuarioActual, hoy);
-      
+      cargarDatosCaja(usuarioActual, hoy, controller.signal);
+
       // Limpiar intervalo anterior si existe
       if (intervaloRef.current) clearInterval(intervaloRef.current);
-      
+
       // En host real, 10-15 segundos es más seguro que 5
       intervaloRef.current = setInterval(() => {
-        cargarDatosCaja(usuarioActual, hoy);
-      }, 10000); 
+        cargarDatosCaja(usuarioActual, hoy, controller.signal);
+      }, 10000);
     }
 
     return () => {
       if (intervaloRef.current) clearInterval(intervaloRef.current);
+      controller.abort();
     };
   }, [rol, cargarDatosCaja]);
 

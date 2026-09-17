@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import api from '../services/api';
 import { Modal } from 'react-bootstrap';
 import { 
@@ -68,7 +69,7 @@ const Historial = () => {
 
   // --- LÓGICA DE DATOS ---
   // Las notificaciones de tiempo agotado ahora las vigila Sidebar.tsx en toda la app.
-  const fetchDatosCaja = useCallback(async () => {
+  const fetchDatosCaja = useCallback(async (signal?: AbortSignal) => {
     try {
       const datosTurno = localStorage.getItem('datosTurno');
       const rol = localStorage.getItem('rol');
@@ -91,10 +92,10 @@ const Historial = () => {
       const hoy = new Date().toISOString().split('T')[0];
       setFecha(hoy);
 
-      const resCuadre = await api.get('/cuadre');
-      const cuadreActivo = resCuadre.data.find((c: Cuadre) => 
-        c.colaborador === nombreUsuario && 
-        c.fecha === hoy && 
+      const resCuadre = await api.get('/cuadre', { signal });
+      const cuadreActivo = resCuadre.data.find((c: Cuadre) =>
+        c.colaborador === nombreUsuario &&
+        c.fecha === hoy &&
         !c.turnoCerrado
       );
 
@@ -104,28 +105,30 @@ const Historial = () => {
         if (!turnoActual) setTurno(cuadreActivo.turno);
       }
 
-      const resReservas = await api.get('/reservas');
-      
+      const resReservas = await api.get('/reservas', { signal });
+
       const misReservasHoy = resReservas.data.filter((r: Reserva) => r.colaborador === nombreUsuario && r.fecha === hoy);
-      
+
       const total = misReservasHoy.reduce((sum: number, r: Reserva) => sum + r.valor, 0);
       setTotalVentas(total);
 
     } catch (error) {
+      if (axios.isCancel(error)) return;
       console.error('Error cargando caja:', error);
     }
   }, []);
 
-  const fetchDatosReservas = async () => {
+  const fetchDatosReservas = useCallback(async (signal?: AbortSignal) => {
     try {
-      const response = await api.get('/reservas');
+      const response = await api.get('/reservas', { signal });
       const reservasData = response.data;
       setReservas(reservasData);
 
     } catch (error) {
+      if (axios.isCancel(error)) return;
       console.error('Error fetching reservas:', error);
     }
-  };
+  }, []);
 
   const calcularEstadoTiempo = (horaEntrada: string, fecha?: string) => {
     if (!horaEntrada) return { minutosPasados: 0, minutosRestantes: 240, porcentaje: 0, excedido: false };
@@ -253,12 +256,16 @@ const Historial = () => {
   };
 
   useEffect(() => {
-    fetchDatosReservas();
-    fetchDatosCaja();
-    const interval = setInterval(() => { fetchDatosReservas(); fetchDatosCaja(); }, 10000);
+    const controller = new AbortController();
+    fetchDatosReservas(controller.signal);
+    fetchDatosCaja(controller.signal);
+    const interval = setInterval(() => {
+      fetchDatosReservas(controller.signal);
+      fetchDatosCaja(controller.signal);
+    }, 10000);
     const clock = setInterval(() => setNow(new Date()), 60000);
-    return () => { clearInterval(interval); clearInterval(clock); };
-  }, [fetchDatosCaja]);
+    return () => { clearInterval(interval); clearInterval(clock); controller.abort(); };
+  }, [fetchDatosCaja, fetchDatosReservas]);
 
   const estadoModal = reservaSeleccionada ? calcularEstadoTiempo(reservaSeleccionada.hentrada, reservaSeleccionada.fecha) : null;
 

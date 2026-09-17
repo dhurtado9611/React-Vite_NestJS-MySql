@@ -1,42 +1,21 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
 // ❌ ELIMINADO: import logoSrc from "/assets/Logo-PNG.png";
 
 const LogoLoader = () => {
   const [isAnimating, setIsAnimating] = useState(true);
   const [progress, setProgress] = useState(0);
 
+  // Animación puramente decorativa: antes pedía /reservas completo solo
+  // para tener una excusa de "carga" y descartaba la respuesta.
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          console.warn("No hay token JWT, se omite llamada.");
-          setIsAnimating(false);
-          return;
-        }
-
-        setProgress(30);
-        await new Promise((res) => setTimeout(res, 500));
-        setProgress(60);
-
-        await axios.get("https://react-vitenestjs-mysql-production.up.railway.app/reservas", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setProgress(100);
-        setTimeout(() => setIsAnimating(false), 500);
-      } catch (error) {
-        console.error("Error al cargar datos logoLoader:", error);
-        setProgress(100);
-        setTimeout(() => setIsAnimating(false), 500);
-      }
-    };
-
-    fetchData();
+    const timers = [
+      setTimeout(() => setProgress(30), 150),
+      setTimeout(() => setProgress(60), 500),
+      setTimeout(() => setProgress(100), 900),
+      setTimeout(() => setIsAnimating(false), 1400),
+    ];
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   const radius = 75;

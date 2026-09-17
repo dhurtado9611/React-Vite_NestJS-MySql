@@ -1,5 +1,5 @@
 // Código actualizado de TableReservas.tsx con filtros por rango de fechas y colaborador
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import * as XLSX from 'xlsx';
 import api from '../../services/api';
 
@@ -82,11 +82,11 @@ const TableReservas = ({ reservas, fetchReservas, selectedId, setSelectedId }: P
     }
   };
 
-  const filteredReservas = reservas.filter((r) => {
+  const filteredReservas = useMemo(() => reservas.filter((r) => {
     const fechaOK = (!startDate || r.fecha >= startDate) && (!endDate || r.fecha <= endDate);
     const colaboradorOK = !colaborador || r.colaborador?.toLowerCase().includes(colaborador.toLowerCase());
     return fechaOK && colaboradorOK;
-  });
+  }), [reservas, startDate, endDate, colaborador]);
 
   const totalPages = Math.ceil(filteredReservas.length / rowsPerPage);
 

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import axios from 'axios';
 import api from '../services/api'; // Asegúrate que tu instancia de axios esté aquí
 import { Modal } from 'react-bootstrap';
 import { 
@@ -68,16 +69,16 @@ const ActividadAdmin = () => {
 
   // --- LÓGICA CORE: OBTENER CAJA Y DETECTAR TURNOS ---
   // Las notificaciones de tiempo agotado ahora las vigila Sidebar.tsx en toda la app.
-  const fetchDatosCaja = useCallback(async () => {
+  const fetchDatosCaja = useCallback(async (signal?: AbortSignal) => {
     try {
       const hoy = new Date().toISOString().split('T')[0];
       setFecha(hoy);
 
       // 1. Buscamos SI EXISTE ALGÚN TURNO ABIERTO (De cualquier persona)
-      const resCuadre = await api.get('/cuadre');
-      
+      const resCuadre = await api.get('/cuadre', { signal });
+
       // Filtramos: Fecha de hoy Y que NO tenga fecha de cierre
-      const cuadreActivo = resCuadre.data.find((c: Cuadre) => 
+      const cuadreActivo = resCuadre.data.find((c: Cuadre) =>
         c.fecha === hoy && !c.turnoCerrado
       );
 
@@ -101,32 +102,34 @@ const ActividadAdmin = () => {
       }
 
       // 2. Calcular Ventas basadas en el dueño del turno
-      const resReservas = await api.get('/reservas');
-      
+      const resReservas = await api.get('/reservas', { signal });
+
       // Solo sumamos las ventas del usuario que tiene la caja abierta
-      const misReservasHoy = resReservas.data.filter((r: Reserva) => 
+      const misReservasHoy = resReservas.data.filter((r: Reserva) =>
         r.colaborador === usuarioDelTurno && r.fecha === hoy
       );
-      
+
       const total = misReservasHoy.reduce((sum: number, r: Reserva) => sum + r.valor, 0);
       setTotalVentas(total);
 
     } catch (error) {
+      if (axios.isCancel(error)) return;
       console.error('Error cargando caja:', error);
     }
   }, []);
 
   // --- LÓGICA CORE: OBTENER ESTADO DE HABITACIONES ---
-  const fetchDatosReservas = async () => {
+  const fetchDatosReservas = useCallback(async (signal?: AbortSignal) => {
     try {
-      const response = await api.get('/reservas');
+      const response = await api.get('/reservas', { signal });
       const reservasData = response.data;
       setReservas(reservasData);
 
     } catch (error) {
+      if (axios.isCancel(error)) return;
       console.error('Error fetching reservas:', error);
     }
-  };
+  }, []);
 
   // Cálculo matemático del tiempo restante
   const calcularEstadoTiempo = (horaEntrada: string, fecha?: string) => {
@@ -256,16 +259,20 @@ const ActividadAdmin = () => {
 
   // --- EFFECTS ---
   useEffect(() => {
-    fetchDatosReservas();
-    fetchDatosCaja();
-    
+    const controller = new AbortController();
+    fetchDatosReservas(controller.signal);
+    fetchDatosCaja(controller.signal);
+
     // Polling de datos cada 10 seg
-    const interval = setInterval(() => { fetchDatosReservas(); fetchDatosCaja(); }, 10000);
+    const interval = setInterval(() => {
+      fetchDatosReservas(controller.signal);
+      fetchDatosCaja(controller.signal);
+    }, 10000);
     // Reloj local cada 1 min
     const clock = setInterval(() => setNow(new Date()), 60000);
-    
-    return () => { clearInterval(interval); clearInterval(clock); };
-  }, [fetchDatosCaja]);
+
+    return () => { clearInterval(interval); clearInterval(clock); controller.abort(); };
+  }, [fetchDatosCaja, fetchDatosReservas]);
 
   const estadoModal = reservaSeleccionada ? calcularEstadoTiempo(reservaSeleccionada.hentrada, reservaSeleccionada.fecha) : null;
 
