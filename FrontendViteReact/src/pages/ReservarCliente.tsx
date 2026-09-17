@@ -3,6 +3,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { getFechaLocal } from '../utils/fecha';
 
 const ReservarCliente = () => {
   const [fecha, setFecha] = useState<Date | null>(new Date());
@@ -23,7 +24,7 @@ const ReservarCliente = () => {
       if (!fecha) return;
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/reservas-cliente/disponibles`, {
-          params: { fecha: fecha.toISOString().split('T')[0] },
+          params: { fecha: getFechaLocal(fecha) },
         });
         setHabitacionesDisponibles(res.data.disponibles);
         if (res.data.disponibles.length > 0) {
@@ -48,7 +49,7 @@ const ReservarCliente = () => {
         telefono_cliente: telefono,
         habitacion,
         tipo_habitacion: tipoHabitacion,
-        fecha: fecha?.toISOString().split('T')[0],
+        fecha: fecha ? getFechaLocal(fecha) : undefined,
         hora_entrada: horaEntrada,
         hora_salida: horaSalida,
         precio,

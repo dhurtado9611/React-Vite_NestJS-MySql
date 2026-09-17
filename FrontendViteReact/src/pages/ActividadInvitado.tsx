@@ -13,6 +13,7 @@ import {
   FaStickyNote,
   FaSignOutAlt
 } from 'react-icons/fa';
+import { getFechaLocal } from '../utils/fecha';
 
 // --- INTERFACES ---
 interface Reserva {
@@ -89,7 +90,7 @@ const Historial = () => {
 
       if (!nombreUsuario) return;
 
-      const hoy = new Date().toISOString().split('T')[0];
+      const hoy = getFechaLocal();
       setFecha(hoy);
 
       const resCuadre = await api.get('/cuadre', { signal });

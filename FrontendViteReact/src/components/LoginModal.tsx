@@ -3,6 +3,7 @@ import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { FaTimes } from 'react-icons/fa';
 import FormularioTurno from './FormularioTurno';
+import { getFechaLocal } from '../utils/fecha';
 
 const LoginModal = ({ onClose }: { onClose: () => void }) => {
   const [username, setUsername] = useState('');
@@ -27,7 +28,7 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
 
       if (rol === 'invitado') {
         const token = access_token;
-        const fechaHoy = new Date().toISOString().split('T')[0];
+        const fechaHoy = getFechaLocal();
 
         try {
           const cuadreResponse = await api.get('/cuadre', {

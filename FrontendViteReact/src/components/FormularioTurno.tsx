@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import LogoLoader from './LogoLoader';
+import { getFechaLocal } from '../utils/fecha';
 
 interface Props {
   onSubmit: (data: { colaborador: string; turno: string; fecha: string }) => void;
@@ -33,7 +34,7 @@ const FormularioTurno = ({ onSubmit }: Props) => {
   });
 
   const [errores, setErrores] = useState<{ turno?: string; baseCaja?: string }>({});
-  const fechaActual = new Date().toISOString().split('T')[0];
+  const fechaActual = getFechaLocal();
   const navigate = useNavigate();
 
   useEffect(() => {

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import api from '../services/api';
+import { getFechaLocal } from '../utils/fecha';
 
 // Interfaces mantenidas del original
 interface Cuadre {
@@ -82,7 +83,7 @@ const Caja = () => {
 
   useEffect(() => {
     const datosTurno = localStorage.getItem('datosTurno');
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = getFechaLocal();
     setFecha(hoy);
 
     let usuarioActual = '';

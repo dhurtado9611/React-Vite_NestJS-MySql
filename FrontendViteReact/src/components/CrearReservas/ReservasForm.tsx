@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import { getFechaLocal } from '../../utils/fecha';
 
 interface Reserva {
   id: number;
@@ -125,7 +126,7 @@ const ReservasForm = ({
         alert('Selecciona el banco/app y escribe la referencia de la transferencia.');
         return;
       }
-      const fechaActual = new Date().toISOString().split('T')[0];
+      const fechaActual = getFechaLocal();
       const datosTurno = JSON.parse(localStorage.getItem('datosTurno') || '{}');
       const adminUsername = localStorage.getItem('username') || 'admin';
       // "id" viene de handleEdit (setFormData(reserva)) cuando se está editando; el

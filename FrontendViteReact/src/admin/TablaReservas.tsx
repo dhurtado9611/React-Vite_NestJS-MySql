@@ -13,6 +13,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { TrendingUp, Clock3, BedDouble, Trophy, DoorOpen, Wallet } from 'lucide-react';
+import { getFechaLocal } from '../utils/fecha';
 
 interface Reserva {
   id: number;
@@ -125,7 +126,7 @@ const TablaReservas = () => {
   const [cuadres, setCuadres] = useState<Cuadre[]>([]);
   const [mes, setMes] = useState<number>(new Date().getMonth() + 1);
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
-  const [fechaTurno, setFechaTurno] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [fechaTurno, setFechaTurno] = useState<string>(getFechaLocal());
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
@@ -140,8 +141,13 @@ const TablaReservas = () => {
     }
   };
 
+  // El turno activo cambia en tiempo real (nuevas reservas, cierres de caja)
+  // mientras esta pestaña permanece abierta, así que hay que refrescar
+  // periódicamente y no solo al montar el componente.
   useEffect(() => {
     fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const resetearReservas = async () => {
@@ -218,7 +224,7 @@ const TablaReservas = () => {
     [reservasDelMes]
   );
 
-  const hoy = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const hoy = getFechaLocal();
 
   // El turno activo no persiste sus ventas en la BD (totalActual nunca se
   // escribe durante el turno), así que se calculan en vivo igual que en

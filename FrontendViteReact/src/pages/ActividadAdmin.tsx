@@ -12,6 +12,7 @@ import {
   FaStickyNote,
   FaSignOutAlt
 } from 'react-icons/fa';
+import { getFechaLocal } from '../utils/fecha';
 
 // --- INTERFACES DE DATOS ---
 interface Reserva {
@@ -71,7 +72,7 @@ const ActividadAdmin = () => {
   // Las notificaciones de tiempo agotado ahora las vigila Sidebar.tsx en toda la app.
   const fetchDatosCaja = useCallback(async (signal?: AbortSignal) => {
     try {
-      const hoy = new Date().toISOString().split('T')[0];
+      const hoy = getFechaLocal();
       setFecha(hoy);
 
       // 1. Buscamos SI EXISTE ALGÚN TURNO ABIERTO (De cualquier persona)
